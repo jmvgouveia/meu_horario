@@ -27,7 +27,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('meuhorario')
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -57,11 +57,17 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
-            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
             ->brandName('Meu Horário')
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Calendarização'),
+                NavigationGroup::make()
+                    ->label('Gestão'),
+                NavigationGroup::make()
                     ->label('Pólos e Núcleos'),
+                NavigationGroup::make('settings')
+                    ->label('Definições'),
                 NavigationGroup::make()
                     ->label('Administração')
                     ->collapsible(false),

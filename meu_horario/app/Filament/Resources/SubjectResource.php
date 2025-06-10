@@ -2,38 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\BuildingResource\Pages;
-use App\Filament\Resources\BuildingResource\RelationManagers;
-use App\Models\Building;
+use App\Filament\Resources\SubjectResource\Pages;
+use App\Filament\Resources\SubjectResource\RelationManagers;
+use App\Models\Subject;
 use Filament\Forms;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class BuildingResource extends Resource
+class SubjectResource extends Resource
 {
-    protected static ?string $model = Building::class;
-    protected static ?string $navigationGroup = 'Pólos e Núcleos';
-    protected static ?string $navigationLabel = 'Edifícios';
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static ?string $model = Subject::class;
 
-    public static function getModelLabel(): string
-    {
-        return 'Edifício';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'Edifícios';
-    }
+    protected static ?string $navigationGroup = 'Gestão';
+    protected static ?string $navigationLabel = 'Disciplinas';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -41,20 +31,24 @@ class BuildingResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->label('Nome')
-                    ->required()
                     ->maxLength(255)
+                    ->required()
                     ->placeholder('Introduza nome')
-                    ->columnSpan(2),
+                    ->columnSpan(3),
                 TextInput::make('acronym')
                     ->label('Sigla')
-                    ->maxLength(20)
-                    ->placeholder('Ex: ABC'),
-                Textarea::make('address')
-                    ->label('Local')
+                    ->maxLength(30)
                     ->required()
-                    ->maxLength(1000)
-                    ->placeholder('Introduza local')
-                    ->columnSpan(3),
+                    ->placeholder('Ex: ABC'),
+                Select::make('type')
+                    ->label('Tipo')
+                    ->options([
+                        'Letiva' => 'Letiva',
+                        'Não Letiva' => 'Não Letiva',
+                    ])
+                    ->default('Letiva')
+                    ->required()
+                    ->helperText('Selecione o tipo de disciplina'),
             ])->columns(3);
     }
 
@@ -63,14 +57,17 @@ class BuildingResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nome')
+                    ->label('Disciplina')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('address')
-                    ->label('Local')
-                    ->searchable()
+                TextColumn::make('acronym')
+                    ->label('Sigla')
                     ->sortable()
-                    ->limit(50),
+                    ->searchable(),
+                TextColumn::make('type')
+                    ->label('Tipo')
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 //
@@ -95,9 +92,9 @@ class BuildingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListBuildings::route('/'),
-            'create' => Pages\CreateBuilding::route('/create'),
-            'edit' => Pages\EditBuilding::route('/{record}/edit'),
+            'index' => Pages\ListSubjects::route('/'),
+            'create' => Pages\CreateSubject::route('/create'),
+            'edit' => Pages\EditSubject::route('/{record}/edit'),
         ];
     }
 }

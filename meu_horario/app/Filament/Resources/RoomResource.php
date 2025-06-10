@@ -7,6 +7,7 @@ use App\Filament\Resources\RoomResource\RelationManagers;
 use App\Models\Room;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,7 +21,7 @@ class RoomResource extends Resource
 {
     protected static ?string $model = Room::class;
 
-    protected static ?string $navigationGroup = 'Polos e Núcleos';
+    protected static ?string $navigationGroup = 'Pólos e Núcleos';
     protected static ?string $navigationLabel = 'Salas';
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
 
@@ -48,8 +49,13 @@ class RoomResource extends Resource
                     ->relationship('building', 'name')
                     ->required()
                     ->searchable()
-                    ->preload()
-            ]);
+                    ->preload(),
+                Textarea::make('description')
+                        ->label('Descrição')
+                        ->maxLength(1000)
+                        ->placeholder('Introduza descrição')
+                        ->columnSpan(2),
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -57,6 +63,7 @@ class RoomResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nome')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('building.name')

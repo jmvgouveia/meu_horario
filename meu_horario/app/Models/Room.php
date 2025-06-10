@@ -9,11 +9,12 @@ class Room extends Model
 {
     protected $fillable = [
         'name',
+        'description',
         'building_id',
     ];
 
     public function building(): BelongsTo
     {
-        return $this->belongsTo(Building::class);
+        return $this->belongsTo(Building::class, 'building_id');
     }
 }
