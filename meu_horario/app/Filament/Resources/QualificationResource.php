@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CourseResource\Pages;
-use App\Filament\Resources\CourseResource\RelationManagers;
-use App\Models\Course;
+use App\Filament\Resources\QualificationResource\Pages;
+use App\Filament\Resources\QualificationResource\RelationManagers;
+use App\Models\Qualification;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,24 +15,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CourseResource extends Resource
+class QualificationResource extends Resource
 {
-    protected static ?string $model = Course::class;
+    protected static ?string $model = Qualification::class;
 
     protected static ?string $navigationGroup = 'Gestão';
-    protected static ?string $navigationLabel = 'Cursos';
-    protected static ?string $navigationIcon = 'heroicon-s-academic-cap';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationLabel = 'Qualificações';
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Nome')
-                    ->maxLength(255)
+                    ->label('Habilitação')
                     ->required()
-                    ->placeholder('Introduza nome'),
+                    ->maxLength(255)
+                    ->placeholder('Introduza habilitação'),
             ]);
     }
 
@@ -41,7 +40,7 @@ class CourseResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nome')
+                    ->label('Habilitação')
                     ->sortable()
                     ->searchable(),
             ])
@@ -68,9 +67,9 @@ class CourseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCourses::route('/'),
-            'create' => Pages\CreateCourse::route('/create'),
-            'edit' => Pages\EditCourse::route('/{record}/edit'),
+            'index' => Pages\ListQualifications::route('/'),
+            'create' => Pages\CreateQualification::route('/create'),
+            'edit' => Pages\EditQualification::route('/{record}/edit'),
         ];
     }
 }

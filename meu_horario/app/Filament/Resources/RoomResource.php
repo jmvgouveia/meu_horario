@@ -44,7 +44,7 @@ class RoomResource extends Resource
                     ->required()
                     ->maxLength('255')
                     ->placeholder('Introduza nome'),
-                Select::make('building_id')
+                Select::make('id_building')
                     ->label('Edifício')
                     ->relationship('building', 'name')
                     ->required()

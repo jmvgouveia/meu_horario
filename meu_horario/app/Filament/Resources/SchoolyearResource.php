@@ -12,6 +12,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\CheckboxColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -90,7 +92,14 @@ class SchoolyearResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('schoolyear')
+                    ->label('Ano letivo'),
+                TextColumn::make('start_date')
+                    ->label('Data de Início'),
+                TextColumn::make('end_date')
+                    ->label('Data de fim'),
+                CheckboxColumn::make('active')
+                    ->label('Ativo'),
             ])
             ->filters([
                 //
