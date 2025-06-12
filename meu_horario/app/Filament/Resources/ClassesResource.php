@@ -2,36 +2,39 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\QualificationResource\Pages;
-use App\Filament\Resources\QualificationResource\RelationManagers;
-use App\Models\Qualification;
+use App\Filament\Resources\ClassesResource\Pages;
+use App\Filament\Resources\ClassesResource\RelationManagers;
+use App\Models\Classes;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class QualificationResource extends Resource
+class ClassesResource extends Resource
 {
-    protected static ?string $model = Qualification::class;
+    protected static ?string $model = Classes::class;
 
-    protected static ?string $navigationGroup = 'Gestão';
-    protected static ?string $navigationLabel = 'Qualificações';
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Qualificação')
+                    ->label('Nome da Turma')
                     ->required()
                     ->maxLength(255)
-                    ->placeholder('Introduza qualificação'),
+                    ->placeholder('Introduza nome da turma'),
+                Select::make('id_course')
+                    ->label('Curso')
+                    ->relationship('course', 'name')
+                    ->placeholder('Selecione o curso')
+                    ->required(),
             ]);
     }
 
@@ -39,10 +42,7 @@ class QualificationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->label('Qualificação')
-                    ->sortable()
-                    ->searchable(),
+                //
             ])
             ->filters([
                 //
@@ -67,9 +67,9 @@ class QualificationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListQualifications::route('/'),
-            'create' => Pages\CreateQualification::route('/create'),
-            'edit' => Pages\EditQualification::route('/{record}/edit'),
+            'index' => Pages\ListClasses::route('/'),
+            'create' => Pages\CreateClasses::route('/create'),
+            'edit' => Pages\EditClasses::route('/{record}/edit'),
         ];
     }
 }

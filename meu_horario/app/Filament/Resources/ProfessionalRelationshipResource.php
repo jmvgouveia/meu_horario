@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\QualificationResource\Pages;
-use App\Filament\Resources\QualificationResource\RelationManagers;
-use App\Models\Qualification;
+use App\Filament\Resources\ProfessionalRelationshipResource\Pages;
+use App\Filament\Resources\ProfessionalRelationshipResource\RelationManagers;
+use App\Models\ProfessionalRelationship;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,23 +15,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class QualificationResource extends Resource
+class ProfessionalRelationshipResource extends Resource
 {
-    protected static ?string $model = Qualification::class;
+    protected static ?string $model = ProfessionalRelationship::class;
 
     protected static ?string $navigationGroup = 'Gestão';
-    protected static ?string $navigationLabel = 'Qualificações';
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationLabel = 'Relações Profissionais';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Qualificação')
+                    ->label('Nome')
                     ->required()
                     ->maxLength(255)
-                    ->placeholder('Introduza qualificação'),
+                    ->placeholder('Introduza nome'),
             ]);
     }
 
@@ -40,7 +40,7 @@ class QualificationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Qualificação')
+                    ->label('Nome')
                     ->sortable()
                     ->searchable(),
             ])
@@ -67,9 +67,9 @@ class QualificationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListQualifications::route('/'),
-            'create' => Pages\CreateQualification::route('/create'),
-            'edit' => Pages\EditQualification::route('/{record}/edit'),
+            'index' => Pages\ListProfessionalRelationships::route('/'),
+            'create' => Pages\CreateProfessionalRelationship::route('/create'),
+            'edit' => Pages\EditProfessionalRelationship::route('/{record}/edit'),
         ];
     }
 }

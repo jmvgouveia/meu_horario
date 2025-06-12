@@ -9,12 +9,12 @@ class Student extends Model
     protected $fillable = [
         'number',
         'name',
-        'gender_id',
+        'id_gender',
         'birthdate',
     ];
 
     public function genders()
     {
-        return $this->belongsTo(Gender::class, 'gender_id');
+        return $this->belongsTo(Gender::class, 'id_gender');
     }
 }

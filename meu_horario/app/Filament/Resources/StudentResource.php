@@ -45,7 +45,7 @@ class StudentResource extends Resource
                         DatePicker::make('birthdate')
                             ->label('Data de nascimento')
                             ->required(),
-                        Select::make('gender_id')
+                        Select::make('id_gender')
                             ->label('Género')
                             ->relationship('genders', 'gender')
                             ->placeholder('Selecione o género'),

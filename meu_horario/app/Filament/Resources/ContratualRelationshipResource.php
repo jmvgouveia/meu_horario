@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\QualificationResource\Pages;
-use App\Filament\Resources\QualificationResource\RelationManagers;
-use App\Models\Qualification;
+use App\Filament\Resources\ContratualRelationshipResource\Pages;
+use App\Filament\Resources\ContratualRelationshipResource\RelationManagers;
+use App\Models\ContratualRelationship;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,23 +15,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class QualificationResource extends Resource
+class ContratualRelationshipResource extends Resource
 {
-    protected static ?string $model = Qualification::class;
+    protected static ?string $model = ContratualRelationship::class;
 
     protected static ?string $navigationGroup = 'Gestão';
-    protected static ?string $navigationLabel = 'Qualificações';
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?string $navigationLabel = 'Relações Contratuais';
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Qualificação')
+                    ->label('Nome')
                     ->required()
                     ->maxLength(255)
-                    ->placeholder('Introduza qualificação'),
+                    ->placeholder('Introduza nome'),
             ]);
     }
 
@@ -40,9 +40,19 @@ class QualificationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Qualificação')
+                    ->label('Relação Contratual')
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('created_at')
+                    ->label('Criado em')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('updated_at')
+                    ->label('Atualizado em')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 //
@@ -67,9 +77,9 @@ class QualificationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListQualifications::route('/'),
-            'create' => Pages\CreateQualification::route('/create'),
-            'edit' => Pages\EditQualification::route('/{record}/edit'),
+            'index' => Pages\ListContratualRelationships::route('/'),
+            'create' => Pages\CreateContratualRelationship::route('/create'),
+            'edit' => Pages\EditContratualRelationship::route('/{record}/edit'),
         ];
     }
 }
