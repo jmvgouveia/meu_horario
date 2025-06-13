@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProfessionalRelationshipResource\Pages;
-use App\Filament\Resources\ProfessionalRelationshipResource\RelationManagers;
-use App\Models\ProfessionalRelationship;
+use App\Filament\Resources\NationalityResource\Pages;
+use App\Filament\Resources\NationalityResource\RelationManagers;
+use App\Models\Nationality;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,23 +15,29 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ProfessionalRelationshipResource extends Resource
+class NationalityResource extends Resource
 {
-    protected static ?string $model = ProfessionalRelationship::class;
+    protected static ?string $model = Nationality::class;
 
-    protected static ?string $navigationGroup = 'Área do Professor';
-    protected static ?string $navigationLabel = 'Relações Profissionais';
-    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
+    protected static ?string $navigationGroup = 'Definições';
+    protected static ?string $navigationLabel = 'Nacionalidades';
+    protected static ?string $navigationIcon = 'heroicon-o-flag';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Nome')
+                    ->label('Nacionalidade')
                     ->required()
                     ->maxLength(255)
-                    ->placeholder('Introduza nome'),
+                    ->required()
+                    ->placeholder('Introduza nacionalidade'),
+                TextInput::make('acronym')
+                    ->label('Sigla')
+                    ->required()
+                    ->maxLength(20)
+                    ->placeholder('Ex: ABC'),
             ]);
     }
 
@@ -40,7 +46,11 @@ class ProfessionalRelationshipResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nome')
+                    ->label('Nacionalidade')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('acronym')
+                    ->label('Sigla')
                     ->sortable()
                     ->searchable(),
             ])
@@ -67,9 +77,9 @@ class ProfessionalRelationshipResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProfessionalRelationships::route('/'),
-            'create' => Pages\CreateProfessionalRelationship::route('/create'),
-            'edit' => Pages\EditProfessionalRelationship::route('/{record}/edit'),
+            'index' => Pages\ListNationalities::route('/'),
+            'create' => Pages\CreateNationality::route('/create'),
+            'edit' => Pages\EditNationality::route('/{record}/edit'),
         ];
     }
 }

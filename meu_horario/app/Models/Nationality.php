@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Qualification extends Model
+class Nationality extends Model
 {
     protected $fillable = [
-       'name',
+        'name',
+        'acronym',
     ];
 }

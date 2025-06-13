@@ -20,7 +20,7 @@ class TimeReductionResource extends Resource
 {
     protected static ?string $model = TimeReduction::class;
 
-    protected static ?string $navigationGroup = 'Calendarização';
+    protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Reduções de Horário';
     protected static ?string $navigationIcon = 'heroicon-o-clock';
 

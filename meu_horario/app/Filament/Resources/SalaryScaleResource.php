@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProfessionalRelationshipResource\Pages;
-use App\Filament\Resources\ProfessionalRelationshipResource\RelationManagers;
-use App\Models\ProfessionalRelationship;
+use App\Filament\Resources\SalaryScaleResource\Pages;
+use App\Filament\Resources\SalaryScaleResource\RelationManagers;
+use App\Models\SalaryScale;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -15,23 +15,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ProfessionalRelationshipResource extends Resource
+class SalaryScaleResource extends Resource
 {
-    protected static ?string $model = ProfessionalRelationship::class;
+    protected static ?string $model = SalaryScale::class;
 
     protected static ?string $navigationGroup = 'Área do Professor';
-    protected static ?string $navigationLabel = 'Relações Profissionais';
-    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
+    protected static ?string $navigationLabel = 'Escalões Salariais';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-euro';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label('Nome')
+                TextInput::make('scale')
+                    ->label('Escalão Salarial')
                     ->required()
                     ->maxLength(255)
-                    ->placeholder('Introduza nome'),
+                    ->placeholder('Introduza escalão salarial'),
             ]);
     }
 
@@ -39,8 +39,8 @@ class ProfessionalRelationshipResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->label('Nome')
+                TextColumn::make('scale')
+                    ->label('Escalão Salarial')
                     ->sortable()
                     ->searchable(),
             ])
@@ -67,9 +67,9 @@ class ProfessionalRelationshipResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProfessionalRelationships::route('/'),
-            'create' => Pages\CreateProfessionalRelationship::route('/create'),
-            'edit' => Pages\EditProfessionalRelationship::route('/{record}/edit'),
+            'index' => Pages\ListSalaryScales::route('/'),
+            'create' => Pages\CreateSalaryScale::route('/create'),
+            'edit' => Pages\EditSalaryScale::route('/{record}/edit'),
         ];
     }
 }

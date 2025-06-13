@@ -1,0 +1,149 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\TeacherResource\Pages;
+use App\Filament\Resources\TeacherResource\RelationManagers;
+use App\Models\Teacher;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class TeacherResource extends Resource
+{
+    protected static ?string $model = Teacher::class;
+
+    protected static ?string $navigationGroup = 'Área do Professor';
+    protected static ?string $navigationLabel = 'Professores';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make('Dados pessoais')
+                    ->description('Dados pessoais do professor')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Introduza nome')
+                            ->columnSpan(3),
+                        DatePicker::make('birthdate')
+                            ->label('Data de nascimento')
+                            ->required(),
+                        Select::make('id_gender')
+                            ->label('Género')
+                            ->relationship('gender', 'gender')
+                            ->placeholder('Selecione o género'),
+                        Select::make('id_nationality')
+                            ->relationship('nationality', 'name')
+                            ->label('Nacionalidade')
+                            ->required()
+                            ->placeholder('Selecione o Nacionalidade'),
+                    ])->columns(3),
+                Section::make('Dados aluno')
+                    ->description('Dados de professor')
+                    ->schema([
+                        TextInput::make('number')
+                            ->label('Número de professor')
+                            ->required()
+                            ->numeric()
+                            ->placeholder('Introduza número de professor'),
+                        TextInput::make('acronym')
+                            ->label('Sigla')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Introduza sigla'),
+                        DatePicker::make('startingdate')
+                            ->label('Data de início de funções')
+                            ->required()
+                            ->placeholder('Selecione a data de inicio de funções'),
+                        Select::make('id_qualification')
+                            ->relationship('qualification', 'name')
+                            ->label('Habilitações')
+                            ->required()
+                            ->placeholder('Selecione a Habilitação'),
+                        Select::make('id_department')
+                            ->relationship('department', 'name')
+                            ->label('Departamento')
+                            ->required()
+                            ->placeholder('Selecione a departamento'),
+                        Select::make('id_professionalrelationship')
+                            ->relationship('professionalrelationship', 'name')
+                            ->label('Relação Profissional')
+                            ->required()
+                            ->placeholder('Selecione a Relação Profissional'),
+                        Select::make('id_contractualrelationship')
+                            ->relationship('contractualrelationship', 'name')
+                            ->label('Relação Contratual')
+                            ->required()
+                            ->placeholder('Selecione a Relação Contratual'),
+                        Select::make('id_salaryscale')
+                            ->relationship('salaryscale', 'scale')
+                            ->label('Escalão Salarial')
+                            ->required()
+                            ->placeholder('Selecione a Escalão Salarial'),
+                    ]),
+                Section::make('Dados utilizador')
+                    ->description('Dados de utilizador')
+                    ->schema([
+                        TextInput::make('user.email')
+                            ->label('E-mail')
+                            ->required()
+                            ->email()
+                            ->placeholder('Introduza e-mail'),
+                        TextInput::make('user.password')
+                            ->label('Password')
+                            ->password()
+                            ->minLength(5)
+                            ->nullable()
+                            ->placeholder('Deixe em branco para manter a atual'),
+                    ]),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                //
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListTeachers::route('/'),
+            'create' => Pages\CreateTeacher::route('/create'),
+            'edit' => Pages\EditTeacher::route('/{record}/edit'),
+        ];
+    }
+}

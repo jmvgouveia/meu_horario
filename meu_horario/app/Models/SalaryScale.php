@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Qualification extends Model
+class SalaryScale extends Model
 {
     protected $fillable = [
-       'name',
+       'scale',
     ];
 }

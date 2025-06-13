@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Teacher extends Model
+{
+    protected $fillable = [
+        'number',
+        'name',
+        'acronym',
+        'birthdate',
+        'startingdate',
+        'id_nationality',
+        'id_gender',
+        'id_qualification',
+        'id_department',
+        'id_professionalrelationship',
+        'id_contractualrelationship',
+        'id_salaryscale',
+        'id_user',
+    ];
+
+    public function nationality()
+    {
+        return $this->belongsTo(Nationality::class, 'id_nationality');
+    }
+
+    public function gender()
+    {
+        return $this->belongsTo(Gender::class, 'id_gender');
+    }
+
+    public function qualification()
+    {
+        return $this->belongsTo(Qualification::class, 'id_qualification');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'id_department');
+    }
+
+    public function professionalrelationship()
+    {
+        return $this->belongsTo(ProfessionalRelationship::class, 'id_professionalrelationship');
+    }
+
+    public function contractualrelationship()
+    {
+        return $this->belongsTo(ContratualRelationship::class, 'id_contractualrelationship');
+    }
+
+    public function salaryscale()
+    {
+        return $this->belongsTo(SalaryScale::class, 'id_salaryscale');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
+}

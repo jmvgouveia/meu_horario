@@ -63,10 +63,12 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Calendarização'),
                 NavigationGroup::make()
-                    ->label('Gestão'),
+                    ->label('Área do Professor'),
+                NavigationGroup::make()
+                    ->label('Área do Aluno'),
                 NavigationGroup::make()
                     ->label('Pólos e Núcleos'),
-                NavigationGroup::make('settings')
+                NavigationGroup::make()
                     ->label('Definições'),
                 NavigationGroup::make()
                     ->label('Administração')
