@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SchoolyearResource\Pages;
 use App\Filament\Resources\SchoolyearResource\RelationManagers;
-use App\Models\Schoolyear;
+use App\Models\SchoolYear;
 use Filament\Forms;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
@@ -19,9 +19,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Validation\ValidationException;
 
-class SchoolyearResource extends Resource
+class SchoolYearResource extends Resource
 {
-    protected static ?string $model = Schoolyear::class;
+    protected static ?string $model = SchoolYear::class;
 
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Anos Lectivos';

@@ -20,4 +20,10 @@ class Subject extends Model
             ->withPivot(['id_schoolyear'])
             ->withTimestamps();
     }
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'teacher_subjects', 'id_subject', 'id_teacher')
+            ->withPivot('id_schoolyear');
+    }
 }

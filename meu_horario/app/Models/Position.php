@@ -13,4 +13,9 @@ class Position extends Model
        'reduction_nl',
 
     ];
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'teacher_positions', 'id_teacher', 'id_position');
+    }
 }

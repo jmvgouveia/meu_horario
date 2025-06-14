@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -23,7 +24,7 @@ class TeacherResource extends Resource
 
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Professores';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {
@@ -48,10 +49,9 @@ class TeacherResource extends Resource
                         Select::make('id_nationality')
                             ->relationship('nationality', 'name')
                             ->label('Nacionalidade')
-                            ->required()
                             ->placeholder('Selecione o Nacionalidade'),
                     ])->columns(3),
-                Section::make('Dados aluno')
+                Section::make('Dados professor')
                     ->description('Dados de professor')
                     ->schema([
                         TextInput::make('number')
@@ -62,7 +62,7 @@ class TeacherResource extends Resource
                         TextInput::make('acronym')
                             ->label('Sigla')
                             ->required()
-                            ->maxLength(255)
+                            ->maxLength(20)
                             ->placeholder('Introduza sigla'),
                         DatePicker::make('startingdate')
                             ->label('Data de início de funções')
@@ -71,35 +71,35 @@ class TeacherResource extends Resource
                         Select::make('id_qualification')
                             ->relationship('qualification', 'name')
                             ->label('Habilitações')
-                            ->required()
                             ->placeholder('Selecione a Habilitação'),
                         Select::make('id_department')
                             ->relationship('department', 'name')
                             ->label('Departamento')
-                            ->required()
                             ->placeholder('Selecione a departamento'),
                         Select::make('id_professionalrelationship')
                             ->relationship('professionalrelationship', 'name')
                             ->label('Relação Profissional')
-                            ->required()
                             ->placeholder('Selecione a Relação Profissional'),
                         Select::make('id_contractualrelationship')
                             ->relationship('contractualrelationship', 'name')
                             ->label('Relação Contratual')
-                            ->required()
                             ->placeholder('Selecione a Relação Contratual'),
                         Select::make('id_salaryscale')
                             ->relationship('salaryscale', 'scale')
                             ->label('Escalão Salarial')
-                            ->required()
                             ->placeholder('Selecione a Escalão Salarial'),
+                        Select::make('positions')
+                            ->label('Posições')
+                            ->relationship('positions', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
                     ]),
                 Section::make('Dados utilizador')
                     ->description('Dados de utilizador')
                     ->schema([
                         TextInput::make('user.email')
                             ->label('E-mail')
-                            ->required()
                             ->email()
                             ->placeholder('Introduza e-mail'),
                         TextInput::make('user.password')
@@ -116,7 +116,25 @@ class TeacherResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('number')
+                    ->label('Número')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->label('Nome')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('acronym')
+                    ->label('Sigla')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('department.name')
+                    ->label('Departamento')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
             ])
             ->filters([
                 //

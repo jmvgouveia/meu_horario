@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('number')->unique();
             $table->string('name');
-            $table->string('acronym');
+            $table->string('acronym', 20)->unique();
             $table->date('birthdate');
             $table->date('startingdate');
             $table->foreignId('id_nationality')

@@ -65,13 +65,12 @@ class PositionResource extends Resource
                 TextColumn::make('name')
                     ->label('Nome')
                     ->sortable()
-                    ->searchable()
-                    ->toggleable(),
+                    ->searchable(),
                 TextColumn::make('description')
                     ->label('Descrição')
+                    ->wrap()
                     ->sortable()
-                    ->searchable()
-                    ->toggleable(),
+                    ->searchable(),
                 TextColumn::make('reduction_l')
                     ->label('Redução Letiva')
                     ->sortable()

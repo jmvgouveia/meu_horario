@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\SchoolyearResource\Pages;
+namespace App\Filament\Resources\SchoolYearResource\Pages;
 
-use App\Filament\Resources\SchoolyearResource;
+use App\Filament\Resources\SchoolYearResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListSchoolyears extends ListRecords
+class ListSchoolYears extends ListRecords
 {
-    protected static string $resource = SchoolyearResource::class;
+    protected static string $resource = SchoolYearResource::class;
 
     protected function getHeaderActions(): array
     {
