@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('id_course')
                 ->constraint('courses')
                 ->cascadeOnDelete();
+            $table->integer('year')->nullable();
             $table->timestamps();
         });
     }

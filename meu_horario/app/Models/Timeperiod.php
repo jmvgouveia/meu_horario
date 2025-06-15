@@ -9,4 +9,9 @@ class Timeperiod extends Model
     protected $fillable = [
         'description',
     ];
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'id_timeperiod');
+    }
 }

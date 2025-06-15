@@ -23,7 +23,8 @@ class TeacherHourCounterResource extends Resource
 
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Carga Horária';
-    protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?string $navigationIcon = 'heroicon-s-clock';
+    protected static ?int $navigationSort = 8;
 
     public static function form(Form $form): Form
     {

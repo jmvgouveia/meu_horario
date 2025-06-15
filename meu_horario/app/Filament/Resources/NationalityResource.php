@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\NationalityImporter;
 use App\Filament\Resources\NationalityResource\Pages;
 use App\Filament\Resources\NationalityResource\RelationManagers;
 use App\Models\Nationality;
@@ -19,9 +20,10 @@ class NationalityResource extends Resource
 {
     protected static ?string $model = Nationality::class;
 
-    protected static ?string $navigationGroup = 'Definições';
+    protected static ?string $navigationGroup = 'Gestão';
     protected static ?string $navigationLabel = 'Nacionalidades';
     protected static ?string $navigationIcon = 'heroicon-o-flag';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {
@@ -64,6 +66,13 @@ class NationalityResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(NationalityImporter::class)
+                    ->label('Importar Nacionalidades')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ]);
     }
 

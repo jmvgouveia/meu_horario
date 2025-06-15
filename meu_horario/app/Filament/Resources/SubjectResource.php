@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\SubjectImporter;
 use App\Filament\Resources\SubjectResource\Pages;
 use App\Filament\Resources\SubjectResource\RelationManagers;
 use App\Models\Subject;
@@ -79,6 +80,13 @@ class SubjectResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(SubjectImporter::class)
+                    ->label('Importar Disciplinas')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ]);
     }
 

@@ -27,10 +27,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Registar cores adicionais a usar no projeto
         FilamentColor::register([
             'forest_green' => Color::hex('#228B22'),
         ]);
 
+        // Políticas de permissões de utilizadores e Super Admin
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
         Gate::before(function (User $user, string $ability) {

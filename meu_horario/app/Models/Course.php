@@ -11,11 +11,17 @@ class Course extends Model
         'name',
     ];
 
-    public function subjects(): BelongsToMany
+    public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'id_course')
-            ->using(CourseSubject::class)
-            ->withPivot(['id_schoolyear'])
-            ->withTimestamps();
+        return $this->hasMany(CourseSubject::class, 'id_course');
+    }
+
+    public function subjectsPerSchoolYear($schoolyearId)
+    {
+        return $this->courseSubjects()
+            ->where('id_schoolyear', $schoolyearId)
+            ->with('subject')
+            ->get()
+            ->pluck('subject');
     }
 }

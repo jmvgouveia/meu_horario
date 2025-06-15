@@ -24,7 +24,8 @@ class TeacherResource extends Resource
 
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Professores';
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationIcon = 'heroicon-s-users';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -93,7 +94,13 @@ class TeacherResource extends Resource
                             ->relationship('positions', 'name')
                             ->multiple()
                             ->preload()
-                            ->searchable()
+                            ->searchable(),
+                        Select::make('time_reductions')
+                            ->label('Reduções de Horário')
+                            ->relationship('time_reductions', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable(),
                     ]),
                 Section::make('Dados utilizador')
                     ->description('Dados de utilizador')

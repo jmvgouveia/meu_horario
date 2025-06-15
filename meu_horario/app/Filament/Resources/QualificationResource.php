@@ -22,6 +22,7 @@ class QualificationResource extends Resource
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Qualificações';
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {

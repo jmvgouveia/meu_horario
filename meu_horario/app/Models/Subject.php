@@ -13,17 +13,19 @@ class Subject extends Model
         'type',
     ];
 
-    public function courses(): BelongsToMany
+    public function courses()
     {
-        return $this->belongsToMany(Course::class, 'id_subject')
-            ->using(CourseSubject::class)
-            ->withPivot(['id_schoolyear'])
-            ->withTimestamps();
+        return $this->hasMany(CourseSubject::class, 'id_subject');
     }
 
     public function teachers()
     {
         return $this->belongsToMany(Teacher::class, 'teacher_subjects', 'id_subject', 'id_teacher')
             ->withPivot('id_schoolyear');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'id_subject');
     }
 }

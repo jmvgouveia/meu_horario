@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Schoolyear extends Model
+class SchoolYear extends Model
 {
+    protected $table = 'schoolyears';
+    
     protected $fillable = [
         'schoolyear',
         'start_date',
@@ -13,21 +15,9 @@ class Schoolyear extends Model
         'active'
     ];
 
-    public function courseStudents()
+    public function courseSubjects()
     {
         return $this->hasMany(CourseSubject::class, 'id_schoolyear');
-    }
-
-    public function courses()
-    {
-        return $this->hasManyThrough(
-            Course::class,
-            CourseSubject::class,
-            'id_schoolyear',
-            'id',
-            'id',
-            'id_course'
-        )->distinct();
     }
 
     public function students()
@@ -40,5 +30,10 @@ class Schoolyear extends Model
             'id',
             'id_subject'
         )->distinct();
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'id_schoolyear');
     }
 }

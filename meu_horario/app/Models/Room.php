@@ -17,4 +17,9 @@ class Room extends Model
     {
         return $this->belongsTo(Building::class, 'id_building');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'id_room');
+    }
 }

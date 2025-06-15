@@ -68,9 +68,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Área do Aluno'),
                 NavigationGroup::make()
-                    ->label('Pólos e Núcleos'),
+                    ->label('Gestão'),
                 NavigationGroup::make()
-                    ->label('Definições'),
+                    ->label('Pólos e Núcleos'),
                 NavigationGroup::make()
                     ->label('Administração')
                     ->collapsible(false),

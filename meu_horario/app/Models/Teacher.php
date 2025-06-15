@@ -72,4 +72,14 @@ class Teacher extends Model
     {
         return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position');
     }
+
+    public function time_reductions()
+    {
+        return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction');
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'id_teacher');
+    }
 }

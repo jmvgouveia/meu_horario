@@ -13,4 +13,9 @@ class TimeReduction extends Model
         'value_nl',
         'eligibility'
     ];
+
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction');
+    }
 }

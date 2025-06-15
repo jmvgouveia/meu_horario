@@ -21,6 +21,7 @@ class TimeperiodResource extends Resource
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Períodos de tempo';
     protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {

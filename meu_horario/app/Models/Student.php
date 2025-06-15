@@ -13,8 +13,13 @@ class Student extends Model
         'birthdate',
     ];
 
-    public function genders()
+    public function gender()
     {
         return $this->belongsTo(Gender::class, 'id_gender');
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class, 'id_student');
     }
 }

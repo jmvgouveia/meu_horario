@@ -9,4 +9,9 @@ class Weekday extends Model
     protected $fillable = [
         'weekday',
     ];
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'id_weekday');
+    }
 }

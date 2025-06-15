@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class CourseSubject extends Pivot
+class CourseSubject extends Model
 {
     protected $fillable = [
         'id_course',
@@ -17,10 +16,12 @@ class CourseSubject extends Pivot
     {
         return $this->belongsTo(Course::class, 'id_course');
     }
+
     public function subject()
     {
         return $this->belongsTo(Subject::class, 'id_subject');
     }
+    
     public function schoolyear()
     {
         return $this->belongsTo(SchoolYear::class, 'id_schoolyear');

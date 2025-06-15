@@ -21,7 +21,8 @@ class ProfessionalRelationshipResource extends Resource
 
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Relações Profissionais';
-    protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
+    protected static ?string $navigationIcon = 'heroicon-s-bookmark-square';
+    protected static ?int $navigationSort = 10;
 
     public static function form(Form $form): Form
     {

@@ -22,6 +22,7 @@ class SalaryScaleResource extends Resource
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Escalões Salariais';
     protected static ?string $navigationIcon = 'heroicon-o-currency-euro';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {

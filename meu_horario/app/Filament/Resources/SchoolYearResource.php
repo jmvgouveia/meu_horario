@@ -26,6 +26,7 @@ class SchoolYearResource extends Resource
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Anos Lectivos';
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -124,9 +125,9 @@ class SchoolYearResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSchoolyears::route('/'),
-            'create' => Pages\CreateSchoolyear::route('/create'),
-            'edit' => Pages\EditSchoolyear::route('/{record}/edit'),
+            'index' => Pages\ListSchoolYears::route('/'),
+            'create' => Pages\CreateSchoolYear::route('/create'),
+            'edit' => Pages\EditSchoolYear::route('/{record}/edit'),
         ];
     }
 }

@@ -21,7 +21,8 @@ class TeacherSubjectResource extends Resource
 
     protected static ?string $navigationGroup = 'Área do Professor';
     protected static ?string $navigationLabel = 'Professores - Disciplinas';
-    protected static ?string $navigationIcon = 'heroicon-o-paper-clip';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
