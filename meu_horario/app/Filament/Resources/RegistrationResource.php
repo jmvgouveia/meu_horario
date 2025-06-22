@@ -15,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -108,7 +109,37 @@ class RegistrationResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('student.number')
+                    ->label('Nº Aluno')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('student.name')
+                    ->label('Nome')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('course.name')
+                    ->label('Curso')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('class.name')
+                    ->label('Turma')
+                    ->wrap()
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('schoolyear.schoolyear')
+                    ->label('Ano Letivo')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('subjects_list')
+                    ->label('Disciplinas')
+                    ->getStateUsing(function ($record) {
+                        return $record->subjects->pluck('name')->join(', ');
+                    })
+                    ->wrap()
+                    ->sortable(false)
+                    ->searchable(false)
+                    ->toggleable(),
             ])
             ->filters([
                 //

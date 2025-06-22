@@ -51,6 +51,10 @@ class ClassesResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('id')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()

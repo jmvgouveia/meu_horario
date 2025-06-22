@@ -9,7 +9,6 @@ class Building extends Model
 {
     protected $fillable = [
         'name',
-        'acronym',
         'address',
     ];
 

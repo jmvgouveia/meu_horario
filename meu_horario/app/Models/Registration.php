@@ -11,7 +11,6 @@ class Registration extends Model
         'id_course',
         'id_schoolyear',
         'id_class',
-
     ];
 
     public function student()
@@ -31,7 +30,7 @@ class Registration extends Model
 
     public function class()
     {
-        return $this->belongsTo(Classes::class, 'id_class');
+        return $this->belongsTo(Classes::class, 'id_class', 'id');
     }
 
     public function subjects()

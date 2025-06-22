@@ -47,10 +47,6 @@ class BuildingResource extends Resource
                     ->maxLength(255)
                     ->placeholder('Introduza nome')
                     ->columnSpan(2),
-                TextInput::make('acronym')
-                    ->label('Sigla')
-                    ->maxLength(20)
-                    ->placeholder('Ex: ABC'),
                 Textarea::make('address')
                     ->label('Local')
                     ->required()
@@ -64,6 +60,10 @@ class BuildingResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('name')
                     ->label('Nome')
                     ->sortable()

@@ -14,7 +14,7 @@ class ClassesImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('class')
+            ImportColumn::make('name')
                 ->label('Nome da Turma')
                 ->rules(['required', 'string', 'max:255']),
             ImportColumn::make('id_course')
@@ -41,7 +41,7 @@ class ClassesImporter extends Importer
             }
 
             $record->fill([
-                'name' => $data['class'],
+                'name' => $data['name'],
                 'id_course' => $data['id_course'],
                 'year' => $data['year'] ?? null,
             ]);

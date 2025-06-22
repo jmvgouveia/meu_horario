@@ -17,8 +17,18 @@ class Classes extends Model
         return $this->belongsTo(Course::class, 'id_course');
     }
 
-    public function registrarion()
+    /* public function registration()
     {
         return $this->hasMany(Registration::class, 'id_class');
+    } */
+
+    public function classes()
+    {
+        return $this->belongsToMany(
+            \App\Models\Classes::class,
+            'schedule_class',      // nome da tabela pivot
+            'schedule_id',
+            'class_id'
+        );
     }
 }

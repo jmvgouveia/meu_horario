@@ -25,11 +25,13 @@ return new class extends Migration
                 ->nullOnDelete();
             $table->text('justification');
             $table->enum('status', [
+                'Aprovado',
                 'Pendente',
                 'Recusado',
-                'Aprovado Professor',
                 'Escalado',
-                'Aprovado Coordenador',
+                'Aprovado DP',
+                'Recusado DP',
+                'Eliminado',
             ])->default('Pendente');
             $table->text('response')->nullable();
             $table->timestamp('responded_at')->nullable();
