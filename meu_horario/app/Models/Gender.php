@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Gender extends Model
 {
@@ -11,7 +10,12 @@ class Gender extends Model
         'gender',
     ];
 
-    public function students(): HasMany
+    public function teacher()
+    {
+        return $this->hasMany(Teacher::class, 'id_gender');
+    }
+
+    public function students()
     {
         return $this->hasMany(Student::class, 'id_gender');
     }

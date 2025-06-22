@@ -6,6 +6,7 @@ use App\Filament\Resources\TimeperiodResource\Pages;
 use App\Filament\Resources\TimeperiodResource\RelationManagers;
 use App\Models\Timeperiod;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,7 +28,14 @@ class TimeperiodResource extends Resource
     {
         return $form
             ->schema([
-                //
+                TextInput::make('id')
+                    ->label('ID')
+                    ->required()
+                    ->numeric(),
+                TextInput::make('description')
+                    ->label('Descrição')
+                    ->required()
+                    ->maxLength(255),
             ]);
     }
 
@@ -35,6 +43,8 @@ class TimeperiodResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label("ID"),
                 TextColumn::make('description')
                     ->label("Descrição")
                     ->searchable(),
@@ -43,12 +53,12 @@ class TimeperiodResource extends Resource
                 //
             ])
             ->actions([
-                //Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                /* Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]), */
+                ]),
             ]);
     }
 
@@ -63,8 +73,8 @@ class TimeperiodResource extends Resource
     {
         return [
             'index' => Pages\ListTimeperiods::route('/'),
-            //'create' => Pages\CreateTimeperiod::route('/create'),
-            //'edit' => Pages\EditTimeperiod::route('/{record}/edit'),
+            'create' => Pages\CreateTimeperiod::route('/create'),
+            'edit' => Pages\EditTimeperiod::route('/{record}/edit'),
         ];
     }
 }

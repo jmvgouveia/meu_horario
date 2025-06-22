@@ -113,10 +113,42 @@ return new class extends Migration
         });
 
         DB::table('roles')->insert([
-            'name' => 'Super Admin',
-            'guard_name' => 'web',
-            'created_at' => now(),
-            'updated_at' => now(),
+            [
+                'name' => 'Super Admin',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Professor',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Recursos Humanos',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Área Pedagógica',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Gestor Conflitos',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Aluno',
+                'guard_name' => 'web',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
         // Atribuir a Role de Super Admin ao user Admin

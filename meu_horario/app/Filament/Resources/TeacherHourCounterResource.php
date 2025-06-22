@@ -39,7 +39,6 @@ class TeacherHourCounterResource extends Resource
                 Checkbox::make('authorized_overtime')
                     ->label('Horas Extras Autorizadas')
                     ->default(false)
-                    ->required()
                     ->columnSpanFull(),
                 TextInput::make('teaching_load')
                     ->label('Carga Horária Letiva')

@@ -10,4 +10,9 @@ class Department extends Model
        'name',
        'description',
     ];
+
+    public function teacher()
+    {
+        return $this->hasMany(Teacher::class);
+    }
 }

@@ -47,8 +47,8 @@ class StudentResource extends Resource
                             ->label('Data de nascimento')
                             ->required(),
                         Select::make('id_gender')
+                            ->relationship('gender', 'gender')
                             ->label('Género')
-                            ->relationship('genders', 'gender')
                             ->placeholder('Selecione o género'),
                     ])->columns(3),
                 Section::make('Dados aluno')

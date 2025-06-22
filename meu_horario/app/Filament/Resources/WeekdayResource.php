@@ -28,6 +28,10 @@ class WeekdayResource extends Resource
     {
         return $form
             ->schema([
+                TextInput::make('id')
+                    ->label('ID')
+                    ->required()
+                    ->numeric(),
                 TextInput::make('weekday')
                     ->label('Dia da semana')
                     ->maxLength(20)
@@ -40,6 +44,8 @@ class WeekdayResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label("ID"),
                 TextColumn::make('weekday')
                     ->label('Dia da semana')
             ])
@@ -47,12 +53,12 @@ class WeekdayResource extends Resource
                 //
             ])
             ->actions([
-                //Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                /* Tables\Actions\BulkActionGroup::make([
+                Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]), */
+                ]),
             ]);
     }
 
@@ -68,7 +74,7 @@ class WeekdayResource extends Resource
         return [
             'index' => Pages\ListWeekdays::route('/'),
             'create' => Pages\CreateWeekday::route('/create'),
-            //'edit' => Pages\EditWeekday::route('/{record}/edit'),
+            'edit' => Pages\EditWeekday::route('/{record}/edit'),
         ];
     }
 }
