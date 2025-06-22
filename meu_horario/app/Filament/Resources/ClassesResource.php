@@ -44,6 +44,10 @@ class ClassesResource extends Resource
                     ->label('Ano')
                     ->numeric()
                     ->placeholder('Introduza ano'),
+                Select::make('id_building')
+                    ->label('Edifício')
+                    ->relationship('building', 'name')
+                    ->placeholder('Selecione o edifício'),
             ]);
     }
 
@@ -61,9 +65,14 @@ class ClassesResource extends Resource
                     ->sortable(),
                 TextColumn::make('course.name')
                     ->label('Curso')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('year')
                     ->label('Ano')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('building.name')
+                    ->label('Edifício')
                     ->sortable()
                     ->searchable(),
             ])

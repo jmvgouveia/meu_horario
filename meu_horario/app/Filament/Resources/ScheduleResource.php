@@ -7,11 +7,13 @@ use App\Filament\Resources\ScheduleResource\RelationManagers;
 use App\Models\Building;
 use App\Models\Classes;
 use App\Models\Registration;
+use App\Models\Room;
 use App\Models\Schedule;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
+use App\Models\TeacherHourCounter;
 use App\Models\Timeperiod;
 use App\Models\Weekday;
 use Filament\Forms;
@@ -89,7 +91,7 @@ class ScheduleResource extends Resource
 
                                         if (!$buildingId) return [];
 
-                                        return \App\Models\Room::where('id_building', $buildingId)->pluck('name', 'id');
+                                        return Room::where('id_building', $buildingId)->pluck('name', 'id');
                                     })
                                     ->searchable()
                                     ->placeholder('Selecione a sala')
@@ -194,7 +196,7 @@ class ScheduleResource extends Resource
                                         ->pluck('number')
                                         ->sort()
                                         ->implode(', ');
-                                    $set('turno', $numeros);
+                                    $set('shift', $numeros);
 
                                     // Se não estiver a filtrar por turma, atualiza as turmas com base nos alunos
                                     if (!$get('filtrar_por_turma')) {
@@ -208,7 +210,7 @@ class ScheduleResource extends Resource
                                         $set('id_classes', $classIds);
                                     }
                                 } else {
-                                    $set('turno', null);
+                                    $set('shift', null);
                                 }
                             })
                             ->columns(4)
@@ -351,5 +353,34 @@ class ScheduleResource extends Resource
         }
 
         return $query;
+    }
+
+    public static function hoursCounterUpdate(Schedule $schedule, Bool $plusOrMinus): void
+    {
+        $schedule->load('subject');
+
+        $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
+
+        $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)->first();
+        if (!$counter) {
+            return;
+        }
+
+        if ($plusOrMinus) {
+            if ($tipo === 'nao letiva') {
+                $counter->non_teaching_load += 1;
+            } else {
+                $counter->teaching_load += 1;
+            }
+        } else {
+            if ($tipo === 'nao letiva') {
+                $counter->non_teaching_load -= 1;
+            } else {
+                $counter->teaching_load -= 1;
+            }
+        }
+
+        $counter->workload = $counter->teaching_load + $counter->non_teaching_load;
+        $counter->save();
     }
 }

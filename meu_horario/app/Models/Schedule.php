@@ -24,7 +24,7 @@ class Schedule extends Model
 
     public function timeperiod()
     {
-        return $this->belongsTo(TimePeriod::class, 'id_timeperiod');
+        return $this->belongsTo(Timeperiod::class, 'id_timeperiod');
     }
 
     public function room()
@@ -39,7 +39,7 @@ class Schedule extends Model
 
     public function weekday()
     {
-        return $this->belongsTo(WeekDay::class, 'id_weekday');
+        return $this->belongsTo(Weekday::class, 'id_weekday');
     }
 
     public function subject()

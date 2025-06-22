@@ -32,4 +32,9 @@ class ScheduleRequest extends Model
     {
         return $this->belongsTo(Schedule::class, 'id_new_schedule');
     }
+
+    public function requester()
+    {
+        return $this->belongsTo(Teacher::class, 'id_teacher');
+    }
 }

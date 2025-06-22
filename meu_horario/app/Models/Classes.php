@@ -31,4 +31,9 @@ class Classes extends Model
             'class_id'
         );
     }
+
+    public function building()
+    {
+        return $this->belongsTo(Building::class, 'id_building');
+    }
 }

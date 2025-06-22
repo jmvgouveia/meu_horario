@@ -22,4 +22,12 @@ class Room extends Model
     {
         return $this->hasMany(Schedule::class, 'id_room');
     }
+
+    public function isAvailableFor(string $description, string $weekday): bool
+    {
+        return !$this->schedules()
+            ->where('description', $description)
+            ->where('weekday', $weekday)
+            ->exists();
+    }
 }

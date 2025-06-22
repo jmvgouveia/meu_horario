@@ -31,7 +31,8 @@ return new class extends Migration
             $table->foreignId('id_subject')
                 ->constrained('subjects')
                 ->cascadeOnDelete();
-            $table->string('shift'); // turno
+            $table->string('shift')
+                ->nullable(); // turno
             $table->string('status');
             $table->timestamps();
         });

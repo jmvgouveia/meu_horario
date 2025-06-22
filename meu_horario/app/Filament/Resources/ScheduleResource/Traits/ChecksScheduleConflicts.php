@@ -159,7 +159,7 @@ trait ChecksScheduleConflicts
         }
 
         if ($tipo === 'nao letiva') {
-            if ($counter->carga_componente_naoletiva <= 0) {
+            if ($counter->non_teaching_load <= 0) {
                 Notification::make()
                     ->title('Sem horas disponíveis')
                     ->body('Sem horas disponíveis na componente não letiva.')
@@ -170,7 +170,7 @@ trait ChecksScheduleConflicts
                 throw new Halt('Sem horas disponíveis na componente não letiva.');
             }
         } else {
-            if ($counter->carga_componente_letiva <= 0) {
+            if ($counter->teaching_load <= 0) {
                 Notification::make()
                     ->title('Sem horas disponíveis')
                     ->body('Sem horas disponíveis na componente letiva.')

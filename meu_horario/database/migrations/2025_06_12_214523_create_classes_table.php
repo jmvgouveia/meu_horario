@@ -18,6 +18,9 @@ return new class extends Migration
                 ->constraint('courses')
                 ->cascadeOnDelete();
             $table->integer('year')->nullable();
+            $table->integer('id_building')
+                ->nullable()
+                ->nullOnDelete();
             $table->timestamps();
         });
     }
