@@ -6,6 +6,7 @@ use App\Models\Course;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Validation\Rule;
 
 class CourseImporter extends Importer
 {
@@ -15,8 +16,15 @@ class CourseImporter extends Importer
     {
         return [
             ImportColumn::make('name')
-                ->label('Curso')
-                ->rules(['required', 'string', 'max:255']),
+                ->label('Nome do Curso')
+                ->rules([
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:3',
+                    Rule::unique(Course::class, 'name'),
+                ])
+                ->example('Licenciatura em Música'),
         ];
     }
 
@@ -25,34 +33,29 @@ class CourseImporter extends Importer
         return new Course();
     }
 
-    public function import(array $data, Import $import): void
+    protected function beforeFill(): void
     {
-        try {
-            $record = $this->resolveRecord();
-
-            if ($record === null) {
-                return;
-            }
-
-            $record->fill([
-                'name' => $data['name'],
-            ]);
-
-            $record->save();
-
-            $import->increment('processed_rows');
-            $import->increment('successful_rows');
-        } catch (\Exception $e) {
-            $import->increment('processed_rows');
-            $import->increment('failed_rows');
-
-            throw $e;
-        }
+        $this->data['name'] = trim($this->data['name'] ?? '');
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $count = $import->successful_rows;
-        return "Importados com sucesso {$count} Cursos.";
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
+
+        if ($successful === 0) {
+            return "Nenhum curso foi importado. {$failed} registos falharam de {$total} processados.";
+        }
+
+        $message = "Importação concluída: {$successful} cursos importados com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }

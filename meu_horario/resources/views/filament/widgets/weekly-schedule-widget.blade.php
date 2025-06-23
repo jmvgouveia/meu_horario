@@ -1,135 +1,138 @@
 <!-- weekly-schedule-widget.blade.php -->
 
 <style>
+    .notificacao {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        height: 16px;
+        width: 16px;
+        background-color: #dc2626;
+        /* padrão: vermelho */
+        border-radius: 9999px;
+        z-index: 10;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-.notificacao {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    height: 16px;
-    width: 16px;
-    background-color: #dc2626; /* padrão: vermelho */
-    border-radius: 9999px;
-    z-index: 10;
-    color: white;
-    font-size: 10px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+        background: radial-gradient(circle at 30% 30%, #ffffff44, transparent 70%),
+            var(--notif-color, #dc2626);
+        box-shadow:
+            inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+            1px 1px 2px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s;
+    }
 
-      background: radial-gradient(circle at 30% 30%, #ffffff44, transparent 70%),
-                var(--notif-color, #dc2626);
-    box-shadow:
-        inset -1px -1px 2px rgba(0, 0, 0, 0.2),
-        1px 1px 2px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s;
-}
+    .notificacao.dp {
+        background-color: #065f46;
+        color: white;
+        font-size: 9px;
+        font-weight: bold;
+        height: 18px;
+        width: 18px;
+        top: -6px;
+        right: -6px;
+    }
 
-.notificacao.dp {
-    background-color: #065f46;
-    color: white;
-    font-size: 9px;
-    font-weight: bold;
-    height: 18px;
-    width: 18px;
-    top: -6px;
-    right: -6px;
-}
-
-.notificacao.pulsar::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 9999px;
-    opacity: 0.6;
-    animation: pulse 1.2s infinite ease-in-out;
-    z-index: -1;
-}
-
-.notificacao.T {
-    background-color: #2563eb; /* azul */
-}
-
-.notificacao.R {
-    background-color: #dc2626; /* vermelho */
-}
-
-.notificacao.E {
-    background-color: #7c3aed; /* laranja */
-}
-
-.notificacao.pulsar.T::after {
-    background-color: #2563eb;
-}
-
-.notificacao.pulsar.R::after {
-    background-color: #dc2626;
-}
-
-.notificacao.pulsar.E::after {
-    background-color:#7c3aed;
-}
-
- .status-badge {
-    display: block;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    color: white;
-    max-width: 100%;
-    white-space: normal;
-    line-height: 1.3;
-    overflow: hidden;
-    font-weight: 500;
-    font-size: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.06);
-}
-
-.status-title {
-    font-weight: 700;
-    font-size: 0.875rem;
-}
-
-.status-info {
-    font-size: 9px;
-}
-.badge-aprovado {
-    background-color: #059669;
-}
-
-.badge-pendente {
-    background-color: #ca8a04;
-}
-
-.badge-reuniao-tee {
-    background-color: #1e40af;
-    color: white;
-}
-
-.badge-rejeitado {
-    background-color: #dc2626;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
+    .notificacao.pulsar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 9999px;
         opacity: 0.6;
+        animation: pulse 1.2s infinite ease-in-out;
+        z-index: -1;
     }
 
-    70% {
-        transform: scale(2.5);
-        opacity: 0;
+    .notificacao.T {
+        background-color: #2563eb;
+        /* azul */
     }
 
-    100% {
-        transform: scale(1);
-        opacity: 0;
+    .notificacao.R {
+        background-color: #dc2626;
+        /* vermelho */
     }
-}
 
+    .notificacao.E {
+        background-color: #7c3aed;
+        /* laranja */
+    }
+
+    .notificacao.pulsar.T::after {
+        background-color: #2563eb;
+    }
+
+    .notificacao.pulsar.R::after {
+        background-color: #dc2626;
+    }
+
+    .notificacao.pulsar.E::after {
+        background-color: #7c3aed;
+    }
+
+    .status-badge {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        color: white;
+        max-width: 100%;
+        white-space: normal;
+        line-height: 1.3;
+        overflow: hidden;
+        font-weight: 500;
+        font-size: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.06);
+    }
+
+    .status-title {
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .status-info {
+        font-size: 9px;
+    }
+
+    .badge-aprovado {
+        background-color: #059669;
+    }
+
+    .badge-pendente {
+        background-color: #ca8a04;
+    }
+
+    .badge-reuniao-tee {
+        background-color: #1e40af;
+        color: white;
+    }
+
+    .badge-rejeitado {
+        background-color: #dc2626;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+
+        70% {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0;
+        }
+    }
 </style>
 
 <div class="w-full overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
@@ -168,8 +171,8 @@
                     $info[] = collect($schedule->classes)->pluck('class')->join(', ');
                     }
 
-                    if (!empty($schedule->turno)) {
-                    $info[] = 'Turno: ' . $schedule->turno;
+                    if (!empty($schedule->shift)) {
+                    $info[] = 'Turno: ' . $schedule->shift;
                     }
 
                     $info[] = 'ID: ' . $schedule->id;
@@ -191,14 +194,14 @@
                     }
 
                     // Aprovado pelo DP
-                  if ($schedule->status === 'Aprovado DP' && $PedidosAprovadosDP->has($schedule->id)) {
-    $req = $PedidosAprovadosDP[$schedule->id];
-    $hasNotification = true;
-    $notifLetter = 'DP';
-    $notifClass = 'dp';
-    $tooltip = 'Troca aprovada';
-    $link = route('filament.admin.resources.schedule-requests.edit', $req->id);
-}
+                    if ($schedule->status === 'Aprovado DP' && $PedidosAprovadosDP->has($schedule->id)) {
+                    $req = $PedidosAprovadosDP[$schedule->id];
+                    $hasNotification = true;
+                    $notifLetter = 'DP';
+                    $notifClass = 'dp';
+                    $tooltip = 'Troca aprovada';
+                    $link = route('filament.admin.resources.schedule-requests.edit', $req->id);
+                    }
 
                     // Escalado
                     if ($escalados->has($schedule->id)) {
@@ -229,13 +232,13 @@
                     <a href="{{ $link }}">
                         <div class="relative mb-2">
                             <div class="status-badge {{ in_array(strtolower($schedule->subject->subject ?? ''), ['reunião', 'tee']) ? 'badge-reuniao-tee' : $badgeClass }}">
-                                <div class="status-title">{{ $schedule->subject->subject ?? 'Sem Matéria' }}</div>
+                                <div class="status-title">{{ $schedule->subject->name ?? 'Sem Matéria' }}</div>
                                 @foreach ($info as $i)
                                 <div class="status-info">{{ $i }}</div>
                                 @endforeach
                             </div>
                             @if ($hasNotification)
-                           <span class="notificacao {{ $notifLetter }} {{ $notifClass ?: 'pulsar' }}" title="{{ $tooltip }}">{{ $notifLetter }}</span>
+                            <span class="notificacao {{ $notifLetter }} {{ $notifClass ?: 'pulsar' }}" title="{{ $tooltip }}">{{ $notifLetter }}</span>
 
                             @endif
                         </div>
@@ -252,25 +255,25 @@
             @endforeach
         </tbody>
     </table>
-<br>
+    <br>
     <div class="flex flex-wrap justify-center gap-2 mb-4 px-4 text-xs font-medium max-w-4xl mx-auto">
         <div class="status-badge badge-reuniao-tee w-28 text-center truncate">Não Letiva</div>
         <div class="status-badge badge-aprovado w-28 text-center truncate">Aprovado</div>
         <div class="status-badge badge-pendente w-28 text-center truncate">Pendente</div>
 
         <div class="flex items-center gap-1 w-36 truncate">
-           <span class="notificacao T pulsar" style="position: static; transform: scale(0.75);">T</span>
+            <span class="notificacao T pulsar" style="position: static; transform: scale(0.75);">T</span>
 
             <span>Pedido de Troca</span>
         </div>
 
         <div class="flex items-center gap-1 w-36 truncate">
-           <span class="notificacao R pulsar" style="position: static; transform: scale(0.75);">R</span>
+            <span class="notificacao R pulsar" style="position: static; transform: scale(0.75);">R</span>
             <span>Pedido Recusado</span>
         </div>
 
         <div class="flex items-center gap-1 w-36 truncate">
-<span class="notificacao E pulsar" style="position: static; transform: scale(0.75);">E</span>
+            <span class="notificacao E pulsar" style="position: static; transform: scale(0.75);">E</span>
             <span>Pedido Escalado</span>
         </div>
 

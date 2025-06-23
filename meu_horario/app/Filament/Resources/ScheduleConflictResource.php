@@ -3,15 +3,17 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleConflictResource\Pages;
-use App\Filament\Resources\ScheduleConflictResource\RelationManagers;
+
 use App\Models\ScheduleConflict;
 use App\Models\ScheduleRequest;
 use App\Models\Teacher;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -26,171 +28,146 @@ class ScheduleConflictResource extends Resource
     protected static ?string $model = ScheduleRequest::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationGroup = 'Calendarização';
+    protected static ?string $navigationLabel = 'Gestão de Conflitos';
+
+
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Section::make('Pedido de Troca de Horário')
-                    ->description('Preencha os campos abaixo para solicitar uma troca de horário.')
-                    ->columns(1)
-                    ->schema([
-                        Select::make('id_teacher')
-                            ->label(fn($get) => $get('status') === 'Recusado' ? 'Recusado por' : 'Requerente')
-                            ->relationship('requester', 'name')
-                            ->default(function ($record) {
-                                if ($record?->status === 'Recusado') {
-                                    return $record->scheduleConflict?->teacher?->id; // professor original
-                                }
 
-                                return Filament::auth()->user()->teacher?->id;
-                            })
-                            ->disabled()
-                            ->required()
-                            ->searchable()
-                            ->preload()
-                            ->columnSpanFull(),
+        return $form->schema([
 
-                        Select::make('status')
-                            ->label('Estado do Pedido')
-                            ->options([
-                                'Pendente' => 'Pendente',
-                                'Aprovado' => 'Aprovado',
-                                'Recusado' => 'Recusado',
-                                'Escalado' => 'Escalado',
-                                'Aprovado DP' => 'Aprovado DP',
-                                'Recusado DP' => 'Recusado DP',
-                            ])
-                            ->required()
-                            ->reactive() // importante para reatividade
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Textarea::make('justification')
-                            ->label('Justificação do Pedido')
-                            ->visible(fn($get) => $get('status') === 'Pendente')
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Textarea::make('response')
-                            ->label('Motivo da Recusa')
-                            ->visible(fn($get) => $get('status') === 'Recusado')
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Textarea::make('response_coord')
-                            ->label('Notas de Aprovação')
-                            ->visible(fn($get) => $get('status') === 'Aprovado')
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Textarea::make('scaled_justification')
-                            ->label('Notas de Aprovação')
-                            ->visible(fn($get) => $get('status') === 'Escalado')
-                            ->disabled()
-                            ->columnSpanFull(),
-                ]),
-            ]);
+            Section::make('🟢 Passo 1: Marcação original')
+                ->description('O professor que fez a marcação inicial no horário.')
+                ->schema([
+                    Placeholder::make('professor_original')
+                        ->label('Marcado por:')
+                        ->content(fn($record) => $record->scheduleConflict->teacher->name ?? '—'),
+                    Placeholder::make('sala')
+                        ->label('Sala')
+                        ->content(fn($record) => $record->scheduleConflict->room->name ?? '—'),
+                    Placeholder::make('dia')
+                        ->label('Dia da Semana')
+                        ->content(fn($record) => $record->scheduleConflict->weekday->weekday ?? '—'),
+                    Placeholder::make('hora')
+                        ->label('Hora')
+                        ->content(fn($record) => $record->scheduleConflict->timePeriod->description ?? '—'),
+                ])
+                ->columns(2),
+
+            Section::make('🟡 Passo 2: Pedido de alteração')
+                ->description('Solicitação feita por outro professor.')
+                ->schema([
+                    Placeholder::make('solicitante')
+                        ->label('Pedido feito por:')
+                        ->content(fn($record) => $record->requester->name ?? '—'),
+
+                    Textarea::make('justification')
+                        ->label('Justificação do Pedido')
+                        ->disabled(),
+
+                    TextInput::make('created_at')
+                        ->label('Data do Pedido')
+                        ->disabled(),
+                ])
+                ->columns(1),
+
+            Section::make('🔵 Passo 3: Resposta do professor original')
+                ->description('Resposta ao pedido.')
+                ->schema([
+                    Placeholder::make('professor_original')
+                        ->label('Resposta de:')
+                        ->content(fn($record) => $record->scheduleConflict->teacher->name ?? '—'),
+                    Textarea::make('response')
+                        ->label('')
+                        ->disabled(),
+
+                    TextInput::make('responded_at')
+                        ->label('Data da Resposta')
+                        ->disabled(),
+                ])
+                ->columns(1),
+
+            Section::make('🔴 Passo 4: Escalada para Direção Pedagógica')
+                ->description('Situação escalada para análise superior.')
+                ->schema([
+                    TextInput::make('status')
+                        ->label('Estado Atual')
+                        ->disabled(),
+                    Placeholder::make('solicitante')
+                        ->label('Pedido feito por:')
+                        ->content(fn($record) => $record->requester->name ?? '—'),
+                    Textarea::make('justification_escalada')
+                        ->label('Justificação para Escalada')
+                        ->disabled()
+                        ->visible(fn($get) => $get('status') === 'Escalado'),
+
+                    // Placeholder::make('escalada')
+                    //     ->content(
+                    //         fn($record) => $record->status === 'Escalado'
+                    //             ? 'Este pedido foi escalado para a Direção Pedagógica.'
+                    //             : 'Este pedido ainda não foi escalado.'
+                    //     ),
+                ])
+                ->columns(1),
+
+
+        ]);
     }
 
     public static function table(Table $table): Table
     {
-        $userId = Filament::auth()->id();
-        $isGestor = in_array($userId, [1]); // ou usa uma função global/policy
-
-        $columns = [
-           TextColumn::make('requester.name')
-                ->label('Requerente')
-                ->wrap()
-                ->toggleable()
-                ->limit(25),
-           TextColumn::make('scheduleConflict.weekday.weekday')
-                ->label('Dia da Semana')
-                ->wrap()
-                ->toggleable()
-                ->limit(50),
-           TextColumn::make('scheduleConflict.timeperiod.description')
-                ->label('Hora da Aula')
-                ->wrap()
-                ->toggleable()
-                ->limit(50),
-            TextColumn::make('scheduleConflict.room.name')
-                ->label('Sala')
-                ->toggleable()
-                ->limit(50),
-           TextColumn::make('justification')
-                ->label('Justificação do Pedido')
-                ->wrap()
-                ->toggleable()
-                ->limit(50),
-            TextColumn::make('status')
-                ->label('Estado do Pedido')
-                ->toggleable()
-                ->badge()
-                ->color(fn(string $state): string => match ($state) {
-                    'Pendente' => 'warning',
-                    'Aprovado' => 'success',
-                    'Recusado' => 'danger',
-                    'Escalado' => 'info',
-                    'Aprovado DP' => 'success',
-                    'Recusado DP' => 'danger',
-                    default => 'gray',
-                })
-                ->sortable()
-        ];
-
-        if ($isGestor) {
-            $columns = array_merge($columns, [
-            TextColumn::make('scheduleConflict.teacher.name')
-            ->label('Professor Original')
-            ->wrap()
-            ->toggleable()
-            ->limit(50),
-            TextColumn::make('response')
-                ->label('Resposta do Professor')
-                ->wrap()
-                ->toggleable()
-                ->limit(50),
-            TextColumn::make('created_at')
-                ->label('Data de Criação')
-                ->dateTime()
-                ->toggleable()
-                ->sortable(),
-            TextColumn::make('updated_at')
-                ->label('Data de Atualização')
-                ->dateTime()
-                ->toggleable()
-                ->sortable(),
-            TextColumn::make('id')
-                ->label('ID do Pedido')
-                ->toggleable()
-                ->sortable(),       
-            ]);
-        }
 
         return $table
-            ->columns($columns)
-            ->filters([
-                MultiSelectFilter::make('status')
-                    ->options([
-                        'Pendente' => 'Pendente',
-                        'Aprovado' => 'Aprovado',
-                        'Recusado' => 'Recusado',
-                        'Escalado' => 'Escalado',
-                        'Aprovado DP' => 'Aprovado DP',
-                        'Recusado DP' => 'Recusado DP',
-                    ])
-                    ->label('Estado'),
-                ...( $isGestor ? [
-                MultiSelectFilter::make('id_teacher')
-                    ->relationship('requester', 'name')
-                    ->label('Requerente'),
-                ] : []),
-            ])
-            ->actions([
-                //Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->columns([
+
+                // 1. Quem fez a marcação original (professor com conflito)
+                TextColumn::make('scheduleConflict.teacher.name')
+                    ->label('Professor com Marcações')
+                    ->sortable()
+                    ->searchable(),
+
+                // 2. Quem fez o pedido
+                TextColumn::make('requester.name')
+                    ->label('Solicitante')
+                    ->sortable()
+                    ->searchable(),
+
+                // 3. Sala
+                TextColumn::make('scheduleConflict.room.name')
+                    ->label('Sala')
+                    ->sortable()
+                    ->searchable(),
+
+                // 4. Hora
+                TextColumn::make('scheduleConflict.timePeriod.description')
+                    ->label('Hora')
+                    ->sortable(),
+
+                // 5. Dia da semana
+                TextColumn::make('scheduleConflict.weekday.weekday')
+                    ->label('Dia da Semana')
+                    ->sortable(),
+
+                // 6. Estado
+                TextColumn::make('status')
+                    ->label('Estado')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'Pendente' => 'warning',
+                        'Aprovado' => 'success',
+                        'Recusado' => 'danger',
+                        'Escalado' => 'info',
+                        'Aprovado DP' => 'primary',
+                        'Recusado DP' => 'danger',
+                        default => 'gray',
+                    })
+                    ->sortable(),
+            ]) // vamos preencher depois
+            ->filters([])
+            ->actions([])
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array
@@ -209,24 +186,24 @@ class ScheduleConflictResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $userId = Filament::auth()->id();
-        $user = Filament::auth()->user();
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     $userId = Filament::auth()->id();
+    //     $user = Filament::auth()->user();
 
-        if ($user instanceof \App\Models\User && $user->hasRole('Super Admin')) {
-            return parent::getEloquentQuery();
-        }
+    //     if ($user instanceof \App\Models\User && $user->hasRole('Super Admin')) {
+    //         return parent::getEloquentQuery();
+    //     }
 
-        $teacher = Teacher::where('id_user', $userId)->first();
+    //     $teacher = Teacher::where('id_user', $userId)->first();
 
-        return parent::getEloquentQuery()
-            ->where(function ($query) use ($teacher) {
-                $query
-                    ->where('id_teacher_requester', $teacher?->id)
-                    ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
-                        $subQuery->where('id_teacher', $teacher?->id);
-                    });
-            });
-    }
+    //     return parent::getEloquentQuery()
+    //         ->where(function ($query) use ($teacher) {
+    //             $query
+    //                 ->where('id_teacher_requester', $teacher?->id)
+    //                 ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
+    //                     $subQuery->where('id_teacher', $teacher?->id);
+    //                 });
+    //         });
+    // }
 }

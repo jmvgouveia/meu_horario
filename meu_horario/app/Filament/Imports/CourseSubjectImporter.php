@@ -15,14 +15,19 @@ class CourseSubjectImporter extends Importer
     {
         return [
             ImportColumn::make('id_course')
-            ->label('ID do Curso')
-            ->rules(['required', 'string', 'max:255']),
+                ->label('ID do Curso')
+                ->rules(['required', 'integer', 'exists:courses,id'])
+                ->example('3'),
+
             ImportColumn::make('id_subject')
                 ->label('ID da Disciplina')
-                ->rules(['required', 'string', 'max:255']),
+                ->rules(['required', 'integer', 'exists:subjects,id'])
+                ->example('15'),
+
             ImportColumn::make('id_schoolyear')
                 ->label('ID do Ano Letivo')
-                ->rules(['required', 'string', 'max:255']),
+                ->rules(['required', 'integer', 'exists:school_years,id'])
+                ->example('2024'),
         ];
     }
 
@@ -31,36 +36,31 @@ class CourseSubjectImporter extends Importer
         return new CourseSubject();
     }
 
-    public function import(array $data, Import $import): void
+    protected function beforeFill(): void
     {
-        try {
-            $record = $this->resolveRecord();
-
-            if ($record === null) {
-                return;
-            }
-
-            $record->fill([
-                'id_course' => $data['id_course'],
-                'id_subject' => $data['id_subject'],
-                'id_schoolyear' => $data['id_schoolyear'],
-            ]);
-
-            $record->save();
-
-            $import->increment('processed_rows');
-            $import->increment('successful_rows');
-        } catch (\Exception $e) {
-            $import->increment('processed_rows');
-            $import->increment('failed_rows');
-
-            throw $e;
-        }
+        $this->data['id_course'] = intval($this->data['id_course'] ?? 0);
+        $this->data['id_subject'] = intval($this->data['id_subject'] ?? 0);
+        $this->data['id_schoolyear'] = intval($this->data['id_schoolyear'] ?? 0);
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $count = $import->successful_rows;
-        return "{$count} Relacos importadas com sucesso.";
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
+
+        if ($successful === 0) {
+            return "Nenhuma relação curso-disciplina foi importada. {$failed} registos falharam de {$total} processados.";
+        }
+
+        $message = "Importação concluída: {$successful} relações curso-disciplina importadas com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }

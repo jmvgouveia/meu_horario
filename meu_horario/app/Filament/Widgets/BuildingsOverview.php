@@ -22,14 +22,19 @@ class BuildingsOverview extends ChartWidget
                     'label' => 'Número de Salas',
                     'data' => $buildings->pluck('rooms_count')->toArray(),
                     'backgroundColor' => [
-                        '#2563EB', '#16A34A', '#DC2626', '#CA8A04',
-                        '#9333EA', '#DB2777', '#2563EB', '#16A34A',
+                        '#2563EB',
+                        '#16A34A',
+                        '#DC2626',
+                        '#CA8A04',
+                        '#9333EA',
+                        '#DB2777',
+                        '#2563EB',
+                        '#16A34A',
                     ],
                 ],
             ],
             'labels' => $buildings->pluck('name')->toArray(),
         ];
-
     }
 
     protected function getType(): string
@@ -49,6 +54,7 @@ class BuildingsOverview extends ChartWidget
             'maintainAspectRatio' => false,
         ];
     }
+
 
     public static function canView(): bool
     {

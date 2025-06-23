@@ -56,4 +56,8 @@ class Schedule extends Model
     {
         return $this->belongsToMany(Classes::class, 'schedules_classes', 'id_schedule', 'id_class');
     }
+    public function requests()
+    {
+        return $this->hasMany(ScheduleRequest::class, 'id_new_schedule');
+    }
 }

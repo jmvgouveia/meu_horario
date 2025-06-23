@@ -6,6 +6,7 @@ use App\Models\Nationality;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Validation\Rule;
 
 class NationalityImporter extends Importer
 {
@@ -16,10 +17,24 @@ class NationalityImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->label('Nacionalidade')
-                ->rules(['required', 'string', 'max:255']),
+                ->rules([
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:2',
+                    Rule::unique(Nationality::class, 'name'),
+                ])
+                ->example('Portuguesa'),
+
             ImportColumn::make('acronym')
                 ->label('Sigla')
-                ->rules(['required', 'string', 'max:255']),
+                ->rules([
+                    'required',
+                    'string',
+                    'size:2',
+                    Rule::unique(Nationality::class, 'acronym'),
+                ])
+                ->example('PT'),
         ];
     }
 
@@ -28,35 +43,30 @@ class NationalityImporter extends Importer
         return new Nationality();
     }
 
-    public function import(array $data, Import $import): void
+    protected function beforeFill(): void
     {
-        try {
-            $record = $this->resolveRecord();
-
-            if ($record === null) {
-                return;
-            }
-
-            $record->fill([
-                'name' => $data['name'],
-                'acronym' => $data['acronym'],
-            ]);
-
-            $record->save();
-
-            $import->increment('processed_rows');
-            $import->increment('successful_rows');
-        } catch (\Exception $e) {
-            $import->increment('processed_rows');
-            $import->increment('failed_rows');
-
-            throw $e;
-        }
+        $this->data['name'] = trim($this->data['name'] ?? '');
+        $this->data['acronym'] = strtoupper(trim($this->data['acronym'] ?? ''));
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $count = $import->successful_rows;
-        return "{$count} Nacionalidades Importadas com sucesso!";
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
+
+        if ($successful === 0) {
+            return "Nenhuma nacionalidade foi importada. {$failed} registos falharam de {$total} processados.";
+        }
+
+        $message = "Importação concluída: {$successful} nacionalidades importadas com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }

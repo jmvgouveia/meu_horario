@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\TeacherHourCounterImporter;
 use App\Filament\Resources\TeacherHourCounterResource\Pages;
 use App\Filament\Resources\TeacherHourCounterResource\RelationManagers;
 use App\Models\TeacherHourCounter;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -85,10 +87,46 @@ class TeacherHourCounterResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('teacher.name')
+                    ->label('Professor')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('workload')
+                    ->label('Carga Restante')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('teaching_load')
+                    ->label('Carga Horária Letiva')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('non_teaching_load')
+                    ->label('Carga Horária Não Letiva')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('authorized_overtime')
+                    ->label('Horas Extras Autorizadas')
+                    ->badge()
+                    ->formatStateUsing(function (?string $state): string {
+                        return match ($state) {
+                            '1' => 'Autorizado',
+                            '0' => 'Não Autorizado',
+                            default => ucfirst($state ?? '-'),
+                        };
+                    })
+                    ->color(fn(?string $state): string => in_array($state, ['1', '1']) ? 'success' : 'danger')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 //
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(TeacherHourCounterImporter::class)
+                    ->label('Import Teacher Hours')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success'),
+                // Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

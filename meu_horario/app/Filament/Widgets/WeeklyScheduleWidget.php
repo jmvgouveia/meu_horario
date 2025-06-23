@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Schedule;
+use App\Models\ScheduleRequest;
 use App\Models\Teacher;
 use App\Models\Timeperiod;
 use App\Models\Weekday;
@@ -69,12 +70,12 @@ class WeeklyScheduleWidget extends Widget
             $calendar[$timeId][$dayId][] = $schedule;
         }
 
-        $recusados = \App\Models\ScheduleRequest::where('status', 'Recusado')
-            ->where('id_teacher_requester', $teacher->id)
+        $recusados = ScheduleRequest::where('status', 'Recusado')
+            ->where('id_teacher', $teacher->id)
             ->get()
-            ->keyBy('id_schedule_novo');
+            ->keyBy('id_new_schedule');
 
-        $escalados = \App\Models\ScheduleRequest::where('status', 'Escalado')
+        $escalados = ScheduleRequest::where('status', 'Escalado')
             ->get()
             ->reduce(function ($carry, $req) {
                 $carry[$req->id_schedule_conflict] = $req;
@@ -82,7 +83,7 @@ class WeeklyScheduleWidget extends Widget
                 return $carry;
             }, collect());
 
-        $PedidosAprovadosDP = \App\Models\ScheduleRequest::where('status', 'Aprovado DP')
+        $PedidosAprovadosDP = ScheduleRequest::where('status', 'Aprovado DP')
             ->get()
             ->reduce(function ($carry, $req) {
                 $carry[$req->id_schedule_conflict] = $req;
@@ -98,7 +99,7 @@ class WeeklyScheduleWidget extends Widget
         return view(static::$view, compact('calendar', 'weekdays', 'timePeriods', 'recusados', 'escalados', 'PedidosAprovadosDP', 'AprovadosDP'))
             ->with('teacher', $teacher);
     }
-/* 
+    /* 
     public static function canView(): bool
     {
         $user = Filament::auth()->user();

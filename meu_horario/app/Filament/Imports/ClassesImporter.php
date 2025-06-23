@@ -6,6 +6,7 @@ use App\Models\Classes;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Validation\Rule;
 
 class ClassesImporter extends Importer
 {
@@ -16,13 +17,29 @@ class ClassesImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->label('Nome da Turma')
-                ->rules(['required', 'string', 'max:255']),
+                ->rules([
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:2',
+                    Rule::unique(Classes::class, 'name'),
+                ])
+                ->example('10.º A'),
+
             ImportColumn::make('id_course')
                 ->label('ID do Curso')
-                ->rules(['required', 'int']),
+                ->rules(['required', 'integer'])
+                ->example('3'),
+
             ImportColumn::make('year')
-                ->label('Ano')
-                ->rules(['nullable', 'int']),
+                ->label('Ano Letivo')
+                ->rules(['nullable', 'integer', 'min:1', 'max:12'])
+                ->example('10'),
+
+            ImportColumn::make('id_building')
+                ->label('ID do Edifício')
+                ->rules(['nullable', 'integer'])
+                ->example('2'),
         ];
     }
 
@@ -31,36 +48,29 @@ class ClassesImporter extends Importer
         return new Classes();
     }
 
-    public function import(array $data, Import $import): void
+    protected function beforeFill(): void
     {
-        try {
-            $record = $this->resolveRecord();
-
-            if ($record === null) {
-                return;
-            }
-
-            $record->fill([
-                'name' => $data['name'],
-                'id_course' => $data['id_course'],
-                'year' => $data['year'] ?? null,
-            ]);
-
-            $record->save();
-
-            $import->increment('processed_rows');
-            $import->increment('successful_rows');
-        } catch (\Exception $e) {
-            $import->increment('processed_rows');
-            $import->increment('failed_rows');
-
-            throw $e;
-        }
+        $this->data['name'] = trim($this->data['name'] ?? '');
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $count = $import->successful_rows;
-        return "{$count}  Trumas importadas com sucesso.";
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
+
+        if ($successful === 0) {
+            return "Nenhuma turma foi importada. {$failed} registos falharam de {$total} processados.";
+        }
+
+        $message = "Importação concluída: {$successful} turmas importadas com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }

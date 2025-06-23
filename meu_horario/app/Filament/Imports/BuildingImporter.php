@@ -6,6 +6,7 @@ use App\Models\Building;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Validation\Rule;
 
 class BuildingImporter extends Importer
 {
@@ -16,10 +17,23 @@ class BuildingImporter extends Importer
         return [
             ImportColumn::make('name')
                 ->label('Nome')
-                ->rules(['required', 'string', 'max:255']),
+                ->rules([
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:3',
+                    Rule::unique(Building::class, 'name'),
+                ])
+                ->example('Edifício Central'),
+
             ImportColumn::make('address')
                 ->label('Morada')
-                ->rules(['required', 'string', 'max:65535']),
+                ->rules([
+                    'required',
+                    'string',
+                    'max:65535',
+                ])
+                ->example('Rua das Flores, 123, Lisboa'),
         ];
     }
 
@@ -27,36 +41,32 @@ class BuildingImporter extends Importer
     {
         return new Building();
     }
-
-    public function import(array $data, Import $import): void
+    protected function beforeFill(): void
     {
-        try {
-            $record = $this->resolveRecord();
-            
-            if ($record === null) {
-                return;
-            }
-
-            $record->fill([
-                'name' => $data['name'],
-                'address' => $data['address'],
-            ]);
-
-            $record->save();
-
-            $import->increment('processed_rows');
-            $import->increment('successful_rows');
-        } catch (\Exception $e) {
-            $import->increment('processed_rows');
-            $import->increment('failed_rows');
-            
-            throw $e;
-        }
+        // Limpa espaços em branco
+        $this->data['name'] = trim($this->data['name'] ?? '');
+        $this->data['address'] = trim($this->data['address'] ?? '');
     }
+
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $count = $import->successful_rows;
-        return "Importados com sucesso {$count} edifícios.";
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
+
+        if ($successful === 0) {
+            return "Nenhum edifício foi importado. {$failed} registos falharam de {$total} processados.";
+        }
+
+        $message = "Importação concluída: {$successful} edifícios importados com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }

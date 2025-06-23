@@ -15,6 +15,7 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\DB;
 
 class EditSchedule extends EditRecord
 {
@@ -31,24 +32,45 @@ class EditSchedule extends EditRecord
 
     protected function beforeSave(): void
     {
-        $this->validateScheduleWindow();
-        $this->checkScheduleConflictsAndAvailability($this->data, $this->record?->id);
+        try {
+            DB::transaction(function () {
+                $this->validateScheduleWindow();
+                $this->checkScheduleConflictsAndAvailability($this->data, $this->record?->id);
+                $this->form->fill([
+                    'status' => 'Aprovado',
+                ]);
+            });
+        } catch (\Exception $e) {
 
+            Notification::make()
+                ->title('Erro ao salvar o horário')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
 
-        $this->form->fill([
-            'status' => 'Aprovado',
-        ]);
+            throw $e; // Re-throw the exception to prevent saving
+        }
     }
 
     protected function afterSave(): void
     {
-        $record = $this->record;
+        try {
+            DB::transaction(function () {
+                $record = $this->record;
+                // Sincroniza as turmas (many-to-many)
+                $record->classes()->sync($this->data['id_classes'] ?? []);
+                // Sincroniza os alunos (many-to-many)
+                $record->students()->sync($this->data['students'] ?? []);
+            });
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Erro ao atualizar o horário')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
 
-        // Sincroniza as turmas (many-to-many)
-        $record->classes()->sync($this->data['id_classes'] ?? []);
-
-        // Sincroniza os alunos (many-to-many)
-        $record->students()->sync($this->data['students'] ?? []);
+            throw $e; // Re-throw the exception to prevent saving
+        }
     }
 
     public function getFormActions(): array
@@ -63,29 +85,37 @@ class EditSchedule extends EditRecord
                 ->requiresConfirmation()
                 ->action(function () {
 
-                    $this->validateScheduleWindow();
+                    try {
+                        $this->validateScheduleWindow();
 
-                    ScheduleResource::rollbackScheduleRequest($this->record);
+                        ScheduleResource::rollbackScheduleRequest($this->record);
 
-                    if ($this->record->status !== 'Pendente') {
+                        if ($this->record->status !== 'Pendente') {
 
-                        ScheduleResource::hoursCounterUpdate($this->record, true);
+                            ScheduleResource::hoursCounterUpdate($this->record, true);
+                        }
+
+                        $this->record->delete();
+
+                        Notification::make()
+                            ->title("Horário Eliminado")
+                            ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
+                            ->success()
+                            ->sendToDatabase(Filament::auth()->user());
+
+                        Notification::make()
+                            ->title('Horário Eliminado')
+                            ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
+                            ->success()
+                            ->send();
+                        $this->redirect(filament()->getUrl());
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Erro ao eliminar o horário')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
                     }
-
-                    $this->record->delete();
-
-                    Notification::make()
-                        ->title("Horário Eliminado")
-                        ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
-                        ->success()
-                        ->sendToDatabase(Filament::auth()->user());
-
-                    Notification::make()
-                        ->title('Horário Eliminado')
-                        ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
-                        ->success()
-                        ->send();
-                    $this->redirect(filament()->getUrl());
                 }),
 
             $this->getCancelFormAction(),

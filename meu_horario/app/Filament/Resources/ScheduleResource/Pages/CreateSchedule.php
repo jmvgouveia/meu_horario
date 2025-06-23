@@ -12,7 +12,10 @@ use App\Models\Teacher;
 use Filament\Actions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\DB;
+
 
 class CreateSchedule extends CreateRecord
 {
@@ -46,8 +49,22 @@ class CreateSchedule extends CreateRecord
 
     protected function beforeCreate(): void
     {
-        $this->validateScheduleWindow();
-        $this->checkScheduleConflictsAndAvailability($this->data);
+
+        try {
+
+            DB::transaction(function () {
+                $this->validateScheduleWindow();
+                $this->checkScheduleConflictsAndAvailability($this->data);
+            });
+        } catch (\Exception $e) {
+
+            Notification::make()
+                ->title('Erro ao criar o horário')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+            throw $e; // Re-throw the exception to prevent saving
+        }
     }
 
     protected function beforeSave(): void
@@ -58,8 +75,22 @@ class CreateSchedule extends CreateRecord
 
     protected function afterCreate(): void
     {
-        $this->afterSave();
-        ScheduleResource::hoursCounterUpdate($this->record, false);
+
+        try {
+            DB::transaction(function () {
+                //$this->afterSave();
+                $this->record->classes()->sync($this->data['id_classes'] ?? []);
+                $this->record->students()->sync($this->data['students'] ?? []);
+                ScheduleResource::hoursCounterUpdate($this->record, false);
+            });
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Erro ao criar o horário')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+            throw $e; // Re-throw the exception to prevent saving
+        }
     }
 
     public function mount(): void
@@ -70,12 +101,14 @@ class CreateSchedule extends CreateRecord
         ]);
     }
 
-    protected function afterSave(): void
-    {
-        $record = $this->record;
-        //     // Sincroniza as turmas (many-to-many)
-        $record->classes()->sync($this->data['id_classes'] ?? []);
-        // Sincroniza os alunos (many-to-many)
-        $record->students()->sync($this->data['students'] ?? []);
-    }
+
+    // ADICIONADO NO BEFORE SAVE
+    // protected function afterSave(): void 
+    // {
+    //     $record = $this->record;
+    //     //     // Sincroniza as turmas (many-to-many)
+    //     $record->classes()->sync($this->data['id_classes'] ?? []);
+    //     // Sincroniza os alunos (many-to-many)
+    //     $record->students()->sync($this->data['students'] ?? []);
+    // }
 }
