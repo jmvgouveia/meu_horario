@@ -1,0 +1,273 @@
+﻿Turma,Ano,id_curso,id_edificio
+POP Rock,1,1,9
+POP Rock 2,2,1,9
+FNC - 6.ºGrau - Canto,10,2,1
+FNC - 7.ºGrau - Canto,11,2,1
+FNC - 8.ºGrau - Canto,12,2,1
+Jazz I - CL,1,3,1
+CAM 1 FA 2024/2025,1,9,18
+CL - For. Adulto - 1.º Grau,1,9,1
+FNC 1 FA 2024/2025,1,9,1
+CL - For. Adulto - 2.º Grau,2,9,1
+CL - For. Adulto - 3.º Grau FNC,3,10,1
+CL - Jazz I,1,12,1
+CL - Jazz II,2,12,1
+CL - Jazz III,3,12,1
+FNC - CLDO,1,13,1
+CLA - Canto - 1.º Nível - Básico,5,14,9
+CLA - Canto - 2.º Nível - Básico,6,14,9
+CLA - Canto - 3.º Nível - Básico,7,15,9
+CLA - Canto - 4.º Nível - COMP,8,15,9
+CLA - Canto - 5.º Nível - COMP,9,15,9
+CLA - Canto - 1.º Nível - INI,1,17,9
+CML-CLA-Canto - 1.º Nível - INI,1,17,4
+CLA - Canto - 3.º Nível - INI,3,17,9
+CLA - Canto - 4.º Nível - INI,4,17,9
+CLA - Canto - 6.º Nível - COMP,10,18,9
+CLA - Canto - P.D. Pessoal 11,11,18,9
+CLA - Canto - P.D. Pessoal 12,12,18,9
+SMT - CLA - Dança-1.ºNível-BAS,5,19,14
+SMT - CLA - Dança-2.ºNível-BAS,6,19,14
+SMT - CLA - Dança-3.ºNível-BAS,7,20,14
+SMT - CLA - Dança-4.ºNível-COM,8,20,14
+SMT - CLA - Dança-5.ºNível-COM,9,20,14
+SMT - CLA - Dança-1.ºNível - INI,1,21,14
+SMT - CLA - Dança-2.ºNível - INI,2,21,14
+SMT - CLA - Dança-3.ºNível - INI,3,21,14
+SMT - CLA - Dança-4.ºNível - INI,4,21,14
+SMT - CLA - Dança-6.ºNível-COM,10,22,14
+SMT - CLA - Dança-P.D.Pessoal 11,11,22,14
+SMT - CLA - Dança-P.D.Pessoal 12,12,22,14
+LEV - CLA - CMM - Básico 2,6,23,9
+LEV - CLA - CMM - Básico 3,7,24,9
+LEV - CLA - CMM - Complementar 4,8,24,9
+LEV - CLA - CMM - Complementar 5,9,24,9
+LEV - CLA - CMM - Iniciação 1,1,25,9
+LEV - CLA - CMM - Iniciação 2,2,25,9
+INS 2 LEV - CLA - CMM - Básico 2,6,27,9
+SMT - CLA - Teatro-1.ºNível BAS,5,28,14
+SMT - CLA - Teatro-2.ºNível-BAS,6,28,14
+SMT - CLA - Teatro-1.ºNível-INI,1,30,14
+SMT - CLA - Teatro-2.ºNível-INI,2,30,14
+SMT - CLA - Teatro-3.ºNível-INI,3,30,14
+SMT - CLA - Teatro-4.ºNível-INI,4,30,14
+CPAEI 1,1,33,14
+CPAEI 2,2,33,14
+CPAEI 3,3,33,14
+CPICT 1,1,34,1
+CPICT 2,2,34,1
+CPICT 3,3,34,1
+CPIJ 1,1,35,1
+CPIJ 2,2,35,1
+CPIJ 3,3,35,1
+CPISP 1,1,36,1
+CPISP 2,2,36,1
+CPISP 3,3,36,1
+CPTA 1,1,38,14
+CPTA 2,2,38,14
+CPTA 3,3,38,14
+CPIDC 1,1,39,14
+CPIDC 2,2,39,14
+CPIDC 3,3,39,14
+CPTM 1,1,40,14
+CPTM 2,2,40,14
+CPTM 3,3,40,14
+SMT-CLA-Circenses-INI.1,1,42,14
+SMT-CLA-Circenses-INI.2,2,42,14
+CLA - AMI - 1.º Nível,1,43,9
+MAC - CLA - AMI - 1.º Nível,1,43,7
+CLA - AMI - 2.º Nível,2,43,9
+MAC - CLA - AMI - 2.º Nível,2,43,7
+CLA - AMI - 3.º Nível,3,43,9
+MAC - CLA - AMI - 3.º Nível,3,43,7
+CLA - Banda Desenhada - INI.1,1,45,9
+CLA - Banda Desenhada - INI.2,2,45,9
+CLA - Canto - Plano Des. Pessoal,1,49,9
+CLA - Cin. de Ani. - 2.º Nível,2,51,9
+PXO-CLA-INST-1.ºNível-BAS,1,58,12
+PXO-CLA-INST.2.ºNível-BAS,2,58,12
+FNC-CLA-INST-3.ºNível-BAS,3,58,1
+PXO-CLA-INST.5.ºNível-COMP,2,60,12
+FNC-CLA-INST-1.ºNível-INI,1,62,1
+PXO-CLA-INST-1.ºNível-INI,1,62,12
+PXO - CLA - INST.2.º Nível - INI,2,62,12
+CLA - CCMM - Nivel 7,1,67,9
+CLA - CBMM - Nivel 2,2,67,9
+CLA - CCMM - Nivel 1,1,68,9
+LEV-CLA - Musicoterapia - INI.1,1,70,9
+LEV-CLA - Musicoterapia - INI.2,2,70,9
+CLA - OM - 1.º Nível,1,71,9
+CLA - OM - 2.º Nível,2,71,9
+CLA - Prática Coral - 1.ºNível,1,72,9
+CLA - Prática Coral - 2.ºNível,2,72,9
+CAL-CLA-INST.-1.ºNível-BAS,5,78,3
+CAM - CLA-INST.-1.ºNível-BAS,5,78,18
+FNC - CLA-INST.-1.ºNível-BAS,5,78,1
+LEV-CLA-INST.-1.ºNível-BAS,5,78,9
+FNC - CLA-INST.-2.ºNível-BAS,6,78,1
+LEV-CLA-INST.-2.ºNível-BAS,6,78,9
+MAC-CLA-INST.2.º Nível - BAS,6,78,7
+RBR-CLA-INST.-2.ºNível-BAS,6,78,13
+CAM - CLA-INST.-3.ºNível-Bás.,7,79,18
+LEV-CLA-INST.-3.ºNível-BAS,7,79,9
+MAC-CLA-INST.-3.ºNível-BAS.,7,79,7
+RBR-CLA-INST.-3.ºNível-BAS,7,79,13
+CAM - CLA-INST.-4.ºNível-COMP,8,79,18
+FNC - CLA-INST.-4.ºNível-COMP,8,79,1
+LEV-CLA-INST.-4.ºNível-COMP,8,79,9
+MAC-CLA-INST.-4.ºNível-COMP,8,79,7
+SAT-CLA-INST.-4.ºNível-COMP,8,79,15
+FNC - CLA-INST.-5.ºNível-COMP,9,79,1
+LEV-CLA-INST.-5.ºNível-COMP,9,79,9
+SAT-CLA-INST.-5.ºNível-COMP,9,79,15
+CAN - CLA - INST. 1.ºNÍVEL INI,1,80,5
+CML - CLA - INST. 1.ºNÍVEL INI,1,80,4
+FNC - CLA - INST. 1.ºNÍVEL INI,1,80,1
+LEV - CLA - INST. 1.ºNÍVEL INI,1,80,9
+CAN - CLA - INST. 2.ºNÍVEL INI,2,80,5
+CML - CLA - INST. 2.ºNÍVEL INI,2,80,4
+FNC - CLA - INST. 2.ºNÍVEL INI,2,80,1
+LEV - CLA - INST. 2.ºNÍVEL INI,2,80,9
+RBR - CLA - INST. 2.ºNÍVEL INI,2,80,13
+CAL - CLA - INST. 3.ºNÍVEL INI,3,80,3
+FNC - CLA - INST. 3.ºNÍVEL INI,3,80,1
+LEV - CLA - INST. 3.ºNÍVEL INI,3,80,9
+PXO - CLA - INST. 3.ºNÍVEL INI,3,80,12
+CAL - CLA - INST. 4.ºNÍVEL INI,4,80,3
+CAN - CLA - INST. 4.ºNÍVEL INI,4,80,9
+FNC - CLA - INST. 4.ºNÍVEL INI,4,80,1
+LEV - CLA - INST. 4.ºNÍVEL INI,4,80,9
+PXO - CLA - INST. 4.ºNÍVEL INI,4,80,12
+FNC - CLA-INST.-6.ºNível-COMP,10,81,1
+LEV-CLA-INST.-6.ºNível-COMP,10,81,9
+CAL - CLA-Inst.-P.Des.Pessoal 11,11,81,3
+FNC - CLA-Inst.-P.Des.Pessoal 11,11,81,1
+LEV-CLA-Inst.-P.Des.Pessoal 11,11,81,9
+PXO-CLA-Inst.-P.Des.Pessoal 11,11,81,12
+RBR-CLA-Inst.-P.Des.Pessoal 11,11,81,13
+LEV-CLA-Inst.-P.Des.Pessoal 12,12,81,9
+PXO-CLA-Inst.-P.Des.Pessoal 12,12,81,12
+INS-2-LEV-CLA-INST.-1.ºINIC,1,84,9
+INS-2-LEV-CLA-INST.-2.ºINIC,2,84,9
+INS-2-FNC-CLA-INST.-3.ºINIC,3,84,1
+CAL - 1.ºGrau,5,88,3
+CAM - 1.ºGrau,5,88,18
+CAN - 1.ºGrau,5,88,5
+CML - 1.ºGrau,5,88,4
+FNC - 1.º Grau,5,88,1
+MAC - 1.ºGrau,5,88,7
+PSOL - 1.ºGrau,5,88,11
+PXO - 1.ºGrau,5,88,12
+RBR - 1.ºGrau,5,88,13
+SAT - 1.ºGrau,5,88,15
+CAL - 2.ºGrau,6,88,3
+CAM - 2.ºGrau,6,88,18
+CAN - 2.ºGrau,6,88,5
+CML - 2.ºGrau,6,88,4
+FNC - 2.º Grau,6,88,1
+MAC - 2.ºGrau,6,88,7
+PSOL - 2.ºGrau,6,88,11
+PXO - 2.ºGrau,6,88,12
+RBR - 2.ºGrau,6,88,13
+SAT - 2.ºGrau,6,88,15
+SVT - 2.º Grau,6,88,16
+CAL - 3.ºGrau,7,89,3
+CAM - 3º Grau,7,89,18
+CAN - 3.ºGrau,7,89,5
+CML - 3º Grau,7,89,4
+FNC - 3.ºGrau,7,89,1
+MAC - 3.ºGrau,7,89,7
+PSOL - 3.ºGrau,7,89,11
+PXO - 3.ºGrau,7,89,12
+RBR - 3º Grau,7,89,13
+SAT - 3.ºGrau,7,89,15
+SVT - 3.º Grau,7,89,16
+CAL - 4.ºGrau,8,89,3
+CAM - 4.ºGrau,8,89,18
+CAN - 4.ºGrau,8,89,5
+CML - 4º Grau,8,89,4
+FNC - 4.ºGrau,8,89,1
+LEV - 4.ºGrau,8,89,9
+MAC - 4.ºGrau,8,89,7
+PSOL - 4.ºGrau,8,89,11
+PXO - 4.ºGrau,8,89,12
+RBR - 4º Grau,8,89,13
+SAT - 4.ºGrau,8,89,15
+SVT - 4.º Grau,8,89,16
+CAL - 5.ºGrau,9,89,3
+CAM - 5.ºGrau,9,89,18
+CAN - 5.ºGrau,9,89,5
+CML - 5.ºGrau,9,89,4
+FNC - 5.ºGrau,9,89,1
+MAC - 5.ºGrau,9,89,7
+PSOL - 5.ºGrau,9,89,11
+PXO - 5.ºGrau,9,89,12
+RBR - 5º Grau,9,89,13
+SAT - 5.ºGrau,9,89,15
+SVT - 5.º Grau,9,89,16
+CAL - 6.ºGrau,10,90,3
+CAN - 6.ºGrau,10,90,5
+CML - 6.ºGrau,10,90,4
+FNC - 6.ºGrau,10,90,1
+MAC - 6.ºGrau,10,90,7
+PSOL - 6.ºGrau,10,90,11
+RBR - 6º Grau,10,90,13
+SAT - 6.ºGrau,10,90,15
+SVT - 6.º Grau,10,90,16
+CAL - 7º Grau,11,90,3
+CML - 7.ºGrau,11,90,4
+FNC - 7.ºGrau,11,90,1
+MAC - 7.ºGrau,11,90,7
+PSOL - 7.ºGrau,11,90,11
+RBR - 7º Grau,11,90,13
+SVT - 7.º Grau,11,90,16
+FNC - 8.ºGrau,12,90,1
+MAC - 8.ºGrau,12,90,7
+PSOL - 8.ºGrau,12,90,11
+FNC - 5.ºGrau (Louros),9,92,1
+CAL - 1.º Nivel,1,93,3
+CAL - 1.º Nível,1,93,3
+CAM - 1º Nível,1,93,18
+CAN - 1ºNível,1,93,5
+CML - 1.º Nível,1,93,4
+FNC - 1.º Nível,1,93,1
+MAC - 1.ºNível,1,93,7
+PSOL - 1.ºNível,1,93,11
+PXO - 1.º Nível,1,93,12
+RBR - 1.ºNível,1,93,13
+SAT - 1.ºNível,1,93,15
+CAL - 2.º Nível,2,93,3
+CAM - 2.º Nível,2,93,18
+CAN - 2.ºNível,2,93,5
+CML - 2.º Nível,2,93,4
+FNC - 2.º Nível,2,93,1
+MAC - 2.ºNível,2,93,7
+PSOL - 2.º Nível,2,93,11
+PXO - 2.º Nível,2,93,12
+RBR - 2.º Nível,2,93,13
+SAT - 2.ºNível,2,93,15
+SVT - 2.ºNível,2,93,16
+CAL - 3.º Nível,3,93,3
+CAM - 3.º Nível,3,93,18
+CAN - 3.ºNível,3,93,5
+CML - 3.ºNível,3,93,4
+FNC - 3.º Nível,3,93,1
+IM I 2024/2028 - RB Turma2,3,93,13
+LEV - 3.º Nível,3,93,9
+MAC - 3.ºNível,3,93,7
+PSOL - 3.ºNível,3,93,11
+PXO - 3.º Nível,3,93,12
+RBR - 3.º Nível,3,93,13
+SAT - 3.ºNível,3,93,15
+SVT - 3.ºNível,3,93,16
+CAL - 4.º Nível,4,93,3
+CAM - 4.º Nível,4,93,18
+CAN - 4.ºNível,4,93,5
+CML - 4.ºNível,4,93,4
+FNC - 4.ºNível,4,93,1
+MAC - 4.ºNível,4,93,7
+PSOL - 4.ºNível,4,93,11
+PXO - 4.º Nível,4,93,12
+RBR - 4º Nível,4,93,13
+SAT - 4.ºNível,4,93,15
+SVT - 4.ºNível,4,93,16
