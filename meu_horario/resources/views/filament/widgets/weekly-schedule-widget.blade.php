@@ -208,7 +208,7 @@
                     $hasNotification = true;
                     $notifLetter = 'E';
                     $tooltip = 'Troca escalada';
-                    $link = route('filament.admin.resources.schedule-request-resolve-conflicts.edit', $escalados[$schedule->id]->id);
+                    $link = route('filament.admin.resources.schedule-conflicts.edit', $escalados[$schedule->id]->id);
                     }
 
                     // Novo: só considera pedidos com status relevante (Pendente, Escalado, Aprovado DP)
@@ -217,6 +217,7 @@
                     ->whereIn('status', ['Pendente', 'Escalado', 'Aprovado DP'])
                     ->orderBy('created_at')
                     ->first();
+
 
                     if ($firstRequest && $firstRequest->status === 'Pendente') {
                     if ($authId === $firstRequest->scheduleConflict?->teacher?->id) {
@@ -231,7 +232,7 @@
                     @unless($schedule->status === 'Eliminado' || $schedule->status === 'Recusado DP')
                     <a href="{{ $link }}">
                         <div class="relative mb-2">
-                            <div class="status-badge {{ in_array(strtolower($schedule->subject->subject ?? ''), ['reunião', 'tee']) ? 'badge-reuniao-tee' : $badgeClass }}">
+                            <div class="status-badge {{ in_array(strtolower($schedule->subject->name ?? ''), ['reunião', 'tee']) ? 'badge-reuniao-tee' : $badgeClass }}">
                                 <div class="status-title">{{ $schedule->subject->name ?? 'Sem Matéria' }}</div>
                                 @foreach ($info as $i)
                                 <div class="status-info">{{ $i }}</div>

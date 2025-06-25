@@ -7,6 +7,7 @@ use App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Models\ScheduleConflict;
 use App\Models\ScheduleRequest;
 use App\Models\Teacher;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Components\Placeholder;
@@ -31,8 +32,6 @@ class ScheduleConflictResource extends Resource
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Gestão de Conflitos';
 
-
-
     public static function form(Form $form): Form
     {
 
@@ -44,12 +43,15 @@ class ScheduleConflictResource extends Resource
                     Placeholder::make('professor_original')
                         ->label('Marcado por:')
                         ->content(fn($record) => $record->scheduleConflict->teacher->name ?? '—'),
+
                     Placeholder::make('sala')
                         ->label('Sala')
                         ->content(fn($record) => $record->scheduleConflict->room->name ?? '—'),
+
                     Placeholder::make('dia')
                         ->label('Dia da Semana')
                         ->content(fn($record) => $record->scheduleConflict->weekday->weekday ?? '—'),
+
                     Placeholder::make('hora')
                         ->label('Hora')
                         ->content(fn($record) => $record->scheduleConflict->timePeriod->description ?? '—'),
@@ -63,54 +65,54 @@ class ScheduleConflictResource extends Resource
                         ->label('Pedido feito por:')
                         ->content(fn($record) => $record->requester->name ?? '—'),
 
-                    Textarea::make('justification')
-                        ->label('Justificação do Pedido')
-                        ->disabled(),
-
-                    TextInput::make('created_at')
+                    Placeholder::make('data_pedido')
                         ->label('Data do Pedido')
-                        ->disabled(),
+                        ->content(fn($record) => optional($record->created_at)->format('d/m/Y H:i') ?? '—'),
+
+                    Placeholder::make('justification')
+                        ->label('Justificação do Pedido')
+                        ->content(fn($record) => $record->justification ?? '—')
+                        ->columnSpanFull(),
                 ])
-                ->columns(1),
+                ->columns(2),
 
             Section::make('🔵 Passo 3: Resposta do professor original')
                 ->description('Resposta ao pedido.')
                 ->schema([
-                    Placeholder::make('professor_original')
+                    Placeholder::make('professor_respondeu')
                         ->label('Resposta de:')
                         ->content(fn($record) => $record->scheduleConflict->teacher->name ?? '—'),
-                    Textarea::make('response')
-                        ->label('')
-                        ->disabled(),
 
-                    TextInput::make('responded_at')
+                    Placeholder::make('responded_at')
                         ->label('Data da Resposta')
-                        ->disabled(),
+                        ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—'),
+
+                    Placeholder::make('response')
+                        ->label('Resposta do Professor')
+                        ->content(fn($record) => $record->response ?? '—')
+                        ->columnSpanFull(),
                 ])
-                ->columns(1),
+                ->columns(2),
 
             Section::make('🔴 Passo 4: Escalada para Direção Pedagógica')
                 ->description('Situação escalada para análise superior.')
                 ->schema([
-                    TextInput::make('status')
-                        ->label('Estado Atual')
-                        ->disabled(),
+
                     Placeholder::make('solicitante')
                         ->label('Pedido feito por:')
                         ->content(fn($record) => $record->requester->name ?? '—'),
-                    Textarea::make('justification_escalada')
-                        ->label('Justificação para Escalada')
-                        ->disabled()
-                        ->visible(fn($get) => $get('status') === 'Escalado'),
 
-                    // Placeholder::make('escalada')
-                    //     ->content(
-                    //         fn($record) => $record->status === 'Escalado'
-                    //             ? 'Este pedido foi escalado para a Direção Pedagógica.'
-                    //             : 'Este pedido ainda não foi escalado.'
-                    //     ),
+                    Placeholder::make('status')
+                        ->label('Estado Atual')
+                        ->content(fn($record) => $record->status ?? '—'),
+
+                    Placeholder::make('justification_escalada')
+                        ->label('Justificação para Escalada')
+                        ->content(fn($record) => $record->justification_escalada ?? '—')
+                        ->visible(fn($record) => $record->status === 'Escalado')
+                        ->columnSpanFull(),
                 ])
-                ->columns(1),
+                ->columns(2),
 
 
         ]);
@@ -206,4 +208,6 @@ class ScheduleConflictResource extends Resource
     //                 });
     //         });
     // }
+
+
 }

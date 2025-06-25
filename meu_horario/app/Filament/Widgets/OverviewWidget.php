@@ -86,4 +86,10 @@ class OverviewWidget extends Widget
 
         return view(static::$view, compact('resumo'));
     }
+    public static function canView(): bool
+    {
+        $user = Filament::auth()->user();
+
+        return $user instanceof \App\Models\User && $user->hasRole('Professor');
+    }
 }

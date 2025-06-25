@@ -58,12 +58,17 @@ class User extends Authenticatable
         return Str::of($this->name)
             ->explode(' ')
             ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
+            ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
 
     public function teacher()
     {
         return $this->hasOne(Teacher::class, 'id_user');
+    }
+
+    public function isGestorConflitos(): bool
+    {
+        return $this->hasRole('Gestor Conflitos');
     }
 }

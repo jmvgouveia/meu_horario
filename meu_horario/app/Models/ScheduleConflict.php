@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ScheduleConflict extends Model
 {
+    // protected $table = 'schedule_requests'; // mesma tabela
+    // public $timestamps = true;
+
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'id_teacher');

@@ -37,7 +37,7 @@ class WeeklyScheduleWidget extends Widget
         }
 
         // Busca as marcações aprovadas do professor
-        $schedules = Schedule::with(['room', 'weekday', 'timePeriod', 'subject', 'classes'])
+        $schedules = Schedule::with(['room', 'weekday', 'timeperiod', 'subject', 'classes'])
             ->where('id_teacher', $teacher->id)
             ->whereNotIn('status', ['Recusado DP', 'Eliminado'])
             ->orderByRaw("
@@ -78,16 +78,16 @@ class WeeklyScheduleWidget extends Widget
         $escalados = ScheduleRequest::where('status', 'Escalado')
             ->get()
             ->reduce(function ($carry, $req) {
-                $carry[$req->id_schedule_conflict] = $req;
-                $carry[$req->id_schedule_novo] = $req;
+                $carry[$req->id_schedule] = $req;
+                $carry[$req->id_new_schedule] = $req;
                 return $carry;
             }, collect());
 
         $PedidosAprovadosDP = ScheduleRequest::where('status', 'Aprovado DP')
             ->get()
             ->reduce(function ($carry, $req) {
-                $carry[$req->id_schedule_conflict] = $req;
-                $carry[$req->id_schedule_novo] = $req;
+                $carry[$req->id_schedule] = $req;
+                $carry[$req->id_new_schedule] = $req;
                 return $carry;
             }, collect());
 
@@ -99,11 +99,11 @@ class WeeklyScheduleWidget extends Widget
         return view(static::$view, compact('calendar', 'weekdays', 'timePeriods', 'recusados', 'escalados', 'PedidosAprovadosDP', 'AprovadosDP'))
             ->with('teacher', $teacher);
     }
-    /* 
+
     public static function canView(): bool
     {
         $user = Filament::auth()->user();
 
         return $user instanceof \App\Models\User && $user->hasRole('Professor');
-    } */
+    }
 }

@@ -8,8 +8,13 @@ use App\Models\SchoolYears;
 use App\Models\Schedules;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
+//use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action;
+
+use Filament\Notifications\Actions\Action as NotificationAction;
+
 use Illuminate\Support\Facades\DB;
 
 trait HandlesScheduleSwap
@@ -64,10 +69,17 @@ trait HandlesScheduleSwap
                     ->success()
                     ->send();
 
+
                 Notification::make()
                     ->title("Novo pedido de troca recebido")
                     ->body("O(a) professor(a) {$requestername} solicitou trocar a sala {$currentRoom}, marcada para {$dayName} entre {$timePeriod}.")
                     ->success()
+                    ->actions([
+                        Action::make('Ver Pedido')
+                            ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                'record' => $scheduleRequest->id,
+                            ])),
+                    ])
                     ->sendToDatabase($owner);
             });
 

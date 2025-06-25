@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-    
+
     protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Utilizadores';
     protected static ?string $navigationIcon = 'heroicon-s-user-group';
@@ -40,7 +40,7 @@ class UserResource extends Resource
                     ->placeholder('Introduza e-mail'),
                 TextInput::make('password')
                     ->label('Password')
-                    ->required()
+                    //->required()
                     ->placeholder('Introduza password')
                     ->password(),
                 Select::make('roles')->multiple()->relationship('roles', 'name')->preload()

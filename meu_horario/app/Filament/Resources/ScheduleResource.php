@@ -18,6 +18,7 @@ use App\Models\Teacher;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Student;
+use App\Models\TeacherHourCounter;
 use Filament\Facades\Filament;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -146,9 +147,6 @@ class ScheduleResource extends Resource
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
-
-
-
 
     // Filtrar os horários para mostrar apenas os do professor autenticado
     public static function getEloquentQuery(): Builder
@@ -554,7 +552,7 @@ class ScheduleResource extends Resource
     public static function rollbackScheduleRequest(Schedule $schedule): void
     {
         try {
-            ScheduleRequest::where('id_schedule_novo', $schedule->id)->delete();
+            ScheduleRequest::where('id_new_schedule', $schedule->id)->delete();
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Erro ao eliminar o pedido de troca de horário')
@@ -573,7 +571,7 @@ class ScheduleResource extends Resource
 
             $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
 
-            $counter = \App\Models\TeacherHourCounter::where('id_teacher', $schedule->id_teacher)->first();
+            $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)->first();
             if (!$counter) {
                 Log::warning('Contador de horas não encontrado.', ['id_teacher' => $schedule->id_teacher]);
                 return;
@@ -581,24 +579,23 @@ class ScheduleResource extends Resource
 
             if ($plusOrMinus) {
                 if ($tipo === 'nao letiva') {
-                    $counter->carga_componente_naoletiva += 1;
+                    $counter->non_teaching_load += 1;
                     $componente = 'Não Letiva';
                 } else {
-                    $counter->carga_componente_letiva += 1;
+                    $counter->teaching_load += 1;
                     $componente = 'Letiva';
                 }
             } else {
                 if ($tipo === 'nao letiva') {
-                    $counter->carga_componente_naoletiva -= 1;
+                    $counter->non_teaching_load -= 1;
                     $componente = 'Não Letiva';
                 } else {
-                    $counter->carga_componente_letiva -= 1;
+                    $counter->teaching_load -= 1;
                     $componente = 'Letiva';
                 }
             }
 
-
-            $counter->carga_horaria = $counter->carga_componente_letiva + $counter->carga_componente_naoletiva;
+            $counter->workload = $counter->teaching_load + $counter->non_teaching_load;
             $counter->save();
         });
     }

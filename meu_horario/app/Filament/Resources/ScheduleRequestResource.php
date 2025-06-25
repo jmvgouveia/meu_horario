@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleRequestResource\Pages;
 use App\Models\ScheduleRequest;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -31,11 +32,11 @@ class ScheduleRequestResource extends Resource
         $userId = Filament::auth()->id();
         $user = Filament::auth()->user();
 
-
+        // --- VALIDAR COM PERMISSÕES ---
         // ✅ Se for um gestor (por ID ou por papel), vê tudo
-        if (in_array($user?->id, [1])) { //|| $user?->hasRole('admin')) {
-            return parent::getEloquentQuery();
-        }
+        // if (in_array($user?->id, [1])) { //|| $user?->hasRole('admin')) {
+        //     return parent::getEloquentQuery();
+        // }
 
         $teacher = \App\Models\Teacher::where('id_user', $userId)->first();
 
@@ -97,6 +98,12 @@ class ScheduleRequestResource extends Resource
 
                         Textarea::make('response')
                             ->label('Motivo da Recusa')
+                            ->visible(fn($get) => $get('status') === 'Recusado')
+                            ->disabled()
+                            ->columnSpanFull(),
+
+                        Textarea::make('responded_at')
+                            ->label('Data de Resposta')
                             ->visible(fn($get) => $get('status') === 'Recusado')
                             ->disabled()
                             ->columnSpanFull(),
@@ -245,4 +252,9 @@ class ScheduleRequestResource extends Resource
             'edit' => Pages\EditScheduleRequest::route('/{record}/edit'),
         ];
     }
+
+    // public static function getPermissionPrefixes(): array
+    // {
+    //     return ['schedule_request'];
+    // }
 }

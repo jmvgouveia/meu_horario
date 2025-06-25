@@ -50,21 +50,21 @@ class CreateSchedule extends CreateRecord
     protected function beforeCreate(): void
     {
 
-        try {
+        //try {
 
-            DB::transaction(function () {
-                $this->validateScheduleWindow();
-                $this->checkScheduleConflictsAndAvailability($this->data);
-            });
-        } catch (\Exception $e) {
+        DB::transaction(function () {
+            $this->validateScheduleWindow();
+            $this->checkScheduleConflictsAndAvailability($this->data);
+        });
+        // } catch (\Exception $e) {
 
-            Notification::make()
-                ->title('Erro ao criar o horário')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-            throw $e; // Re-throw the exception to prevent saving
-        }
+        //     Notification::make()
+        //         ->title('Erro ao criar o horário321')
+        //         ->body($e->getMessage())
+        //         ->danger()
+        //         ->send();
+        //     throw $e; // Re-throw the exception to prevent saving
+        // }
     }
 
     protected function beforeSave(): void
@@ -85,7 +85,7 @@ class CreateSchedule extends CreateRecord
             });
         } catch (\Exception $e) {
             Notification::make()
-                ->title('Erro ao criar o horário')
+                ->title('Erro ao criar o horário123')
                 ->body($e->getMessage())
                 ->danger()
                 ->send();

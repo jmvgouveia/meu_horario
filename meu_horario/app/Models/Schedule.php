@@ -17,6 +17,13 @@ class Schedule extends Model
         'status'
     ];
 
+
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'teacher_subjects');
+    }
+
     public function schoolyear()
     {
         return $this->belongsTo(SchoolYear::class, 'id_schoolyear');
@@ -58,6 +65,6 @@ class Schedule extends Model
     }
     public function requests()
     {
-        return $this->hasMany(ScheduleRequest::class, 'id_new_schedule');
+        return $this->hasMany(ScheduleRequest::class, 'id_schedule');
     }
 }

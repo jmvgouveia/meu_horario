@@ -26,7 +26,7 @@ class EditScheduleRequest extends EditRecord
         $this->record->loadMissing('scheduleConflict');
 
         $teacherId = Filament::auth()->user()?->teacher?->id;
-        $requesterId = $this->record->id_teacher_requester;
+        $requesterId = $this->record->id_teacher;
         $conflictOwnerId = $this->record->scheduleConflict?->id_teacher;
 
         $isRequestOwner = $teacherId === $requesterId;
@@ -65,9 +65,9 @@ class EditScheduleRequest extends EditRecord
                             'responded_at' => now(),
                         ]);
 
-                        $this->record->scheduleNovo?->update(['status' => 'Aprovado']);
+                        $this->record->scheduleNew?->update(['status' => 'Aprovado']);
 
-                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNovo, false);
+                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
 
                         extract($this->getScheduleDetails());
 
@@ -180,7 +180,7 @@ class EditScheduleRequest extends EditRecord
                         $this->validateScheduleWindow();
 
                         $this->record->update(['status' => 'Cancelado']);
-                        $this->record->scheduleNovo?->update(['status' => 'Cancelado']);
+                        $this->record->scheduleNew?->update(['status' => 'Cancelado']);
 
                         extract($this->getScheduleDetails());
 
@@ -211,14 +211,14 @@ class EditScheduleRequest extends EditRecord
         $actions[] = DeleteAction::make('cancelarPedido')
             ->label('Eliminar Pedido')
             ->color('danger')
-            ->visible(fn() => Filament::auth()->user()?->teacher?->id === $this->record->id_teacher_requester)
+            ->visible(fn() => Filament::auth()->user()?->teacher?->id === $this->record->id_teacher)
             ->requiresConfirmation()
             ->modalHeading('Cancelar Pedido de Troca')
             ->modalDescription('Isto irá eliminar o pedido e o horário criado para a troca.')
             ->after(function ($record) {
                 try {
                     DB::transaction(function () use ($record) {
-                        $schedule = $record->scheduleNovo;
+                        $schedule = $record->scheduleNew;
 
                         if ($schedule) {
                             $schedule->delete();
