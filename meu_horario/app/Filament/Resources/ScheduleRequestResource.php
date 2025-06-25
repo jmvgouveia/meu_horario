@@ -25,6 +25,7 @@ class ScheduleRequestResource extends Resource
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Pedidos de Troca';
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-circle';
+    protected static ?string $navigationBadgeTooltip = 'Pedidos recebidos';
     protected static ?int $navigationSort = 2;
 
     public static function getEloquentQuery(): Builder
@@ -251,6 +252,12 @@ class ScheduleRequestResource extends Resource
             'create' => Pages\CreateScheduleRequest::route('/create'),
             'edit' => Pages\EditScheduleRequest::route('/{record}/edit'),
         ];
+    }
+
+    // Apresentar o total de pedidos pendentes
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 
     // public static function getPermissionPrefixes(): array

@@ -8,3 +8,6 @@ php artisan permissions:sync //Add permissions
 select id, name
 from classes
 where id in (1, 2,3,4) and idbuilding = 1 
+
+
+Cores do estado nas grelhas tal como no mapa de horário

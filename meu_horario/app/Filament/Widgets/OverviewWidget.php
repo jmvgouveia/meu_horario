@@ -15,7 +15,7 @@ use Filament\Facades\Filament;
 class OverviewWidget extends Widget
 {
     protected static string $view = 'filament.widgets.overview-widget';
-
+    protected static ?int $sort = 2;
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
@@ -86,6 +86,7 @@ class OverviewWidget extends Widget
 
         return view(static::$view, compact('resumo'));
     }
+
     public static function canView(): bool
     {
         $user = Filament::auth()->user();

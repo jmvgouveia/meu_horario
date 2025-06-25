@@ -15,6 +15,7 @@ class WeeklyScheduleWidget extends Widget
 {
     protected static string $view = 'filament.widgets.weekly-schedule-widget';
     protected static bool $isLazy = false; // Para garantir que carrega completamente
+    protected static ?int $sort = 1;
 
     protected int | string | array $columnSpan = [
         'sm' => 12,

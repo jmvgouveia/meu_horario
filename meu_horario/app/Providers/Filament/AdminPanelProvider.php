@@ -62,17 +62,14 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            //->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                WeeklyScheduleWidget::class,
+                /* WeeklyScheduleWidget::class,
                 OverviewWidget::class,
                 StatsOverview::class,
                 TeachersOverview::class,
                 StudentsOverview::class,
-                // Uncomment if you want to use the BuildingsOverview widget
-                //
-                BuildingsOverview::class,
-
+                BuildingsOverview::class, */
 
                 /* Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class, */
@@ -108,6 +105,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Administração')
                     ->collapsible(false),
-            ]);
+            ])
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('5s');;
     }
 }

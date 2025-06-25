@@ -55,7 +55,6 @@ class BuildingsOverview extends ChartWidget
         ];
     }
 
-
     public static function canView(): bool
     {
         $user = Filament::auth()->user();
