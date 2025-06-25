@@ -23,7 +23,15 @@ class TeacherSubjectResource extends Resource
     protected static ?string $navigationLabel = 'Professores - Disciplinas';
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?int $navigationSort = 2;
+    public static function getLabel(): string
+    {
+        return 'Disciplina do Professor';
+    }
 
+    public static function getPluralLabel(): string
+    {
+        return 'Disciplinas do Professor';
+    }
     public static function form(Form $form): Form
     {
         return $form

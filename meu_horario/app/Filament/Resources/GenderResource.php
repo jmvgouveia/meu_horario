@@ -24,6 +24,16 @@ class GenderResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
     protected static ?int $navigationSort = 5;
 
+    public static function getLabel(): string
+    {
+        return 'Género';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Géneros';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -30,6 +30,16 @@ class RegistrationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?int $navigationSort = 2;
 
+    public static function getLabel(): string
+    {
+        return 'Matrícula';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Matrículas';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

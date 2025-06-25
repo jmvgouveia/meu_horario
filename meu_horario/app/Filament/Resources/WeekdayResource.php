@@ -24,6 +24,17 @@ class WeekdayResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?int $navigationSort = 5;
 
+    public static function getLabel(): string
+    {
+        return 'Dia da Semana';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Dias da Semana';
+    }
+
+
     public static function form(Form $form): Form
     {
         return $form

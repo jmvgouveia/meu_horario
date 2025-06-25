@@ -23,7 +23,15 @@ class UserResource extends Resource
     protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Utilizadores';
     protected static ?string $navigationIcon = 'heroicon-s-user-group';
+    public static function getLabel(): string
+    {
+        return 'Utilizador';
+    }
 
+    public static function getPluralLabel(): string
+    {
+        return 'Utilizadores';
+    }
     public static function form(Form $form): Form
     {
         return $form

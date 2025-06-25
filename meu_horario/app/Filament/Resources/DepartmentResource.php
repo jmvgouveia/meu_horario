@@ -21,9 +21,19 @@ class DepartmentResource extends Resource
     protected static ?string $model = Department::class;
 
     protected static ?string $navigationGroup = 'Área do Professor';
-    protected static ?string $navigationLabel = 'Departamentos';
+    protected static ?string $navigationLabel = 'Departamentos Curriculares';
     protected static ?string $navigationIcon = 'heroicon-s-briefcase';
     protected static ?int $navigationSort = 3;
+
+    public static function getLabel(): string
+    {
+        return 'Departamento Curricular';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Departamentos Curriculares';
+    }
 
     public static function form(Form $form): Form
     {

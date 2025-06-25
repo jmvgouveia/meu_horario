@@ -24,6 +24,16 @@ class ContratualRelationshipResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?int $navigationSort = 9;
 
+    public static function getLabel(): string
+    {
+        return 'Relação Contratual';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Relações Contratuais';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

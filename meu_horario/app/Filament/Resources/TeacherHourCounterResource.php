@@ -28,6 +28,15 @@ class TeacherHourCounterResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-s-clock';
     protected static ?int $navigationSort = 8;
 
+    public static function getLabel(): string
+    {
+        return 'Carga Horária do Professor';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Cargas Horárias dos Professores';
+    }
     public static function form(Form $form): Form
     {
         return $form

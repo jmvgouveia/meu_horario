@@ -26,6 +26,16 @@ class SubjectResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
     protected static ?int $navigationSort = 3;
 
+    public static function getLabel(): string
+    {
+        return 'Disciplina';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Disciplinas';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -57,17 +67,25 @@ class SubjectResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('name')
                     ->label('Disciplina')
                     ->sortable()
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('acronym')
                     ->label('Sigla')
                     ->sortable()
+                    ->toggleable()
                     ->searchable(),
                 TextColumn::make('type')
                     ->label('Tipo')
                     ->sortable()
+                    ->toggleable()
                     ->searchable(),
             ])
             ->filters([

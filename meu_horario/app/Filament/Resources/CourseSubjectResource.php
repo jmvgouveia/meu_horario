@@ -25,6 +25,16 @@ class CourseSubjectResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-s-clipboard-document-check';
     protected static ?int $navigationSort = 4;
 
+    public static function getLabel(): string
+    {
+        return 'Disciplina do Curso';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Disciplinas do Curso';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

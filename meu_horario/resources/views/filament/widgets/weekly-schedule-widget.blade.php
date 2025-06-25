@@ -168,7 +168,7 @@
                     $info = ['Sala: ' . ($schedule->room->name ?? '—')];
 
                     if (!empty($schedule->classes)) {
-                    $info[] = collect($schedule->classes)->pluck('class')->join(', ');
+                    $info[] = collect($schedule->classes)->pluck('name')->join(', ');
                     }
 
                     if (!empty($schedule->shift)) {

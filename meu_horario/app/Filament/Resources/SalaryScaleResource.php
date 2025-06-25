@@ -24,6 +24,16 @@ class SalaryScaleResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-currency-euro';
     protected static ?int $navigationSort = 6;
 
+    public static function getLabel(): string
+    {
+        return 'Escalão Salarial';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Escalões Salariais';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

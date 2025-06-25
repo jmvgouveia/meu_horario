@@ -28,6 +28,15 @@ class SchoolYearResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
     protected static ?int $navigationSort = 3;
 
+    public static function getLabel(): string
+    {
+        return 'Ano Lecivo';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Anos Letivos';
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -56,7 +65,8 @@ class SchoolYearResource extends Resource
 
                                 $set('schoolyear', "{$startYear}/{$endYear}");
                             }
-                        }),
+                        }
+                    ),
                 DatePicker::make('end_date')
                     ->label('Data de Fim')
                     ->required()
@@ -78,7 +88,8 @@ class SchoolYearResource extends Resource
 
                                 $set('schoolyear', "{$startYear}/{$endYear}");
                             }
-                        }),
+                        }
+                    ),
 
                 TextInput::make('schoolyear')
                     ->label('Ano Letivo')

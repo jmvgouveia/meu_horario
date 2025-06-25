@@ -24,6 +24,16 @@ class PositionResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
     protected static ?int $navigationSort = 4;
 
+    public static function getLabel(): string
+    {
+        return 'Cargo';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Cargos';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -26,6 +26,16 @@ class ClassesResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?int $navigationSort = 1;
 
+    public static function getLabel(): string
+    {
+        return 'Turma';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Turmas';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -24,6 +24,16 @@ class QualificationResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?int $navigationSort = 5;
 
+    public static function getLabel(): string
+    {
+        return 'Habilitação Académica';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Habilitações Académicas';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -32,6 +32,16 @@ class ScheduleConflictResource extends Resource
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Gestão de Conflitos';
 
+    public static function getLabel(): string
+    {
+        return 'Gestão de Conflitos de Horário';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Gestão de Conflitos de Horário';
+    }
+
     public static function form(Form $form): Form
     {
 
@@ -62,7 +72,7 @@ class ScheduleConflictResource extends Resource
                 ->description('Solicitação feita por outro professor.')
                 ->schema([
                     Placeholder::make('solicitante')
-                        ->label('Pedido feito por:')
+                        ->label('Pedido por:')
                         ->content(fn($record) => $record->requester->name ?? '—'),
 
                     Placeholder::make('data_pedido')
@@ -70,7 +80,7 @@ class ScheduleConflictResource extends Resource
                         ->content(fn($record) => optional($record->created_at)->format('d/m/Y H:i') ?? '—'),
 
                     Placeholder::make('justification')
-                        ->label('Justificação do Pedido')
+                        ->label('Justificação do Pedido: ')
                         ->content(fn($record) => $record->justification ?? '—')
                         ->columnSpanFull(),
                 ])
@@ -88,27 +98,31 @@ class ScheduleConflictResource extends Resource
                         ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—'),
 
                     Placeholder::make('response')
-                        ->label('Resposta do Professor')
+                        ->label('Resposta:')
                         ->content(fn($record) => $record->response ?? '—')
                         ->columnSpanFull(),
                 ])
                 ->columns(2),
 
-            Section::make('🔴 Passo 4: Escalada para Direção Pedagógica')
+
+            Section::make('🔴 Passo 4:Situacßão Escalada para Direção Pedagógica')
                 ->description('Situação escalada para análise superior.')
                 ->schema([
 
                     Placeholder::make('solicitante')
                         ->label('Pedido feito por:')
                         ->content(fn($record) => $record->requester->name ?? '—'),
+                    Placeholder::make('updated_at')
+                        ->label('Data da Resposta')
+                        ->content(fn($record) => optional($record->updated_at)->format('d/m/Y H:i') ?? '—'),
 
-                    Placeholder::make('status')
-                        ->label('Estado Atual')
-                        ->content(fn($record) => $record->status ?? '—'),
+                    // Placeholder::make('status')
+                    //     ->label('Estado Atual')
+                    //     ->content(fn($record) => $record->status ?? '—'),
 
                     Placeholder::make('justification_escalada')
                         ->label('Justificação para Escalada')
-                        ->content(fn($record) => $record->justification_escalada ?? '—')
+                        ->content(fn($record) => $record->scaled_justification ?? '—')
                         ->visible(fn($record) => $record->status === 'Escalado')
                         ->columnSpanFull(),
                 ])

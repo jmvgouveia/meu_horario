@@ -207,7 +207,7 @@ class ScheduleResource extends Resource
 
                         Grid::make(2)
                             ->schema([
-                                Select::make('building_id')
+                                Select::make('id_building')
                                     ->label('Núcleo ou Pólo')
                                     ->required()
                                     ->options(Building::all()->pluck('name', 'id'))
@@ -216,7 +216,7 @@ class ScheduleResource extends Resource
                                     ->placeholder('Selecione o local da aula')
                                     ->afterStateHydrated(function (callable $set, ?Schedule $record) {
                                         if ($record && $record->id_room && $record->room) {
-                                            $set('building_id', $record->room->building_id);
+                                            $set('id_building', $record->room->id_building);
                                         }
                                     }),
 
@@ -224,7 +224,7 @@ class ScheduleResource extends Resource
                                     ->label('Sala')
                                     ->required()
                                     ->options(function (callable $get, ?Schedule $record) {
-                                        $buildingId = $get('building_id') ?? $record?->room?->building_id;
+                                        $buildingId = $get('id_building') ?? $record?->room?->id_building;
 
                                         if (!$buildingId) return [];
 
@@ -276,8 +276,8 @@ class ScheduleResource extends Resource
                             ->multiple()
                             ->required(function (callable $get) {
                                 $subjectId = $get('id_subject');
-                                $subjectName = Subject::find($subjectId)?->subject;
-
+                                $subjectName = Subject::find($subjectId)?->name;
+                                //  dd('id_subject', $subjectId, 'subjectName', $subjectName);
                                 return !in_array(strtolower($subjectName), ['reunião', 'tee']);
                             })
                             ->helperText('Selecione a(s) turma(s) que vão assistir à aula')
@@ -287,7 +287,7 @@ class ScheduleResource extends Resource
                             })
                             ->options(function (callable $get) {
                                 $subjectId = $get('id_subject');
-                                $buildingId = $get('building_id');
+                                $buildingId = $get('id_building');
 
                                 if (!$subjectId || !$buildingId) {
                                     return [];
@@ -342,7 +342,7 @@ class ScheduleResource extends Resource
                                         ->sort()
                                         ->implode(', ');
 
-                                    $set('turno', $numeros);
+                                    $set('shift', $numeros);
 
                                     // Se não estiver a filtrar por turma, atualiza as turmas com base nos alunos
                                     if (!$get('filtrar_por_turma')) {
@@ -356,7 +356,7 @@ class ScheduleResource extends Resource
                                         $set('id_classes', $classIds);
                                     }
                                 } else {
-                                    $set('turno', null);
+                                    $set('shift', null);
                                 }
                                 Log::debug('State dos alunos após update', ['state' => $state]);
                             })
@@ -385,11 +385,11 @@ class ScheduleResource extends Resource
 
                                 return $query->get()->mapWithKeys(function ($registration) {
                                     $student = $registration->student;
-                                    $turma = $registration->class?->class ?? '—';
+                                    $turma = $registration->class?->name ?? '—';
                                     if (!$student) return [];
 
                                     return [
-                                        $registration->id_student => "{$student->studentnumber} - {$student->name} - {$turma}",
+                                        $registration->id_student => "{$student->number} - {$student->name} - {$turma}",
                                     ];
                                 });
                             }),
@@ -407,7 +407,7 @@ class ScheduleResource extends Resource
                                         return is_array($students) ? count($students) === 0 : true; // mostra se for array vazio ou não for array
                                     })
                                     ->options(function () {
-                                        $acronym = \Illuminate\Support\Facades\Auth::user()?->teacher?->acronym ?? '';
+                                        $acronym = Auth::user()?->teacher?->acronym ?? '';
                                         return [
                                             "Turno A - $acronym" => "Turno A - $acronym",
                                             "Turno B - $acronym" => "Turno B - $acronym",
@@ -425,7 +425,7 @@ class ScheduleResource extends Resource
                                         return is_array($students) && count($students) > 0;
                                     })
                                     ->extraAttributes(['readonly' => true])
-                                    ->default(fn(callable $get, ?Schedule $record) => $get('shift') ?? $record?->turno)
+                                    ->default(fn(callable $get, ?Schedule $record) => $get('shift') ?? $record?->shift)
                                     ->placeholder('Será preenchido automaticamente com os números dos alunos'),
                             ]),
 
@@ -573,39 +573,42 @@ class ScheduleResource extends Resource
 
     public static function hoursCounterUpdate(Schedule $schedule, Bool $plusOrMinus): void
     {
-        DB::transaction(function () use ($schedule, $plusOrMinus) {
+        try {
+            DB::transaction(function () use ($schedule, $plusOrMinus) {
 
-            $schedule->load('subject');
+                $schedule->load('subject');
 
-            $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
+                $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
 
-            $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)->first();
-            if (!$counter) {
-                Log::warning('Contador de horas não encontrado.', ['id_teacher' => $schedule->id_teacher]);
-                return;
-            }
-
-            if ($plusOrMinus) {
-                if ($tipo === 'nao letiva') {
-                    $counter->non_teaching_load += 1;
-                    $componente = 'Não Letiva';
-                } else {
-                    $counter->teaching_load += 1;
-                    $componente = 'Letiva';
+                $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)->first();
+                if (!$counter) {
+                    return;
                 }
-            } else {
-                if ($tipo === 'nao letiva') {
-                    $counter->non_teaching_load -= 1;
-                    $componente = 'Não Letiva';
-                } else {
-                    $counter->teaching_load -= 1;
-                    $componente = 'Letiva';
-                }
-            }
 
-            $counter->workload = $counter->teaching_load + $counter->non_teaching_load;
-            $counter->save();
-        });
+                if ($plusOrMinus) {
+                    if ($tipo === 'Não Letiva' || $tipo === 'nao letiva' || $tipo === 'não letiva') {
+                        $counter->non_teaching_load += 1;
+                    } else {
+                        $counter->teaching_load += 1;
+                    }
+                } else {
+                    if ($tipo === 'Não Letiva' || $tipo === 'nao letiva' || $tipo === 'não letiva') {
+                        $counter->non_teaching_load -= 1;
+                    } else {
+                        $counter->teaching_load -= 1;
+                    }
+                }
+
+                $counter->workload = $counter->teaching_load + $counter->non_teaching_load;
+                $counter->save();
+            });
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Erro ao atualizar a carga horária do professor')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
     }
 
 

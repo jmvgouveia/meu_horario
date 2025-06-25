@@ -24,6 +24,16 @@ class ProfessionalRelationshipResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-s-bookmark-square';
     protected static ?int $navigationSort = 10;
 
+    public static function getLabel(): string
+    {
+        return 'Relação Profissional';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Relações Profissionais';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

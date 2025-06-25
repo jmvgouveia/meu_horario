@@ -24,7 +24,15 @@ class TimeReductionResource extends Resource
     protected static ?string $navigationLabel = 'Reduções de Horário';
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?int $navigationSort = 7;
+    public static function getLabel(): string
+    {
+        return 'Redução de Horário';
+    }
 
+    public static function getPluralLabel(): string
+    {
+        return 'Reduções de Horário';
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -47,7 +55,7 @@ class TimeReductionResource extends Resource
                     ->maxValue(99)
                     ->placeholder('Introduza redução letiva')
                     ->helperText('Ex: 1'),
-               TextInput::make('value_nl')
+                TextInput::make('value_nl')
                     ->label('Redução Não Letiva')
                     ->numeric()
                     ->required()
@@ -91,10 +99,10 @@ class TimeReductionResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
-                TextColumn::make('eligibility') 
+                TextColumn::make('eligibility')
                     ->label('Elegibilidade')
                     ->badge()
-                    ->color(fn (string $state): string => match (strtolower($state)) {
+                    ->color(fn(string $state): string => match (strtolower($state)) {
                         'feminino' => 'primary',
                         'masculino' => 'success',
                         'ambos' => 'info',

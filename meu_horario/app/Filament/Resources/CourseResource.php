@@ -25,6 +25,16 @@ class CourseResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-s-academic-cap';
     protected static ?int $navigationSort = 2;
 
+    public static function getLabel(): string
+    {
+        return 'Curso';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Cursos';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -41,6 +51,11 @@ class CourseResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
                     ->label('Nome')
                     ->sortable()

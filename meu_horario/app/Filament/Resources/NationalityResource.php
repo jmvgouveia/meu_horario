@@ -25,6 +25,16 @@ class NationalityResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-flag';
     protected static ?int $navigationSort = 6;
 
+    public static function getLabel(): string
+    {
+        return 'Nacionalidade';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Nacionalidades';
+    }
+
     public static function form(Form $form): Form
     {
         return $form

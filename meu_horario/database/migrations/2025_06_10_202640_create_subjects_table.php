@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('acronym', 30)->unique();
-            $table->string('type')->default('Letiva'); // Normal, Optativa, etc.
+            $table->enum('type', ['Letiva', 'Nao Letiva'])->default('Letiva'); // Ativo, Inativo
+            // $table->string('type')->default('Letiva'); // Normal, Optativa, etc.
             $table->timestamps();
         });
     }
