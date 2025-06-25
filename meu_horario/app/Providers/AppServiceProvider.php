@@ -27,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app()->setLocale(session('locale', 'pt_PT')); // ou cookie, user preference, etc.
+
         // Registar cores adicionais a usar no projeto
         FilamentColor::register([
             'forest_green' => Color::hex('#228B22'),
@@ -36,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
         Gate::before(function (User $user, string $ability) {
-            return $user->isSuperAdmin() ? true: null;
+            return $user->isSuperAdmin() ? true : null;
         });
     }
 }

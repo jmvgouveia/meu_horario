@@ -66,7 +66,15 @@ class ScheduleResource extends Resource
     public ?Schedule $conflictingSchedule = null;
 
 
+    public static function getLabel(): string
+    {
+        return 'Marcação de Horários';
+    }
 
+    public static function getPluralLabel(): string
+    {
+        return 'Marcações de Horários';
+    }
     public static function exportSchedules(?Collection $records = null): StreamedResponse
     {
         if ($records) {
