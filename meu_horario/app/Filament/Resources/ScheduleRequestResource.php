@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleRequestResource\Pages;
+use App\Models\Schedule;
 use App\Models\ScheduleRequest;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -254,10 +255,39 @@ class ScheduleRequestResource extends Resource
         ];
     }
 
-    // Apresentar o total de pedidos pendentes
+    // Apresentar o total de pedidos recebidos pendentes
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        $user = Filament::auth()->user();
+    
+        if (!$user || !$user->teacher) {
+            return null;
+        }
+
+        $teacherId = $user->teacher->id;
+
+        $conflictingSchedules = Schedule::where('id_teacher', $teacherId)
+            ->get(['id_schoolyear', 'id_timeperiod', 'id_room', 'id_weekday']);
+
+        if ($conflictingSchedules->isEmpty()) {
+            return null;
+        }
+
+        $query = \App\Models\ScheduleRequest::where('status', 'Pendente')
+            ->where(function ($query) use ($conflictingSchedules) {
+                foreach ($conflictingSchedules as $schedule) {
+                    $query->orWhere(function ($sub) use ($schedule) {
+                        $sub->whereHas('scheduleConflict', function ($q) use ($schedule) {
+                            $q->where('id_schoolyear', $schedule->id_schoolyear)
+                            ->where('id_timeperiod', $schedule->id_timeperiod)
+                            ->where('id_room', $schedule->id_room)
+                            ->where('id_weekday', $schedule->id_weekday);
+                        });
+                    });
+                }
+            });
+
+        return (string) $query->count();
     }
 
     // public static function getPermissionPrefixes(): array
