@@ -4,38 +4,22 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\BuildingImporter;
 use App\Filament\Resources\BuildingResource\Pages;
-use App\Filament\Resources\BuildingResource\RelationManagers;
 use App\Filament\Resources\BuildingResource\RelationManagers\RoomsRelationManager;
 use App\Models\Building;
-use Filament\Forms;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BuildingResource extends Resource
 {
     protected static ?string $model = Building::class;
-    protected static ?string $navigationGroup = 'Pólos e Núcleos';
-    protected static ?string $navigationLabel = 'Edifícios';
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
-
-    public static function getModelLabel(): string
-    {
-        return 'Edifício';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'Edifícios';
-    }
+    protected static ?string $navigationGroup = 'Pólos e Núcleos';              // Grupo de navegação
+    protected static ?string $navigationLabel = 'Edifícios';                    // Label
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';  // Icon apresentadp
 
     public static function form(Form $form): Form
     {
