@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\GenderResource\Pages;
 use App\Filament\Resources\GenderResource\RelationManagers;
 use App\Models\Gender;
+use Dom\Text;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -50,6 +51,11 @@ class GenderResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('gender')
                     ->label('Género')
                     ->searchable()

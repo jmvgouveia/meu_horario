@@ -6,6 +6,7 @@ use App\Models\Building;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class BuildingImporter extends Importer
@@ -39,7 +40,10 @@ class BuildingImporter extends Importer
 
     public function resolveRecord(): ?Building
     {
-        return new Building();
+        // Use a transaction to ensure atomicity
+        return DB::transaction(function () {
+            return new Building();
+        });
     }
     protected function beforeFill(): void
     {

@@ -2,39 +2,48 @@
 
 namespace App\Filament\Imports;
 
-use App\Models\TimePeriod;
+
+use App\Models\SalaryScale;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
-class TimePeriodImporter extends Importer
+class SalaryScaleImporter extends Importer
 {
-    protected static ?string $model = TimePeriod::class;
+    protected static ?string $model = SalaryScale::class;
 
     public static function getColumns(): array
     {
         return [
+            ImportColumn::make('scale')
+                ->label('Nome')
+                ->rules([
+                    'required',
+                    'string',
+                    'max:255',
+                    'min:3',
+                    Rule::unique(SalaryScale::class, 'scale'),
+                ])
+                ->example('1. Escalão'),
 
-            ImportColumn::make('description')
-                ->label('Descrição')
-                ->rules(['required', 'string', 'max:255']),
 
         ];
     }
 
-    public function resolveRecord(): ?TimePeriod
+    public function resolveRecord(): ?SalaryScale
     {
         return DB::transaction(function () {
-            return new TimePeriod();
+            return new SalaryScale();
         });
     }
-
     protected function beforeFill(): void
     {
         // Limpa espaços em branco
-        $this->data['description'] = trim($this->data['description'] ?? '');
+        $this->data['scale'] = trim($this->data['scale'] ?? '');
     }
+
 
     public static function getCompletedNotificationBody(Import $import): string
     {
@@ -43,10 +52,10 @@ class TimePeriodImporter extends Importer
         $total = $import->total_rows;
 
         if ($successful === 0) {
-            return "Nenhuma hora foi importada. {$failed} registos falharam de {$total} processados.";
+            return "Nenhum Escalão Salarial foi importado. {$failed} registos falharam de {$total} processados.";
         }
 
-        $message = "Importação concluída: {$successful} horas importadas com sucesso";
+        $message = "Importação concluída: {$successful} Escalões Salariais importados com sucesso";
 
         if ($failed > 0) {
             $message .= ", {$failed} falharam";

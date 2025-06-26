@@ -48,6 +48,10 @@ class EditTeacher extends EditRecord
 
         $record->updateOrFail($data);
 
+        //Atualizar o contador de horas com base nas posições e reduções
+        $record->load(['positions', 'timeReductions']);
+        $record->updateHourCounterFromReductions();
+
         return $record;
     }
 }

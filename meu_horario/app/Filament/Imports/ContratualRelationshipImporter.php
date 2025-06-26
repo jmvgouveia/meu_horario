@@ -2,55 +2,48 @@
 
 namespace App\Filament\Imports;
 
-use App\Models\Nationality;
+use App\Models\ContratualRelationship;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
-class NationalityImporter extends Importer
+class ContratualRelationshipImporter extends Importer
 {
-    protected static ?string $model = Nationality::class;
+    protected static ?string $model = ContratualRelationship::class;
 
     public static function getColumns(): array
     {
         return [
             ImportColumn::make('name')
-                ->label('Nacionalidade')
+                ->label('Nome')
                 ->rules([
                     'required',
                     'string',
                     'max:255',
-                    'min:2',
-                    Rule::unique(Nationality::class, 'name'),
+                    'min:3',
+                    Rule::unique(ContratualRelationship::class, 'name'),
                 ])
-                ->example('Portuguesa'),
+                ->example('Edifício Central'),
 
-            ImportColumn::make('acronym')
-                ->label('Sigla')
-                ->rules([
-                    'required',
-                    'string',
-                    'size:2',
-                    Rule::unique(Nationality::class, 'acronym'),
-                ])
-                ->example('PT'),
+
         ];
     }
 
-    public function resolveRecord(): ?Nationality
+    public function resolveRecord(): ?ContratualRelationship
     {
+
         return DB::transaction(function () {
-            return new Nationality();
+            return new ContratualRelationship();
         });
     }
-
     protected function beforeFill(): void
     {
+        // Limpa espaços em branco
         $this->data['name'] = trim($this->data['name'] ?? '');
-        $this->data['acronym'] = strtoupper(trim($this->data['acronym'] ?? ''));
     }
+
 
     public static function getCompletedNotificationBody(Import $import): string
     {
@@ -59,10 +52,10 @@ class NationalityImporter extends Importer
         $total = $import->total_rows;
 
         if ($successful === 0) {
-            return "Nenhuma nacionalidade foi importada. {$failed} registos falharam de {$total} processados.";
+            return "Nenhum relação contratual foi importada. {$failed} registos falharam de {$total} processados.";
         }
 
-        $message = "Importação concluída: {$successful} nacionalidades importadas com sucesso";
+        $message = "Importação concluída: {$successful} Relações contratuais importadas com sucesso";
 
         if ($failed > 0) {
             $message .= ", {$failed} falharam";

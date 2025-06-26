@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\QualificationImporter;
 use App\Filament\Resources\QualificationResource\Pages;
 use App\Filament\Resources\QualificationResource\RelationManagers;
 use App\Models\Qualification;
@@ -57,6 +58,13 @@ class QualificationResource extends Resource
             ])
             ->filters([
                 //
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(QualificationImporter::class)
+                    ->label('Importar Qualificações')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

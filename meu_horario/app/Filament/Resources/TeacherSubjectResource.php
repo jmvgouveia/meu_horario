@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\TeacherSubjectsImporter;
 use App\Filament\Resources\TeacherSubjectResource\Pages;
 use App\Filament\Resources\TeacherSubjectResource\RelationManagers;
 use App\Models\TeacherSubject;
@@ -76,6 +77,13 @@ class TeacherSubjectResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(TeacherSubjectsImporter::class)
+                    ->label('Importar Disciplinas-Professor')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

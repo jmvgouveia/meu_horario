@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\DepartmentImporter;
 use App\Filament\Resources\DepartmentResource\Pages;
 use App\Filament\Resources\DepartmentResource\RelationManagers;
 use App\Models\Department;
@@ -71,6 +72,13 @@ class DepartmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(DepartmentImporter::class)
+                    ->label('Importar Departamentos')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

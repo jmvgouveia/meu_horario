@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\TeacherImporter;
 use App\Filament\Resources\TeacherResource\Pages;
 use App\Filament\Resources\TeacherResource\RelationManagers;
 use App\Models\Teacher;
@@ -105,7 +106,7 @@ class TeacherResource extends Resource
                             ->searchable(),
                         Select::make('time_reductions')
                             ->label('Reduções de Horário')
-                            ->relationship('time_reductions', 'name')
+                            ->relationship('timeReductions', 'name')
                             ->multiple()
                             ->preload()
                             ->searchable(),
@@ -124,6 +125,7 @@ class TeacherResource extends Resource
                             ->nullable()
                             ->placeholder('Deixe em branco para manter a atual'),
                     ]),
+
             ]);
     }
 
@@ -157,12 +159,20 @@ class TeacherResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(TeacherImporter::class)
+                    ->label('Importar Professores')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
+
 
     public static function getRelations(): array
     {

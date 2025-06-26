@@ -6,6 +6,7 @@ use App\Models\Room;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 
 class RoomImporter extends Importer
 {
@@ -25,7 +26,9 @@ class RoomImporter extends Importer
 
     public function resolveRecord(): ?Room
     {
-        return new Room();
+        return DB::transaction(function () {
+            return new Room();
+        });
     }
 
     public function import(array $data, Import $import): void

@@ -6,6 +6,7 @@ use App\Models\Registration;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
@@ -54,28 +55,31 @@ class RegistrationImporter extends Importer
 
     public function resolveRecord(): ?Registration
     {
-        try {
-            Log::debug('Importando matrícula:', $this->data);
+        return DB::transaction(function () {
 
-            $registration = Registration::create([
-                'id_student' => $this->data['id_student'],
-                'id_course' => $this->data['id_course'],
-                'id_schoolyear' => $this->data['id_schoolyear'],
-                'id_class' => $this->data['id_class'],
-            ]);
+            try {
+                Log::debug('Importando matrícula:', $this->data);
 
-            if (!empty($this->data['id_subjects'])) {
-                $this->attachSubjectsToRegistration($registration, $this->data['id_subjects']);
+                $registration = Registration::create([
+                    'id_student' => $this->data['id_student'],
+                    'id_course' => $this->data['id_course'],
+                    'id_schoolyear' => $this->data['id_schoolyear'],
+                    'id_class' => $this->data['id_class'],
+                ]);
+
+                if (!empty($this->data['id_subjects'])) {
+                    $this->attachSubjectsToRegistration($registration, $this->data['id_subjects']);
+                }
+
+                return $registration;
+            } catch (\Exception $e) {
+                Log::error('Erro ao importar matrícula:', [
+                    'message' => $e->getMessage(),
+                    'linha' => $this->data,
+                ]);
+                throw $e;
             }
-
-            return $registration;
-        } catch (\Exception $e) {
-            Log::error('Erro ao importar matrícula:', [
-                'message' => $e->getMessage(),
-                'linha' => $this->data,
-            ]);
-            throw $e;
-        }
+        });
     }
 
     private function attachSubjectsToRegistration(Registration $registration, string $subjectsList): void

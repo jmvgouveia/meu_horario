@@ -73,13 +73,41 @@ class Teacher extends Model
         return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position');
     }
 
-    public function time_reductions()
+    public function timeReductions()
     {
         return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction');
     }
-
+    public function hourCounter()
+    {
+        return $this->hasOne(TeacherHourCounter::class, 'id_teacher');
+    }
     public function schedules()
     {
         return $this->hasMany(Schedule::class, 'id_teacher');
+    }
+    public function updateHourCounterFromReductions(): void
+    {
+        $letiva = 0;
+        $naoLetiva = 0;
+
+        // Reduções por cargo
+        foreach ($this->positions as $position) {
+            $letiva += $position->reduction_l ?? 0;
+            $naoLetiva += $position->reduction_nl ?? 0;
+        }
+
+        // Reduções por tempo de serviço
+        foreach ($this->timeReductions as $reduction) {
+            $letiva += $reduction->value_l ?? 0;
+            $naoLetiva += $reduction->value_nl ?? 0;
+        }
+
+        // Atualiza o contador
+        $counter = $this->hourCounter()->firstOrCreate([]);
+
+        $counter->update([
+            'teaching_load' => max(0, $counter->default_teaching_load - $letiva),
+            'non_teaching_load' => max(0, $counter->default_non_teaching_load - $naoLetiva),
+        ]);
     }
 }

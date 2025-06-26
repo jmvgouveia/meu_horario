@@ -14,7 +14,7 @@ class ListScheduleRequests extends ListRecords
 {
     protected static string $resource = ScheduleRequestResource::class;
 
-    public string $filtroAtual = 'meus';
+    public string $filtroAtual = 'recebidos';
 
     public function mount(): void
     {
@@ -76,15 +76,16 @@ class ListScheduleRequests extends ListRecords
         $counts = $this->getCounts();
 
         return [
+            Action::make('recebidos')
+                ->label("Pedidos Recebidos ({$counts['recebidos']})")
+                ->action(fn() => $this->filtroAtual = 'recebidos')
+                ->color(fn() => $this->filtroAtual === 'recebidos' ? 'success' : 'gray'),
             Action::make('meus')
                 ->label("Meus Pedidos ({$counts['meus']})")
                 ->action(fn() => $this->filtroAtual = 'meus')
                 ->color(fn() => $this->filtroAtual === 'meus' ? 'primary' : 'gray'),
 
-            Action::make('recebidos')
-                ->label("Pedidos Recebidos ({$counts['recebidos']})")
-                ->action(fn() => $this->filtroAtual = 'recebidos')
-                ->color(fn() => $this->filtroAtual === 'recebidos' ? 'primary' : 'gray'),
+
         ];
     }
 

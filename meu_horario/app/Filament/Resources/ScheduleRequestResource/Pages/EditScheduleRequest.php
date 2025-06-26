@@ -258,7 +258,7 @@ class EditScheduleRequest extends EditRecord
 
         if (!$conflict) return [];
 
-        return Room::where('id_building', $conflict->room?->building_id)
+        return Room::where('id_building', $conflict->room?->id_building)
             ->whereDoesntHave('schedules', function ($query) use ($conflict) {
                 $query->where('id_timeperiod', $conflict->id_timeperiod)
                     ->where('id_weekday', $conflict->id_weekday);

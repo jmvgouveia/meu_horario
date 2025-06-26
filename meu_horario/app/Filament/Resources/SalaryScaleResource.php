@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\SalaryScaleImporter;
 use App\Filament\Resources\SalaryScaleResource\Pages;
 use App\Filament\Resources\SalaryScaleResource\RelationManagers;
 use App\Models\SalaryScale;
@@ -57,6 +58,13 @@ class SalaryScaleResource extends Resource
             ])
             ->filters([
                 //
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(SalaryScaleImporter::class)
+                    ->label('Importar Escalões Salariais')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

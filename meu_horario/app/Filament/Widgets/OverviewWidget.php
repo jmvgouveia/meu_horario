@@ -48,32 +48,33 @@ class OverviewWidget extends Widget
         $aulasLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'letiva')->count();
         $aulasNaoLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'nao letiva')->count();
 
+
+
+
         // Cargos com redução
-        $cargos = Position::with('position')
-            ->where('id', $teacher->id)
-            ->get()
-            ->map(function ($cargo) {
-                return [
-                    'nome' => $cargo->position->name,
-                    'descricao' => $cargo->position->description ?? 'Cargo sem descrição',
-                    'redução_letiva' => $cargo->position->reduction_l ?? 0,
-                    'redução_naoletiva' => $cargo->position->reduction_nl ?? 0,
-                ];
-            })->toArray();
+        $cargos = $teacher->positions->map(function ($cargo) {
+            return [
+                'nome' => $cargo->name,
+                'descricao' => $cargo->description ?? 'Cargo sem descrição',
+                'redução_letiva' => $cargo->reduction_l ?? 0,
+                'redução_naoletiva' => $cargo->reduction_nl ?? 0,
+            ];
+        })->toArray();
+
+
+
 
         // Reduções por tempo de serviço
-        $tempoReducoes = TimeReduction::with('timeReduction')
-            ->where('id', $teacher->id)
-            ->get()
-            ->map(function ($reducao) {
-                return [
-                    'nome' => $reducao->timeReduction->name ?? 'Redução sem nome',
-                    'descricao' => $reducao->timeReduction->description ?? 'Redução sem descrição',
-                    'redução_letiva' => $reducao->timeReduction->value_l ?? 0,
-                    'redução_naoletiva' => $reducao->timeReduction->value_nl ?? 0,
-                ];
-            })->toArray();
-        // dd($cargos, $tempoReducoes);
+        $tempoReducoes =  $teacher->timeReductions->map(function ($tempoReducoes) {
+            return [
+                'nome' => $tempoReducoes->name,
+                'descricao' => $tempoReducoes->description ?? 'Cargo sem descrição',
+                'redução_letiva' => $tempoReducoes->value_l ?? 0,
+                'redução_naoletiva' => $tempoReducoes->value_nl ?? 0,
+            ];
+        })->toArray();
+
+
         $resumo = [
             //    'disponivel' => $disponivel,
             'letiva' => $aulasLetivas,

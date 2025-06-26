@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Position extends Model
 {
     protected $fillable = [
-       'name',
-       'description',
-       'reduction_l',
-       'reduction_nl',
+        'name',
+        'description',
+        'reduction_l',
+        'reduction_nl',
 
     ];
 

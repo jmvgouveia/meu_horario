@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\ContratualRelationshipImporter;
 use App\Filament\Resources\ContratualRelationshipResource\Pages;
 use App\Filament\Resources\ContratualRelationshipResource\RelationManagers;
 use App\Models\ContratualRelationship;
@@ -70,6 +71,13 @@ class ContratualRelationshipResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(ContratualRelationshipImporter::class)
+                    ->label('Importar Relações Contratuais')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

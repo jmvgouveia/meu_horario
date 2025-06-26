@@ -6,6 +6,7 @@ use App\Models\CourseSubject;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 
 class CourseSubjectImporter extends Importer
 {
@@ -33,7 +34,9 @@ class CourseSubjectImporter extends Importer
 
     public function resolveRecord(): ?CourseSubject
     {
-        return new CourseSubject();
+        return DB::transaction(function () {
+            return new CourseSubject();
+        });
     }
 
     protected function beforeFill(): void

@@ -2,40 +2,69 @@
 
 namespace App\Filament\Imports;
 
-use App\Models\TeacherSubjects;
+use App\Models\TeacherSubject;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 
 class TeacherSubjectsImporter extends Importer
 {
-    protected static ?string $model = TeacherSubjects::class;
+    protected static ?string $model = TeacherSubject::class;
 
     public static function getColumns(): array
     {
         return [
-            //
+
+            ImportColumn::make('id_teacher')
+                ->label('Descrição')
+                ->rules(['required', 'integer', 'exists:teachers,id']),
+
+            ImportColumn::make('id_subject')
+                ->label('Descrição')
+                ->rules(['required', 'integer', 'exists:subjects,id']),
+
+            ImportColumn::make('id_schoolyear')
+                ->label('Descrição')
+                ->rules(['required', 'integer', 'exists:schoolyears,id']),
+
+
         ];
     }
 
-    public function resolveRecord(): ?TeacherSubjects
+    public function resolveRecord(): ?TeacherSubject
     {
-        // return TeacherSubjects::firstOrNew([
-        //     // Update existing records, matching them by `$this->data['column_name']`
-        //     'email' => $this->data['email'],
-        // ]);
+        return DB::transaction(function () {
+            return new TeacherSubject();
+        });
+    }
 
-        return new TeacherSubjects();
+    protected function beforeFill(): void
+    {
+        // Limpa espaços em branco
+        $this->data['id_teacher'] = trim($this->data['id_teacher'] ?? '');
+        $this->data['id_subject'] = trim($this->data['id_subject'] ?? '');
+        $this->data['id_schoolyear'] = trim($this->data['id_schoolyear'] ?? '');
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your teacher subjects import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
 
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+        if ($successful === 0) {
+            return "Nenhuma Disciplina foi importada. {$failed} registos falharam de {$total} processados.";
         }
 
-        return $body;
+        $message = "Importação concluída: {$successful} Disciplinas importadas com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }

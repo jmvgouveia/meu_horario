@@ -6,6 +6,7 @@ use App\Models\Student;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 
 class StudentImporter extends Importer
 {
@@ -31,7 +32,9 @@ class StudentImporter extends Importer
 
     public function resolveRecord(): ?Student
     {
-        return new Student();
+        return DB::transaction(function () {
+            return new Student();
+        });
     }
 
     public function import(array $data, Import $import): void

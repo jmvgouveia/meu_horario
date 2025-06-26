@@ -140,6 +140,13 @@ class TeacherHourCounterResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(TeacherHourCounterImporter::class)
+                    ->label('Importar Cargas Horárias')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
+            ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

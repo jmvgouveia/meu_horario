@@ -175,7 +175,7 @@ class ScheduleConflictResource extends Resource
                         'Aprovado' => 'success',
                         'Recusado' => 'danger',
                         'Escalado' => 'info',
-                        'Aprovado DP' => 'primary',
+                        'Aprovado DP' => 'success',
                         'Recusado DP' => 'danger',
                         default => 'gray',
                     })

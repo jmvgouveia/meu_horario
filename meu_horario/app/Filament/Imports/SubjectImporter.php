@@ -6,6 +6,7 @@ use App\Models\Subject;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\DB;
 
 class SubjectImporter extends Importer
 {
@@ -22,41 +23,40 @@ class SubjectImporter extends Importer
                 ->rules(['required', 'string', 'max:65535']),
         ];
     }
+    protected function beforeFill(): void
+    {
+        // Limpa espaços em branco
+        $this->data['name'] = trim($this->data['name'] ?? '');
+        $this->data['acronym'] = trim($this->data['acronym'] ?? '');
+    }
 
     public function resolveRecord(): ?Subject
     {
-        return new Subject();
+        return DB::transaction(function () {
+            return new Subject();
+        });
     }
 
-    public function import(array $data, Import $import): void
-    {
-        try {
-            $record = $this->resolveRecord();
 
-            if ($record === null) {
-                return;
-            }
-
-            $record->fill([
-                'name' => $data['name'],
-                'acronym' => $data['acronym'],
-            ]);
-
-            $record->save();
-
-            $import->increment('processed_rows');
-            $import->increment('successful_rows');
-        } catch (\Exception $e) {
-            $import->increment('processed_rows');
-            $import->increment('failed_rows');
-
-            throw $e;
-        }
-    }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $count = $import->successful_rows;
-        return "Importados com sucesso {$count} disciplinas.";
+        $successful = $import->successful_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
+
+        if ($successful === 0) {
+            return "Nenhum Disciplina foi importada. {$failed} registos falharam de {$total} processados.";
+        }
+
+        $message = "Importação concluída: {$successful} Disciplinas importadas com sucesso";
+
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        $message .= " de {$total} registos processados.";
+
+        return $message;
     }
 }
