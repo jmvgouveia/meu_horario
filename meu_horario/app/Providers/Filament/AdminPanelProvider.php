@@ -31,6 +31,7 @@ use Filament\Facades\Filament as FacadesFilament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationItem;
 use Filament\Support\Facades\Filament;
 
 use Filament\Notifications\NotificationsPlugin;
@@ -54,8 +55,9 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-user'),
             ])
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#0094ee',
             ])
+            ->favicon('images/favoicon.ico')
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -63,6 +65,7 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+
             ->widgets([
                 /* WeeklyScheduleWidget::class,
                 OverviewWidget::class,
@@ -72,8 +75,7 @@ class AdminPanelProvider extends PanelProvider
                 BuildingsOverview::class, */
 
                 /* Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class, */
-            ])
+                Widgets\FilamentInfoWidget::class, */])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -91,6 +93,13 @@ class AdminPanelProvider extends PanelProvider
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->sidebarFullyCollapsibleOnDesktop()
             ->brandName('Meu Horário')
+            ->brandLogo(function () {
+                if (request()->is('meuhorario/login')) {
+                    return '<img src="' . asset('images/logo-login.png') . '" style="height:64px;">';
+                }
+
+                return '<img src="' . asset('images/logo-painel.png') . '" style="height:32px;">';
+            })
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Calendarização'),
