@@ -35,28 +35,28 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-calculator')
                 ->color('warning'),
 
-            Stat::make('Numero de Docentes', Teacher::count())
+            Stat::make('Número de Docentes', Teacher::count())
                 ->description('Número total de docentes')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('danger'),
 
 
-            Stat::make('Numero de Alunos', Student::count())
+            Stat::make('Número de Alunos', Student::count())
                 ->description('Número total de Alunos')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('warning'),
 
-            Stat::make('Numero de Deparmentos', Department::count())
+            Stat::make('Número de Deparmentos', Department::count())
                 ->description('Número total de Departamentos')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('success'),
 
-            Stat::make('Numero de Cursos', Course::count())
+            Stat::make('Número de Cursos', Course::count())
                 ->description('Número total de Cursos')
                 ->descriptionIcon('heroicon-m-academic-cap')
                 ->color('success'),
 
-            Stat::make('Numero de Turmas', Classes::count())
+            Stat::make('Número de Turmas', Classes::count())
                 ->description('Número total de Turmas')
                 ->descriptionIcon('heroicon-m-user-group')
                 ->color('success'),
