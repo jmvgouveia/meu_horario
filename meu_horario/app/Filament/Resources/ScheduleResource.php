@@ -54,6 +54,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Actions;
 use Mockery\Matcher\Not;
 
+
 class ScheduleResource extends Resource
 {
 
@@ -518,42 +519,20 @@ class ScheduleResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn() => self::exportSchedules())
                     ->color('primary')
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
+
             ])
-            // ->actions([
-            //     DeleteAction::make()
-            //         ->requiresConfirmation()
-            //         ->after(function ($record) {
-            //             SchedulesResource::hoursCounterUpdate($record);
-            //         }),
-            // ])
+
 
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make()
-                    ->after(function (Collection $records) {
-                        try {
-                            DB::transaction(function () use ($records) {
-
-                                foreach ($records as $record) {
-                                    ScheduleResource::rollbackScheduleRequest($record);
-                                    ScheduleResource::hoursCounterUpdate($record, True);
-                                }
-                            });
-                        } catch (\Throwable $e) {
-                            Notification::make()
-                                ->title('Erro ao eliminar horários')
-                                ->body('Ocorreu um erro durante a remoção em massa: ' . $e->getMessage())
-                                ->danger()
-                                ->sendToDatabase(Filament::auth()->user());
-
-                            throw $e;
-                        }
-                    }),
 
                 BulkAction::make('exportar_selecionados')
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
+                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
+
             ]);
     }
 
@@ -632,6 +611,7 @@ class ScheduleResource extends Resource
         return [
             Actions\ViewAction::make(),
             Actions\EditAction::make(),
+            //  ->visible(fn($record) => !in_array($record->estado, ['Aprovado', 'Aprovado DP'])),
             Actions\DeleteAction::make(), // ✅ Este permite o botão "Apagar"
         ];
     }

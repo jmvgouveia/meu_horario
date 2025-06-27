@@ -71,4 +71,9 @@ class User extends Authenticatable
     {
         return $this->hasRole('Gestor Conflitos');
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('Super Admin');
+    }
 }

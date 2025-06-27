@@ -75,8 +75,13 @@ class EditSchedule extends EditRecord
 
     public function getFormActions(): array
     {
+        $record = $this->record;
         return [
-            $this->getSaveFormAction(),
+
+
+            $this->getSaveFormAction()
+                ->visible(fn() => !in_array($record?->status, ['Aprovado', 'Aprovado DP'])),
+
 
 
             DeleteAction::make()
@@ -86,7 +91,7 @@ class EditSchedule extends EditRecord
                 ->action(function () {
 
                     try {
-                        $this->validateScheduleWindow();
+                        // $this->validateScheduleWindow();
 
                         ScheduleResource::rollbackScheduleRequest($this->record);
 

@@ -6,6 +6,8 @@ use App\Filament\Resources\ScheduleConflictResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Models\Room;
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -153,8 +155,47 @@ class EditScheduleConflict extends EditRecord
                 });
         }
 
-        $actions[] = $this->getCancelFormAction();
 
+        $actions[] = DeleteAction::make()
+            ->label('Eliminar Horário')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->action(function () {
+
+                try {
+                    // $this->validateScheduleWindow();
+
+                    ScheduleResource::rollbackScheduleRequest($this->record);
+
+                    if ($this->record->status !== 'Pendente') {
+
+                        ScheduleResource::hoursCounterUpdate($this->record, true);
+                    }
+
+                    $this->record->delete();
+
+                    Notification::make()
+                        ->title("Horário Eliminado")
+                        ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
+                        ->success()
+                        ->sendToDatabase(Filament::auth()->user());
+
+                    Notification::make()
+                        ->title('Horário Eliminado')
+                        ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
+                        ->success()
+                        ->send();
+                    $this->redirect(filament()->getUrl());
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->title('Erro ao eliminar o horário')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                }
+            });
+
+        $actions[] = $this->getCancelFormAction();
         return $actions;
     }
 
@@ -187,7 +228,8 @@ class EditScheduleConflict extends EditRecord
     // protected function getHeaderActions(): array
     // {
     //     return [
-    //         Actions\DeleteAction::make(),
+
+
     //     ];
     // }
 }
