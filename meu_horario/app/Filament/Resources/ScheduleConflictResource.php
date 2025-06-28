@@ -114,7 +114,7 @@ class ScheduleConflictResource extends Resource
                         ->content(fn($record) => $record->requester->name ?? '—'),
                     Placeholder::make('updated_at')
                         ->label('Data da Resposta')
-                        ->content(fn($record) => optional($record->updated_at)->format('d/m/Y H:i') ?? '—'),
+                        ->content(fn($record) => optional($record->justification_at)->format('d/m/Y H:i') ?? '—'),
 
                     // Placeholder::make('status')
                     //     ->label('Estado Atual')
@@ -137,6 +137,12 @@ class ScheduleConflictResource extends Resource
 
         return $table
             ->columns([
+                // 0. ID
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 // 1. Quem fez a marcação original (professor com conflito)
                 TextColumn::make('scheduleConflict.teacher.name')

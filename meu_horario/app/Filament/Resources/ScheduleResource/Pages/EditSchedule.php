@@ -7,6 +7,7 @@ use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
 use App\Models\Schedule;
+use App\Models\ScheduleRequest;
 use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -76,44 +77,80 @@ class EditSchedule extends EditRecord
     public function getFormActions(): array
     {
         $record = $this->record;
+
         return [
 
 
-            $this->getSaveFormAction()
-                ->visible(fn() => !in_array($record?->status, ['Aprovado', 'Aprovado DP'])),
-
-
+            $this->getSaveFormAction(),
+            // ->visible(fn() => !in_array($record?->status, ['Aprovado', 'Aprovado DP'])),
 
             DeleteAction::make()
                 ->label('Eliminar Horário')
                 ->color('danger')
                 ->requiresConfirmation()
+                ->modalHeading('Eliminar Horário')
+                ->modalDescription('Ao eliminar este horário, qualquer pedido de troca que estava pendente com este registo será automaticamente aprovado.')
                 ->action(function () {
-
                     try {
-                        // $this->validateScheduleWindow();
 
-                        ScheduleResource::rollbackScheduleRequest($this->record);
+                        DB::transaction(function () {
+                            // Verifica se o horário está dentro da janela de agendamento
 
-                        if ($this->record->status !== 'Pendente') {
 
-                            ScheduleResource::hoursCounterUpdate($this->record, true);
-                        }
+                            // Verifica se o horário está dentro da janela de agendamento
+                            $record = $this->record;
 
-                        $this->record->delete();
+                            // Verifica se este horário está envolvido num pedido como "alvo do conflito"
+                            $pendingRequest = ScheduleRequest::where('id_schedule', $record->id)
+                                ->where('status', 'Recusado')
+                                ->first();
 
-                        Notification::make()
-                            ->title("Horário Eliminado")
-                            ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
-                            ->success()
-                            ->sendToDatabase(Filament::auth()->user());
+                            if ($pendingRequest) {
+                                // Aprovar automaticamente o pedido
+                                $scheduleNovo = $pendingRequest->scheduleNew;
 
-                        Notification::make()
-                            ->title('Horário Eliminado')
-                            ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
-                            ->success()
-                            ->send();
-                        $this->redirect(filament()->getUrl());
+                                if ($scheduleNovo) {
+                                    $scheduleNovo->status = 'Aprovado';
+                                    $scheduleNovo->save();
+
+                                    // Atualizar contador de horas com base no novo horário aprovado
+                                    ScheduleResource::hoursCounterUpdate($scheduleNovo, false);
+
+                                    // Atualizar o estado do pedido
+                                    $pendingRequest->status = 'Aprovado';
+                                    $pendingRequest->save();
+
+                                    // Notificar o requerente do pedido
+                                    $requerente = $pendingRequest->requester?->user;
+                                    $idNovo = $scheduleNovo->id;
+                                    $idApagado = $record->id;
+
+                                    if ($requerente) {
+                                        Notification::make()
+                                            ->title("Pedido de troca aprovado automaticamente")
+                                            ->body("O horário em conflito (ID: {$idApagado}) foi eliminado. O seu horário (ID: {$idNovo}) foi aprovado automaticamente.")
+                                            ->success()
+                                            ->sendToDatabase($requerente);
+                                    }
+                                }
+                            }
+
+                            // Atualizar contador se for horário previamente aprovado
+                            if ($record->status !== 'Pendente') {
+                                ScheduleResource::hoursCounterUpdate($record, true);
+                            }
+
+                            ScheduleResource::rollbackScheduleRequest($this->record);
+                            $record->delete();
+
+                            Notification::make()
+                                ->title("Horário Eliminado")
+                                ->body("O horário com ID: {$record->id} foi eliminado com sucesso.")
+                                ->success()
+                                ->sendToDatabase(Filament::auth()->user());
+
+                            $this->redirect(filament()->getUrl());
+                        });
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('Erro ao eliminar o horário')
@@ -122,6 +159,8 @@ class EditSchedule extends EditRecord
                             ->send();
                     }
                 }),
+
+
 
             $this->getCancelFormAction(),
         ];

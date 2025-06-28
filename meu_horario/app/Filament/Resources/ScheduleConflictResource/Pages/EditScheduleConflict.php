@@ -5,6 +5,9 @@ namespace App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Filament\Resources\ScheduleConflictResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Models\Room;
+
+use App\Models\User;
+
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
@@ -12,8 +15,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Container\Attributes\Log;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log as FacadesLog;
+
 
 class EditScheduleConflict extends EditRecord
 {
@@ -36,10 +43,10 @@ class EditScheduleConflict extends EditRecord
 
 
     protected function getFormActions(): array
-    {
+    {  // USER CLASSS
         $actions = [];
 
-        if (Auth::user()?->isGestorConflitos()) {
+        if (Auth::user()?->USER::isGestorConflitos()) {
             $actions[] = Action::make('aprovar')
                 ->label('Aprovar Pedido')
                 ->color('success')
@@ -157,35 +164,60 @@ class EditScheduleConflict extends EditRecord
 
 
         $actions[] = DeleteAction::make()
-            ->label('Eliminar Horário')
+            ->label('Eliminar Horário123')
             ->color('danger')
             ->requiresConfirmation()
+            // ->visible(function () {
+            //     $user = Filament::auth()->user();
+            //     return $user?->teacher?->id === $this->record->id_teacher;
+            // })
             ->action(function () {
 
+
                 try {
-                    // $this->validateScheduleWindow();
+                    DB::transaction(function () {
+                        // Verifica se o registro tem um scheduleConflict e scheduleNew
 
-                    ScheduleResource::rollbackScheduleRequest($this->record);
+                        if ($this->record->status === 'Aprovado DP') {
+                            ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, true);
 
-                    if ($this->record->status !== 'Pendente') {
 
-                        ScheduleResource::hoursCounterUpdate($this->record, true);
-                    }
+                            $this->record->delete();
+                            $this->record->scheduleNew?->delete();
+                            $this->record->scheduleConflict?->update([
+                                'status' => 'Aprovado',
+                            ]);
+                        }
 
-                    $this->record->delete();
 
-                    Notification::make()
-                        ->title("Horário Eliminado")
-                        ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
-                        ->success()
-                        ->sendToDatabase(Filament::auth()->user());
+                        if ($this->record->status === 'Escalado') {
+                            ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
 
-                    Notification::make()
-                        ->title('Horário Eliminado')
-                        ->body("O horário com ID: {$this->record->id} foi eliminado com sucesso.")
-                        ->success()
-                        ->send();
-                    $this->redirect(filament()->getUrl());
+
+                            $this->record->delete();
+                            $this->record->scheduleConflict?->delete();
+                            $this->record->scheduleNew?->update([
+                                'status' => 'Aprovado',
+                            ]);
+                            ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        }
+
+
+
+
+                        Notification::make()
+                            ->title("Horário Eliminado")
+                            ->body("O horário foi eliminado com sucesso, 1:{$this->record->id}. 2:{$this->record->scheduleNew?->id}, 3:{$this->record->scheduleConflict?->id}")
+                            ->success()
+                            ->sendToDatabase(Filament::auth()->user());
+
+                        Notification::make()
+                            ->title('Horário Eliminado')
+                            ->body("O horário foi eliminado com sucesso ID:{$this->record->scheduleNew?->id}")
+                            ->success()
+                            ->send();
+                        $this->redirect(filament()->getUrl());
+                    });
                 } catch (\Exception $e) {
                     Notification::make()
                         ->title('Erro ao eliminar o horário')

@@ -309,11 +309,18 @@ class ScheduleResource extends Resource
                             }),
 
                         //---
-                        Toggle::make('filtrar_por_turma')
-                            ->label('Filtrar alunos pelas turmas selecionadas')
-                            ->default(true)
-                            ->reactive(),
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('filtrar_por_turma')
+                                    ->label('Filtrar alunos pelas turmas selecionadas')
+                                    ->default(true)
+                                    ->reactive(),
 
+                                Toggle::make('filter_last_year_students')
+                                    ->label('Mostrar os meus alunos (último ano letivo)')
+                                    ->default(true)
+                                    ->reactive(),
+                            ]),
                         CheckboxList::make('students')
                             ->label('Alunos matriculados na disciplina')
                             ->helperText('Selecione os alunos que vão assistir à aula')
@@ -367,6 +374,8 @@ class ScheduleResource extends Resource
                                 $schoolYear = SchoolYear::where('active', true)->first();
                                 $classIds = $get('id_classes') ?? [];
                                 $filtrarPorTurma = $get('filtrar_por_turma');
+                                $filtrarUltimoAno = $get('filter_last_year_students');
+
 
                                 if (!$subjectId || !$schoolYear) return [];
 
@@ -384,6 +393,25 @@ class ScheduleResource extends Resource
                                     $query->whereIn('id_class', $classIds);
                                 }
 
+                                if ($filtrarUltimoAno) {
+                                    $professorId = Auth::user()?->teacher?->id;
+                                    $studentIdsPermitidos = DB::table('last_year_students')
+                                        ->where('id_teacher', $professorId)
+                                        ->where('id_subject', $subjectId)
+                                        ->where('id_schoolyear', $schoolYear->id)
+                                        ->pluck('id_student');
+
+                                    if ($studentIdsPermitidos->isNotEmpty()) {
+                                        $query->whereIn('id_student', $studentIdsPermitidos);
+                                    } else {
+                                        // Se não houver alunos, retorna vazio
+                                        return [];
+                                    }
+                                }
+
+
+
+
                                 return $query->get()->mapWithKeys(function ($registration) {
                                     $student = $registration->student;
                                     $turma = $registration->class?->name ?? '—';
@@ -394,6 +422,8 @@ class ScheduleResource extends Resource
                                     ];
                                 });
                             }),
+
+
 
 
 
@@ -461,6 +491,11 @@ class ScheduleResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
                 TextColumn::make('weekday.weekday')
                     ->label('Dia da Semana')
                     ->sortable()
@@ -520,7 +555,7 @@ class ScheduleResource extends Resource
                     ->action(fn() => self::exportSchedules())
                     ->color('primary')
                     ->requiresConfirmation()
-                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
+                    ->visible(fn() => Auth::user()?->USER::isSuperAdmin()),
 
             ])
 
@@ -531,7 +566,7 @@ class ScheduleResource extends Resource
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
-                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
+                    ->visible(fn() => Auth::user()?->USER::isSuperAdmin()),
 
             ]);
     }
@@ -552,6 +587,7 @@ class ScheduleResource extends Resource
 
     public static function hoursCounterUpdate(Schedule $schedule, Bool $plusOrMinus): void
     {
+        //dd('Updating hours counter for schedule', ['schedule' => $schedule->id, 'plusOrMinus' => $plusOrMinus]);
         try {
             DB::transaction(function () use ($schedule, $plusOrMinus) {
 

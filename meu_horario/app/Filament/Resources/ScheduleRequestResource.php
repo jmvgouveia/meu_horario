@@ -68,129 +68,151 @@ class ScheduleRequestResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Section::make('Pedido de Troca de Horário')
-                    ->description('Preencha os campos abaixo para solicitar uma troca de horário.')
-                    ->columns(3)
-                    ->schema([
+        // return $form
+        // ->schema([
+        //     Section::make('Pedido de Troca de Horário')
+        //         ->description('Preencha os campos abaixo para solicitar uma troca de horário.')
+        //         ->columns(3)
+        //         ->schema([
+
+        //             Section::make('Justificação do Pedido')
+        //                 ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
+        //                 ->schema([
+        //                     Placeholder::make('solicitante')
+        //                         ->label('Pedido feito por:')
+        //                         ->content(fn($record) => $record->requester->name ?? '—'),
+
+        //                     Placeholder::make('data_pedido')
+        //                         ->label('Data do Pedido')
+        //                         ->content(fn($record) => optional($record->created_at)->format('d/m/Y H:i') ?? '—'),
+        //                     //->columnSpanFull(),
+        //                     Placeholder::make('status')
+        //                         ->label('Estado Atual')
+        //                         ->content(fn($record) => $record->status ?? '—'),
+
+        //                     Placeholder::make('justification')
+        //                         ->label('Justificação do Pedido')
+        //                         ->content(fn($record) => $record->justification ?? '—')
+        //                         ->columnSpanFull(),
+        //                 ])
+        //                 ->columns(3)
+        //                 ->extraAttributes([
+        //                     'class' => 'bg-white border border-gray-300 rounded-xl shadow-sm',
+        //                 ]),
 
 
+        //             Grid::make(2)
+        //                 ->schema([]),
+
+        //             Section::make('Resposta do Professor Original')
+        //                 ->description('Resposta ao pedido.')
+        //                 ->schema([
+        //                     Grid::make(2)
+        //                         ->schema([
+        //                             Placeholder::make('professor_respondeu')
+        //                                 ->label('Resposta de:')
+        //                                 ->content(fn($record) => $record->scheduleConflict->teacher->name ?? '—'),
+
+        //                             Placeholder::make('data_pedido')
+        //                                 ->label('Data da Resposta')
+        //                                 ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—'),
+
+        //                         ])
+        //                         ->columns(2),
+
+        //                     Placeholder::make('response')
+        //                         ->label('Motivo da Recusa')
+        //                         ->content(fn($record) => $record->response ?? '—')
+        //                         ->disabled()
+        //                         ->columnSpanFull(),
+        //                 ])
+        //                 ->extraAttributes([
+        //                     'class' => 'bg-white border border-gray-300 rounded-xl shadow-sm',
+        //                 ]),
+
+
+
+
+
+
+
+
+
+        //             Textarea::make('response_coord')
+        //                 ->label('Notas de Aprovação')
+        //                 ->visible(fn($get) => $get('status') === 'Aprovado')
+        //                 ->disabled()
+        //                 ->columnSpanFull(),
+        //             Textarea::make('scaled_justification')
+        //                 ->label('Notas de Aprovação')
+        //                 ->visible(fn($get) => $get('status') === 'Escalado')
+        //                 ->disabled()
+        //                 ->columnSpanFull(),
+
+        //         ]),
+
+        // ]);
+
+        return $form->schema([
+            Section::make('Pedido de Troca de Horário')
+                ->description('Preencha os campos abaixo para visualizar os detalhes do pedido.')
+                ->schema([
+
+                    // Linha superior com 3 campos
+                    Grid::make(3)->schema([
                         Placeholder::make('solicitante')
-                            ->label('Pedido feito por:')
+                            ->label('Pedido feito por')
                             ->content(fn($record) => $record->requester->name ?? '—'),
+
 
                         Placeholder::make('data_pedido')
                             ->label('Data do Pedido')
                             ->content(fn($record) => optional($record->created_at)->format('d/m/Y H:i') ?? '—'),
-                        //->columnSpanFull(),
+
                         Placeholder::make('status')
                             ->label('Estado Atual')
                             ->content(fn($record) => $record->status ?? '—'),
 
-                        Section::make('📝 Justificação do Pedido')
-                            ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
-                            ->schema([
-                                Placeholder::make('justification')
-                                    ->label('Justificação do Pedido')
-                                    ->content(fn($record) => $record->justification ?? '—')
-                                    ->columnSpanFull()
-                                    ->extraAttributes([
-                                        'class' => 'bg-gray-100 text-gray-800 p-4 rounded-xl',
-                                    ]),
-                            ])
-                            ->columns(1)
-                            ->extraAttributes([
-                                'class' => 'bg-white border border-gray-300 rounded-xl shadow-sm',
-                            ]),
-
-                        Textarea::make('response')
-                            ->label('Motivo da Recusa')
-                            ->visible(fn($get) => $get('status') === 'Recusado')
-                            ->disabled()
-                            ->columnSpanFull(),
-
-                        Textarea::make('responded_at')
-                            ->label('Data de Resposta')
-                            ->visible(fn($get) => $get('status') === 'Recusado')
-                            ->disabled()
-                            ->columnSpanFull(),
-
-                        Textarea::make('response_coord')
-                            ->label('Notas de Aprovação')
-                            ->visible(fn($get) => $get('status') === 'Aprovado')
-                            ->disabled()
-                            ->columnSpanFull(),
-                        Textarea::make('scaled_justification')
-                            ->label('Notas de Aprovação')
-                            ->visible(fn($get) => $get('status') === 'Escalado')
-                            ->disabled()
-                            ->columnSpanFull(),
-
                     ]),
 
-            ]);
+                    // Justificação destacada
+                    Section::make('Justificação do Pedido')
+                        ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
+                        ->schema([
+                            Placeholder::make('justification')
+                                ->label('')
+                                ->content(fn($record) => $record->justification ?? '—')
+                                ->columnSpanFull()
+                        ])
+                        ->columns(1),
 
-        // return $form->schema([
-        //     Section::make('Pedido de Troca de Horário')
-        //         ->description('Preencha os campos abaixo para visualizar os detalhes do pedido.')
-        //         ->schema([
+                    // Campos condicionais com estilo uniforme
+                    Placeholder::make('response')
+                        ->label('Motivo da Recusa')
+                        ->content(fn($record) => $record->response ?? '—')
+                        ->visible(fn($get) => $get('status') === 'Recusado')
+                        ->columnSpanFull(),
 
-        //             // Linha superior com 3 campos
-        //             Grid::make(3)->schema([
-        //                 Placeholder::make('solicitante')
-        //                     ->label('Pedido feito por')
-        //                     ->content(fn($record) => $record->requester->name ?? '—'),
+                    Placeholder::make('responded_at')
+                        ->label('Data da Resposta')
+                        ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—')
+                        ->visible(fn($get) => $get('status') === 'Recusado')
+                        ->columnSpanFull(),
 
+                    Placeholder::make('response_coord')
+                        ->label('Resposta do Docente')
+                        ->content(fn($record) => $record->response ?? '—')
+                        ->visible(fn($get) => $get('status') === 'Aprovado')
+                        ->columnSpanFull(),
 
-        //                 Placeholder::make('data_pedido')
-        //                     ->label('Data do Pedido')
-        //                     ->content(fn($record) => optional($record->created_at)->format('d/m/Y H:i') ?? '—'),
+                    Placeholder::make('scaled_justification')
+                        ->label('Notas da Escalada')
+                        ->content(fn($record) => $record->scaled_justification ?? '—')
+                        ->visible(fn($get) => $get('status') === 'Escalado')
+                        ->columnSpanFull(),
 
-        //                 Placeholder::make('status')
-        //                     ->label('Estado Atual')
-        //                     ->content(fn($record) => $record->status ?? '—'),
-
-        //             ]),
-
-        //             // Justificação destacada
-        //             Section::make('Justificação do Pedido')
-        //                 ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
-        //                 ->schema([
-        //                     Placeholder::make('justification')
-        //                         ->label('')
-        //                         ->content(fn($record) => $record->justification ?? '—')
-        //                         ->columnSpanFull()
-        //                 ])
-        //                 ->columns(1),
-
-        //             // Campos condicionais com estilo uniforme
-        //             Placeholder::make('response')
-        //                 ->label('Motivo da Recusa')
-        //                 ->content(fn($record) => $record->response ?? '—')
-        //                 ->visible(fn($get) => $get('status') === 'Recusado')
-        //                 ->columnSpanFull(),
-
-        //             Placeholder::make('responded_at')
-        //                 ->label('Data da Resposta')
-        //                 ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—')
-        //                 ->visible(fn($get) => $get('status') === 'Recusado')
-        //                 ->columnSpanFull(),
-
-        //             Placeholder::make('response_coord')
-        //                 ->label('Resposta do Docente')
-        //                 ->content(fn($record) => $record->response ?? '—')
-        //                 ->visible(fn($get) => $get('status') === 'Aprovado')
-        //                 ->columnSpanFull(),
-
-        //             Placeholder::make('scaled_justification')
-        //                 ->label('Notas da Escalada')
-        //                 ->content(fn($record) => $record->scaled_justification ?? '—')
-        //                 ->visible(fn($get) => $get('status') === 'Escalado')
-        //                 ->columnSpanFull(),
-
-        //         ]),
-        // ]);
+                ]),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -199,6 +221,10 @@ class ScheduleRequestResource extends Resource
         $isGestor = in_array($userId, [1]); // ou usa uma função global/policy
 
         $columns = [
+            TextColumn::make('id')
+                ->label('ID do Pedido')
+                ->toggleable()
+                ->sortable(),
             TextColumn::make('requester.name')
                 ->label('Requerente')
                 ->wrap()

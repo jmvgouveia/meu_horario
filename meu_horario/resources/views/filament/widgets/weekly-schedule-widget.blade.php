@@ -200,7 +200,7 @@
                     $notifLetter = 'DP';
                     $notifClass = 'dp';
                     $tooltip = 'Troca aprovada';
-                    $link = route('filament.admin.resources.schedule-conflicts.edit', $req->id);
+                    $link = route('filament.admin.resources.schedule-requests.edit', $req->id);
                     }
 
                     // Escalado
