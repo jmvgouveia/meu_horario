@@ -46,7 +46,7 @@ class EditScheduleConflict extends EditRecord
     {  // USER CLASSS
         $actions = [];
 
-        if (Auth::user()?->USER::isGestorConflitos()) {
+        if (Auth::user()?->isGestorConflitos()) {
             $actions[] = Action::make('aprovar')
                 ->label('Aprovar Pedido')
                 ->color('success')

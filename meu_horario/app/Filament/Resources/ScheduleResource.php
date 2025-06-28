@@ -555,7 +555,7 @@ class ScheduleResource extends Resource
                     ->action(fn() => self::exportSchedules())
                     ->color('primary')
                     ->requiresConfirmation()
-                    ->visible(fn() => Auth::user()?->USER::isSuperAdmin()),
+                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
 
             ])
 
@@ -566,7 +566,7 @@ class ScheduleResource extends Resource
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
-                    ->visible(fn() => Auth::user()?->USER::isSuperAdmin()),
+                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
 
             ]);
     }
