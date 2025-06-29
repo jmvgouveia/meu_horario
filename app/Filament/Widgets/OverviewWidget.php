@@ -16,6 +16,9 @@ class OverviewWidget extends Widget
 {
     protected static string $view = 'filament.widgets.overview-widget';
     protected static ?int $sort = 2;
+    protected static bool $isLazy = false; // Para garantir que carrega completamente
+
+    protected int|string|array $pollingInterval = '5s'; // ou 5000 (ms)
 
     protected int | string | array $columnSpan = [
         'sm' => 12,

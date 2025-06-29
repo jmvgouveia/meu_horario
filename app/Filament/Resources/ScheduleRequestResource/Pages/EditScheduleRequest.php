@@ -263,7 +263,13 @@ class EditScheduleRequest extends EditRecord
 
 
 
-
+                        $this->record->delete();
+                        $this->record->scheduleConflict->delete();
+                        $this->record->scheduleNew?->update([
+                            'status' => 'Aprovado',
+                        ]);
+                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
 
 
 
@@ -280,22 +286,18 @@ class EditScheduleRequest extends EditRecord
                         // }
 
 
+                        // if ($this->record->scheduleConflict->status !== "Recusado" || $this->record->scheduleConflict->status === "pe") {
 
-
-
-
-                        if ($this->record->scheduleConflict->status === "Recusado") {
-
-                            $this->record->delete();
-                            $this->record->scheduleConflict->delete();
-                            $this->record->scheduleNew?->update([
-                                'status' => 'Aprovado',
-                            ]);
-                            ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
-                            ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-                        } else {
-                            $this->record->scheduleNew->delete();
-                        }
+                        //     $this->record->delete();
+                        //     $this->record->scheduleConflict->delete();
+                        //     $this->record->scheduleNew?->update([
+                        //         'status' => 'Aprovado',
+                        //     ]);
+                        //     ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        //     ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
+                        // } else {
+                        //     $this->record->scheduleNew->delete();
+                        // }
 
 
                         Notification::make()

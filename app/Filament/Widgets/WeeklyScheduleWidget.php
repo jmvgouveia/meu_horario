@@ -17,6 +17,9 @@ class WeeklyScheduleWidget extends Widget
     protected static bool $isLazy = false; // Para garantir que carrega completamente
     protected static ?int $sort = 1;
 
+    protected int|string|array $pollingInterval = '5s'; // ou 5000 (ms)
+
+
     protected int | string | array $columnSpan = [
         'sm' => 12,
         'md' => 12,
@@ -100,6 +103,9 @@ class WeeklyScheduleWidget extends Widget
         return view(static::$view, compact('calendar', 'weekdays', 'timePeriods', 'recusados', 'escalados', 'PedidosAprovadosDP', 'AprovadosDP'))
             ->with('teacher', $teacher);
     }
+
+
+
 
     public static function canView(): bool
     {

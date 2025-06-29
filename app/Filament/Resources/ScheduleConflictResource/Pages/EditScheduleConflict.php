@@ -179,7 +179,7 @@ class EditScheduleConflict extends EditRecord
                         // Verifica se o registro tem um scheduleConflict e scheduleNew
 
                         if ($this->record->status === 'Aprovado DP') {
-                            ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, true);
+                            //  ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, true);
 
 
                             $this->record->delete();
