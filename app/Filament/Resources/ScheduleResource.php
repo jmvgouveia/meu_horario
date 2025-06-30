@@ -120,7 +120,7 @@ class ScheduleResource extends Resource
                         $linha = [
                             $schedule->id_weekday + 2,
                             $schedule->id_timeperiod,
-                            "\"{$class->class}\"",
+                            "\"{$class->name}\"",
                             $class->year,
                             "\"{$schedule->teacher->number}\"",
                             "\"{$schedule->subject->acronym}\"",

@@ -32,6 +32,9 @@ class ScheduleRequestResource extends Resource
     protected static ?string $navigationBadgeTooltip = 'Pedidos recebidos';
     protected static ?int $navigationSort = 2;
 
+    protected int|string|array $pollingInterval = '5s'; // ou 5000 (ms)
+
+
     public static function getLabel(): string
     {
         return 'Pedido de Troca de Horário';

@@ -3,7 +3,9 @@ $totalReducaoCargos= collect($resumo['cargos'] ?? [])->sum('redução_letiva');
 $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução_letiva');
 @endphp
 
-<div id="calendar-container-overview">
+<div id="calendar-container-overview" class="w-full h-full flex flex-col gap-4">
+
+
     <div class="w-full overflow-x-auto rounded-lg ">
         <div class="p-4 bg-gray dark:bg-gray-800 rounded shadow">
             <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Resumo de Carga Horária</h3>
@@ -148,7 +150,7 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
             })
             .then(response => response.text())
             .then(html => {
-                console.log('HTML recebido:', html); // 👈
+                console.log('HTML recebido:', html);
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const newContainer = doc.querySelector('#calendar-container-overview');

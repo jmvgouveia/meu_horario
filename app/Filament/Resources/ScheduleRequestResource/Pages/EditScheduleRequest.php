@@ -8,12 +8,15 @@ use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Models\Room;
 use App\Models\ScheduleRequest;
 use Filament\Actions\Action;
+use Filament\Notifications\Actions\Action as NotificationAction;
+
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EditScheduleRequest extends EditRecord
@@ -82,6 +85,12 @@ class EditScheduleRequest extends EditRecord
                             ->title("Pedido aprovado")
                             ->body("O professor {$ownername} aprovou o seu pedido para a troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->success()
+                            ->actions([
+                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                        'record' => $this->record->getKey(),
+                                    ]))
+                            ])
                             ->sendToDatabase($requester);
                     });
 
@@ -119,6 +128,12 @@ class EditScheduleRequest extends EditRecord
                             ->title("Pedido recusado")
                             ->body("O professor {$ownername} recusou o seu pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->danger()
+                            ->actions([
+                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                        'record' => $this->record->getKey(),
+                                    ]))
+                            ])
                             ->sendToDatabase($requester);
                     });
 
@@ -146,6 +161,7 @@ class EditScheduleRequest extends EditRecord
 
                         extract($this->getScheduleDetails());
 
+
                         Notification::make()
                             ->title('Pedido Escalado')
                             ->warning()
@@ -156,12 +172,24 @@ class EditScheduleRequest extends EditRecord
                             ->title("Pedido de troca escalado")
                             ->body("O professor {$requestername} escalou o pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->warning()
+                            ->actions([
+                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                        'record' => $this->record->getKey(),
+                                    ]))
+                            ])
                             ->sendToDatabase($owner);
 
                         Notification::make()
                             ->title("Pedido escalado")
                             ->body("O seu pedido de troca foi escalado para análise superior.")
                             ->warning()
+                            ->actions([
+                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                        'record' => $this->record->getKey(),
+                                    ]))
+                            ])
                             ->sendToDatabase($requester);
                     });
 
@@ -195,12 +223,24 @@ class EditScheduleRequest extends EditRecord
                             ->title("Pedido cancelado")
                             ->body("O professor {$requestername} cancelou o pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->success()
+                            ->actions([
+                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                        'record' => $this->record->getKey(),
+                                    ]))
+                            ])
                             ->sendToDatabase($owner);
 
                         Notification::make()
                             ->title("Pedido cancelado com sucesso")
                             ->body("Cancelou o pedido de troca com {$ownername}.")
                             ->success()
+                            ->actions([
+                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
+                                        'record' => $this->record->getKey(),
+                                    ]))
+                            ])
                             ->sendToDatabase($requester);
                     });
 
@@ -208,44 +248,6 @@ class EditScheduleRequest extends EditRecord
                 });
         }
 
-        // Eliminar definitivamente
-        // $actions[] = DeleteAction::make('cancelarPedido')
-        //     ->label('Eliminar Pedido')
-        //     ->color('danger')
-        //     //   ->visible(fn() => Filament::auth()->user()?->teacher?->id === $this->record->id_teacher)
-        //     ->requiresConfirmation()
-        //     ->modalHeading('Cancelar Pedido de Troca')
-        //     ->modalDescription('Isto irá eliminar o pedido e o horário criado para a troca.')
-        //     ->after(function ($record) {
-        //         try {
-        //             DB::transaction(function () use ($record) {
-        //                 $schedule = $record->scheduleNew;
-
-        //                 if ($schedule) {
-        //                     $schedule->delete();
-        //                     if ($schedule->status === 'Aprovado' || $schedule->status === 'Aprovado DP') {
-        //                         ScheduleResource::hoursCounterUpdate($schedule, true);
-        //                     }
-        //                 }
-
-        //                 $owner = $record->scheduleConflict?->teacher?->user;
-        //                 $idMarcacao = $schedule?->id ?? 'N/A';
-
-        //                 Notification::make()
-        //                     ->title('Pedido eliminado com sucesso')
-        //                     ->body("O pedido de troca foi removido e o horário pendente: {$idMarcacao} foi eliminado.")
-        //                     ->success()
-        //                     ->sendToDatabase($owner);
-        //             });
-        //         } catch (\Exception $e) {
-        //             Notification::make()
-        //                 ->title('Erro ao eliminar o pedido')
-        //                 ->body($e->getMessage())
-        //                 ->danger()
-        //                 ->send();
-        //         }
-        //     })
-        //     ->successRedirectUrl($this->getResource()::getUrl('index'));
 
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
@@ -260,58 +262,59 @@ class EditScheduleRequest extends EditRecord
 
                 try {
                     DB::transaction(function () {
+                        $teacherId = Filament::auth()->user()?->teacher?->id;
+                        $isGestor = in_array(Filament::auth()->id(), [1]);
 
+                        $scheduleRequest = $this->record;
+                        $scheduleNew = $scheduleRequest->scheduleNew;
+                        $scheduleConflict = $scheduleRequest->scheduleConflict;
 
+                        $deletedSchedule = null;
+                        $scheduleToApprove = null;
 
-                        $this->record->delete();
-                        $this->record->scheduleConflict->delete();
-                        $this->record->scheduleNew?->update([
-                            'status' => 'Aprovado',
+                        // Verifica quem está a apagar
+                        if ($teacherId === $scheduleRequest->id_teacher) {
+                            // O requerente (B) apaga a sua marcação proposta
+                            $deletedSchedule = $scheduleNew;
+                            $scheduleToApprove = $scheduleConflict;
+                        } elseif ($teacherId === $scheduleConflict?->id_teacher) {
+                            // O destinatário (A) apaga a sua marcação original
+                            $deletedSchedule = $scheduleConflict;
+                            $scheduleToApprove = $scheduleNew;
+                        } else {
+                            throw new \Exception('Não tem permissão para eliminar esta marcação.');
+                        }
+
+                        // Apagar a marcação do utilizador atual
+                        if ($deletedSchedule) {
+                            if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
+                                ScheduleResource::hoursCounterUpdate($deletedSchedule, true);
+                            }
+                            $deletedSchedule->delete();
+                        }
+
+                        // Aprovar automaticamente a outra marcação
+                        if ($scheduleToApprove && $scheduleToApprove->status !== 'Aprovado') {
+                            $scheduleToApprove->update([
+                                'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
+                            ]);
+
+                            ScheduleResource::hoursCounterUpdate($scheduleToApprove, false);
+                        }
+
+                        // Atualizar o pedido de troca
+                        $scheduleRequest->update([
+                            'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
+                            'responded_at' => now(),
                         ]);
-                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
-                        ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-
-
-
-                        // if ($this->record->scheduleConflict->status === "Pendente") {
-                        //     $this->record->scheduleNew->delete();
-                        // } else {
-
-                        //     $this->record->scheduleConflict->delete();
-                        //     $this->record->scheduleNew?->update([
-                        //         'status' => 'Aprovado',
-                        //     ]);
-                        //     ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
-                        //     ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-                        // }
-
-
-                        // if ($this->record->scheduleConflict->status !== "Recusado" || $this->record->scheduleConflict->status === "pe") {
-
-                        //     $this->record->delete();
-                        //     $this->record->scheduleConflict->delete();
-                        //     $this->record->scheduleNew?->update([
-                        //         'status' => 'Aprovado',
-                        //     ]);
-                        //     ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
-                        //     ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-                        // } else {
-                        //     $this->record->scheduleNew->delete();
-                        // }
-
 
                         Notification::make()
-                            ->title("Horário Eliminado")
-                            ->body("O horário foi eliminado com sucesso, 1:{$this->record->id}. 2:{$this->record->scheduleNew?->id}, 3:{$this->record->scheduleConflict?->id}")
+                            ->title('Marcação eliminada e troca aprovada')
+                            ->body('A sua marcação foi eliminada. A marcação da outra parte foi automaticamente aprovada.')
                             ->success()
                             ->sendToDatabase(Filament::auth()->user());
 
-                        Notification::make()
-                            ->title('Horário Eliminado')
-                            ->body("O horário foi eliminado com sucesso ID:{$this->record->scheduleNew?->id}")
-                            ->success()
-                            ->send();
-                        $this->redirect(filament()->getUrl());
+                        $this->redirect($this->getResource()::getUrl('index'));
                     });
                 } catch (\Exception $e) {
                     Notification::make()
@@ -321,8 +324,6 @@ class EditScheduleRequest extends EditRecord
                         ->send();
                 }
             });
-
-
 
 
         $actions[] = Action::make('cancel')

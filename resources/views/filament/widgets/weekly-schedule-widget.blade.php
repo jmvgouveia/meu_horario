@@ -300,6 +300,7 @@
         </div>
     </div>
 </div>
+
 <script>
     setInterval(function() {
         fetch(window.location.href, {

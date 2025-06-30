@@ -20,6 +20,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\MultiSelectFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -187,7 +188,19 @@ class ScheduleConflictResource extends Resource
                     })
                     ->sortable(),
             ]) // vamos preencher depois
-            ->filters([])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Estado')
+                    ->multiple()
+                    ->options([
+                        'Pendente' => 'Pendente',
+                        'Aprovado' => 'Aprovado',
+                        'Recusado' => 'Recusado',
+                        'Escalado' => 'Escalado',
+                        'Aprovado DP' => 'Aprovado DP',
+                        'Recusado DP' => 'Recusado DP',
+                    ])
+            ])
             ->actions([])
             ->bulkActions([]);
     }
