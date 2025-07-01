@@ -50,7 +50,12 @@ class UserResource extends Resource
                     ->label('Password')
                     //->required()
                     ->placeholder('Introduza password')
-                    ->password(),
+                    ->password()
+                    ->dehydrated(fn ($state) => filled($state)) // Apenas guarda se estiver preenchido
+                    ->nullable()
+                    ->minLength(5)
+                    ->regex('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)\[\]\{\}:;_\-\.\,\\\\\/\|~`]).+$/')
+                    ->helperText('Deve conter pelo menos 1 letra maiúscula, 1 número e 1 símbolo especial (! @ # $ %, etc.)'),
                 Select::make('roles')->multiple()->relationship('roles', 'name')->preload()
             ]);
     }
