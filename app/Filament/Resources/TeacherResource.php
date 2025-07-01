@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\TeacherImporter;
 use App\Filament\Resources\TeacherResource\Pages;
 use App\Filament\Resources\TeacherResource\RelationManagers;
+use App\Helpers\ValidationRules;
 use App\Models\Teacher;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -125,7 +126,7 @@ class TeacherResource extends Resource
                             ->dehydrated(fn ($state) => filled($state))
                             ->minLength(5)
                             ->placeholder('Deixe em branco para manter a atual')
-                            ->regex('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)\[\]\{\}:;_\-\.\,\\\\\/\|~`]).+$/')
+                            ->regex(ValidationRules::PASSWORD_REGEX)
                             ->helperText('Deve conter pelo menos 1 letra maiúscula, 1 número e 1 símbolo especial (! @ # $ %, etc.)'),
                     ]),
 

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Helpers\ValidationRules;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -54,7 +55,7 @@ class UserResource extends Resource
                     ->dehydrated(fn ($state) => filled($state)) // Apenas guarda se estiver preenchido
                     ->nullable()
                     ->minLength(5)
-                    ->regex('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)\[\]\{\}:;_\-\.\,\\\\\/\|~`]).+$/')
+                    ->regex(ValidationRules::PASSWORD_REGEX)
                     ->helperText('Deve conter pelo menos 1 letra maiúscula, 1 número e 1 símbolo especial (! @ # $ %, etc.)'),
                 Select::make('roles')->multiple()->relationship('roles', 'name')->preload()
             ]);
