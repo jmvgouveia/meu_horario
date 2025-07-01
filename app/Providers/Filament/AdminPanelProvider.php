@@ -46,8 +46,6 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('meuhorario')
             ->login()
-            //->databaseNotifications()
-
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Minha Conta')
@@ -55,7 +53,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-user'),
             ])
             ->colors([
-                'primary' => '#0094ee',
+                'primary' => '#0094ee', // Cor do Texto
             ])
             ->favicon('images/favoicon.ico')
 
@@ -65,7 +63,6 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-
             ->widgets([
                 /* WeeklyScheduleWidget::class,
                 OverviewWidget::class,

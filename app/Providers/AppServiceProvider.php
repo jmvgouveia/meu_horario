@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         // Registar cores adicionais a usar no projeto
         FilamentColor::register([
             'forest_green' => Color::hex('#228B22'),
+            'blue_mh' => Color::hex('#0094ee'),
         ]);
 
         // Políticas de permissões de utilizadores e Super Admin

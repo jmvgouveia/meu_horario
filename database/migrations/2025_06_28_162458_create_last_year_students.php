@@ -12,11 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('last_year_students', function (Blueprint $table) {
-            $table->id('id')->primary();
-            $table->integer('id_teacher');
-            $table->integer('id_subject');
-            $table->integer('id_student');
-            $table->integer('id_schoolyear');
+            $table->id('id');
+            $table->foreignId('id_teacher')
+                ->constrained('teachers')
+                ->cascadeOnDelete();
+            $table->foreignId('id_subject')
+                ->constrained('subjects')
+                ->cascadeOnDelete();
+            $table->foreignId('id_student')
+                ->constrained('students')
+                ->cascadeOnDelete();
+            $table->foreignId('id_schoolyear')
+                ->constrained('schoolyears')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }
