@@ -51,6 +51,9 @@ class CreateTeacher extends CreateRecord
             'password' => Hash::make($userData['password']),
         ]);
 
+        // Atribuir a role de Professor ao novo Professor/User
+        $user->assignRole('Professor');
+
         // Associar id_user ao professor
         $data['id_user'] = $user->id;
 

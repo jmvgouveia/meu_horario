@@ -121,9 +121,12 @@ class TeacherResource extends Resource
                         TextInput::make('user.password')
                             ->label('Password')
                             ->password()
-                            ->minLength(5)
                             ->nullable()
-                            ->placeholder('Deixe em branco para manter a atual'),
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->minLength(5)
+                            ->placeholder('Deixe em branco para manter a atual')
+                            ->regex('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)\[\]\{\}:;_\-\.\,\\\\\/\|~`]).+$/')
+                            ->helperText('Deve conter pelo menos 1 letra maiúscula, 1 número e 1 símbolo especial (! @ # $ %, etc.)'),
                     ]),
 
             ]);
