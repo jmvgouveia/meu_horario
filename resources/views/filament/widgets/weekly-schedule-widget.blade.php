@@ -260,7 +260,7 @@
                         </a>
                         @endunless
                         @empty
-                        <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId+1, 'timeperiod' => $timePeriod->id]) }}" class="block p-2 text-gray-400 dark:text-gray-600 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                        <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId, 'timeperiod' => $timePeriod->id]) }}" class="block p-2 text-gray-400 dark:text-gray-600 hover:text-blue-600 dark:hover:text-blue-400 transition">
                             +
                         </a>
                         @endforelse
