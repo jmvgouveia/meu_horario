@@ -129,7 +129,7 @@ class EditScheduleRequest extends EditRecord
                             ->body("O professor {$ownername} recusou o seu pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->danger()
                             ->actions([
-                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                NotificationAction::make('Ver Pedido')
                                     ->url(route('filament.admin.resources.schedule-requests.edit', [
                                         'record' => $this->record->getKey(),
                                     ]))
@@ -185,7 +185,7 @@ class EditScheduleRequest extends EditRecord
                             ->body("O seu pedido de troca foi escalado para análise superior.")
                             ->warning()
                             ->actions([
-                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                NotificationAction::make('Ver Pedido')
                                     ->url(route('filament.admin.resources.schedule-requests.edit', [
                                         'record' => $this->record->getKey(),
                                     ]))
@@ -224,7 +224,7 @@ class EditScheduleRequest extends EditRecord
                             ->body("O professor {$requestername} cancelou o pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->success()
                             ->actions([
-                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                NotificationAction::make('Ver Pedido')
                                     ->url(route('filament.admin.resources.schedule-requests.edit', [
                                         'record' => $this->record->getKey(),
                                     ]))
@@ -236,7 +236,7 @@ class EditScheduleRequest extends EditRecord
                             ->body("Cancelou o pedido de troca com {$ownername}.")
                             ->success()
                             ->actions([
-                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                NotificationAction::make('Ver Pedido')
                                     ->url(route('filament.admin.resources.schedule-requests.edit', [
                                         'record' => $this->record->getKey(),
                                     ]))
@@ -247,7 +247,10 @@ class EditScheduleRequest extends EditRecord
                     return redirect($this->getResource()::getUrl('index'));
                 });
         }
-
+        $actions[] = Action::make('cancel')
+            ->label('Cancelar')
+            ->url($this->getResource()::getUrl('index'))
+            ->color('gray');
 
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
@@ -290,6 +293,7 @@ class EditScheduleRequest extends EditRecord
                             if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
                                 ScheduleResource::hoursCounterUpdate($deletedSchedule, true);
                             }
+
                             $deletedSchedule->delete();
                         }
 
@@ -326,10 +330,7 @@ class EditScheduleRequest extends EditRecord
             });
 
 
-        $actions[] = Action::make('cancel')
-            ->label('Cancelar')
-            ->url($this->getResource()::getUrl('index'))
-            ->color('gray');
+
 
         return $actions;
     }

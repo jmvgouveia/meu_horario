@@ -80,7 +80,7 @@ class EditScheduleConflict extends EditRecord
                         ]);
 
                         $salaAntiga = $this->record->scheduleConflict?->room?->name ?? 'desconhecida';
-                        $salaNova = \App\Models\Room::find($data['id_room_novo'])?->name ?? 'desconhecida';
+                        $salaNova = Room::find($data['id_room_novo'])?->name ?? 'desconhecida';
                         $requester = $this->record->requester?->user;
                         $requestername = $this->record->requester?->name ?? 'desconhecido';
                         $owner = $this->record->scheduleConflict?->teacher?->user;
@@ -104,7 +104,7 @@ class EditScheduleConflict extends EditRecord
                             ->body("Aprovou o pedido de {$requestername} na troca da sala {$salaAntiga} para {$salaNova}.")
                             ->sendToDatabase($owner);
 
-                        \App\Filament\Resources\ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
                     });
                 });
 
@@ -161,16 +161,12 @@ class EditScheduleConflict extends EditRecord
                     });
                 });
         }
-
+        $actions[] = $this->getCancelFormAction();
 
         $actions[] = DeleteAction::make()
-            ->label('Eliminar Horário123')
+            ->label('Eliminar Horário')
             ->color('danger')
             ->requiresConfirmation()
-            // ->visible(function () {
-            //     $user = Filament::auth()->user();
-            //     return $user?->teacher?->id === $this->record->id_teacher;
-            // })
             ->action(function () {
 
 
@@ -179,8 +175,6 @@ class EditScheduleConflict extends EditRecord
                         // Verifica se o registro tem um scheduleConflict e scheduleNew
 
                         if ($this->record->status === 'Aprovado DP') {
-                            //  ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, true);
-
 
                             $this->record->delete();
                             $this->record->scheduleNew?->delete();
@@ -191,29 +185,37 @@ class EditScheduleConflict extends EditRecord
 
 
                         if ($this->record->status === 'Escalado') {
-                            ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-
 
                             $this->record->delete();
-                            $this->record->scheduleConflict?->delete();
+
+                            if (Auth::user()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
+                                // Se o usuário for o professor do horário, elimina o scheduleConflict
+                                $this->record->scheduleConflict?->delete();
+                                ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
+
+                                ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                            } else {
+                                $this->record->scheduleNew?->delete();
+                            }
+
                             $this->record->scheduleNew?->update([
                                 'status' => 'Aprovado',
                             ]);
-                            ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
                         }
+
 
 
 
 
                         Notification::make()
                             ->title("Horário Eliminado")
-                            ->body("O horário foi eliminado com sucesso, 1:{$this->record->id}. 2:{$this->record->scheduleNew?->id}, 3:{$this->record->scheduleConflict?->id}")
+                            ->body("O horário foi eliminado com sucesso, e o conflito foi resolvido.")
                             ->success()
                             ->sendToDatabase(Filament::auth()->user());
 
                         Notification::make()
                             ->title('Horário Eliminado')
-                            ->body("O horário foi eliminado com sucesso ID:{$this->record->scheduleNew?->id}")
+                            ->body("O horário foi eliminado com sucesso.")
                             ->success()
                             ->send();
                         $this->redirect(filament()->getUrl());
@@ -227,7 +229,7 @@ class EditScheduleConflict extends EditRecord
                 }
             });
 
-        $actions[] = $this->getCancelFormAction();
+
         return $actions;
     }
 
