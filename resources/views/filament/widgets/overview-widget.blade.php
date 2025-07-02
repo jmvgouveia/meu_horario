@@ -99,9 +99,7 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
                         <div class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                             redução de {{ $cargo['redução_letiva'] }} h
                         </div>
-                        <!-- <div class="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                    Não Letiva: {{ $cargo['redução_naoletiva'] }}h
-                </div> -->
+
                     </div>
                     @endforeach
                 </div>
@@ -127,9 +125,6 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
                         <div class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                             redução de {{ $reducao['redução_letiva'] }} h
                         </div>
-                        <!-- <div class="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                    Não Letiva: {{ $reducao['redução_naoletiva'] }}h
-                </div> -->
                     </div>
                     @endforeach
                 </div>

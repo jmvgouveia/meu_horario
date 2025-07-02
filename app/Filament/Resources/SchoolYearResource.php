@@ -64,7 +64,7 @@ class SchoolYearResource extends Resource
                                     ]);
                                 }
 
-                                $set('schoolyear', "{$startYear}/{$endYear}");
+                                //   $set('schoolyear', "{$startYear}/{$endYear}");
                             }
                         }
                     ),
@@ -87,15 +87,15 @@ class SchoolYearResource extends Resource
                                     ]);
                                 }
 
-                                $set('schoolyear', "{$startYear}/{$endYear}");
+                                //  $set('schoolyear', "{$startYear}/{$endYear}");
                             }
                         }
                     ),
 
                 TextInput::make('schoolyear')
                     ->label('Ano Letivo')
-                    ->disabled()
-                    ->dehydrated()
+                    //  ->disabled()
+                    // ->dehydrated()
                     ->required()
                     ->unique(ignoreRecord: true),
             ])->columns(3);

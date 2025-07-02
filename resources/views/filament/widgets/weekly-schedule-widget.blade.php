@@ -135,9 +135,6 @@
 <div id="calendar-container">
     <div class="flex items-center justify-end text-xs text-gray-500 mt-2 space-x-1" id="last-updated">
 
-        <!-- <span> Atualizado: {{ now()->format('d/m/Y H:i:s') }} </span> -->
-
-
     </div>
 
 
