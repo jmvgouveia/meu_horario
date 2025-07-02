@@ -13,12 +13,14 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Carbon;
 
 class TeacherResource extends Resource
 {
@@ -38,7 +40,7 @@ class TeacherResource extends Resource
     {
         return 'Professores';
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -54,6 +56,10 @@ class TeacherResource extends Resource
                             ->columnSpan(3),
                         DatePicker::make('birthdate')
                             ->label('Data de nascimento')
+                            ->before(Carbon::now()->subYears(18))
+                            ->validationMessages([
+                                'before' => 'Tem de ter pelo menos 18 anos de idade.',
+                            ])
                             ->required(),
                         Select::make('id_gender')
                             ->label('Género')
@@ -80,7 +86,17 @@ class TeacherResource extends Resource
                         DatePicker::make('startingdate')
                             ->label('Data de início de funções')
                             ->required()
-                            ->placeholder('Selecione a data de inicio de funções'),
+                            ->placeholder('Selecione a data de inicio de funções')
+                            ->rule(function (Get $get) {
+                                $birthdate = $get('birthdate');
+                                if (! $birthdate) return null;
+
+                                $minDate = Carbon::parse($birthdate)->addYears(18)->toDateString();
+                                return 'after_or_equal:' . $minDate;
+                            })
+                            ->validationMessages([
+                                'after_or_equal' => 'A data de início deve ser pelo menos 18 anos após a data de nascimento.',
+                            ]),
                         Select::make('id_qualification')
                             ->relationship('qualification', 'name')
                             ->label('Habilitações')
@@ -120,12 +136,14 @@ class TeacherResource extends Resource
                         TextInput::make('user.email')
                             ->label('E-mail')
                             ->email()
+                            ->required()
                             ->placeholder('Introduza e-mail'),
                         TextInput::make('user.password')
                             ->label('Password')
-                            ->password()
                             ->nullable()
-                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn(Get $get) => request()->routeIs('filament.admin.resources.teachers.create'))
+                            ->password()
+                            ->dehydrated(fn($state) => filled($state))
                             ->minLength(5)
                             ->placeholder('Deixe em branco para manter a atual')
                             ->regex(ValidationRules::PASSWORD_REGEX)
