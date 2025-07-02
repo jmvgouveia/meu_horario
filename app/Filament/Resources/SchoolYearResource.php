@@ -3,9 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\SchoolyearResource\Pages;
-use App\Filament\Resources\SchoolyearResource\RelationManagers;
 use App\Models\SchoolYear;
-use Filament\Forms;
+use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -15,8 +14,6 @@ use Filament\Tables;
 use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Validation\ValidationException;
 
 class SchoolYearResource extends Resource
@@ -37,7 +34,7 @@ class SchoolYearResource extends Resource
     {
         return 'Anos Letivos';
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -51,11 +48,11 @@ class SchoolYearResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(
                         function ($state, callable $set, callable $get) {
-                            $startYear = \Carbon\Carbon::parse($state)->year;
+                            $startYear = Carbon::parse($state)->year;
                             $end = $get('end_date');
 
                             if ($end) {
-                                $endYear = \Carbon\Carbon::parse($end)->year;
+                                $endYear = Carbon::parse($end)->year;
 
                                 if ($startYear === $endYear) {
                                     $set('schoolyear', null);
@@ -63,8 +60,6 @@ class SchoolYearResource extends Resource
                                         'end_date' => 'As datas devem estar em anos diferentes.',
                                     ]);
                                 }
-
-                                //   $set('schoolyear', "{$startYear}/{$endYear}");
                             }
                         }
                     ),
@@ -74,11 +69,11 @@ class SchoolYearResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(
                         function ($state, callable $set, callable $get) {
-                            $endYear = \Carbon\Carbon::parse($state)->year;
+                            $endYear = Carbon::parse($state)->year;
                             $start = $get('start_date');
 
                             if ($start) {
-                                $startYear = \Carbon\Carbon::parse($start)->year;
+                                $startYear = Carbon::parse($start)->year;
 
                                 if ($startYear === $endYear) {
                                     $set('schoolyear', null);
@@ -86,16 +81,12 @@ class SchoolYearResource extends Resource
                                         'end_date' => 'As datas devem estar em anos diferentes.',
                                     ]);
                                 }
-
-                                //  $set('schoolyear', "{$startYear}/{$endYear}");
                             }
                         }
                     ),
 
                 TextInput::make('schoolyear')
                     ->label('Ano Letivo')
-                    //  ->disabled()
-                    // ->dehydrated()
                     ->required()
                     ->unique(ignoreRecord: true),
             ])->columns(3);

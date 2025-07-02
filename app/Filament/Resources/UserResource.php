@@ -3,10 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Helpers\ValidationRules;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -14,8 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -34,7 +30,7 @@ class UserResource extends Resource
     {
         return 'Utilizadores';
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -51,10 +47,9 @@ class UserResource extends Resource
                     ->placeholder('Introduza e-mail'),
                 TextInput::make('password')
                     ->label('Password')
-                    //->required()
                     ->placeholder('Introduza password')
                     ->password()
-                    ->dehydrated(fn ($state) => filled($state)) // Apenas guarda se estiver preenchido
+                    ->dehydrated(fn($state) => filled($state))
                     ->nullable()
                     ->minLength(5)
                     ->regex(ValidationRules::PASSWORD_REGEX)

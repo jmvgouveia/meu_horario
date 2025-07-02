@@ -3,9 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TimeReductionResource\Pages;
-use App\Filament\Resources\TimeReductionResource\RelationManagers;
 use App\Models\TimeReduction;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -13,8 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TimeReductionResource extends Resource
 {
@@ -34,7 +30,7 @@ class TimeReductionResource extends Resource
     {
         return 'Reduções de Horário';
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form

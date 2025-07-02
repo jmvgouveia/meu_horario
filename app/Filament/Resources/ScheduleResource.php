@@ -64,11 +64,11 @@ class ScheduleResource extends Resource
     public static function exportSchedules(?Collection $records = null): StreamedResponse
     {
         if ($records) {
-            // Se os registros foram passados (bulk action), faz eager loading manual
+
             $schedules = $records->load(['teacher', 'room', 'subject', 'weekday', 'timePeriod', 'classes', 'students'])
                 ->whereIn('status', ['Aprovado', 'Aprovado DP']);
         } else {
-            // Se não, faz a query completa
+
             $schedules = Schedule::query()
                 ->whereIn('status', ['Aprovado', 'Aprovado DP'])
                 ->with(['teacher', 'room', 'subject', 'weekday', 'timePeriod', 'classes', 'students'])
@@ -142,16 +142,13 @@ class ScheduleResource extends Resource
         ]);
     }
 
-    // Filtrar os horários para mostrar apenas os do professor autenticado
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        // Verifica se o utilizador está autenticado e é um professor com registo
         if (Auth::check() && Auth::user()->teacher) {
             $teacherId = Auth::user()->teacher->id;
 
-            // Filtra os horários para mostrar apenas os do professor autenticado
             $query->where('id_teacher', $teacherId);
         }
 
@@ -189,8 +186,6 @@ class ScheduleResource extends Resource
                 Section::make('Local da Aula')
                     ->description('Selecione o núcleo/pólo e a sala onde será dada a aula')
                     ->schema([
-
-
                         Grid::make(2)
                             ->schema([
                                 Select::make('id_building')
@@ -228,7 +223,6 @@ class ScheduleResource extends Resource
                     ]),
 
 
-
                 Section::make('Composição da Aula')
                     ->description('Defina a disciplina, turmas e alunos envolvidos')
                     ->schema([
@@ -237,7 +231,7 @@ class ScheduleResource extends Resource
                             ->required()
                             ->reactive()
                             ->options(function () {
-                                $userId = \Illuminate\Support\Facades\Auth::id();
+                                $userId = Auth::id();
                                 $teacher = Teacher::where('id_user', $userId)->first();
                                 if (!$teacher) return collect(['' => 'Este utilizador não é um professor']);
                                 $activeYear = SchoolYear::where('active', true)->first();
@@ -263,7 +257,6 @@ class ScheduleResource extends Resource
                             ->required(function (callable $get) {
                                 $subjectId = $get('id_subject');
                                 $subjectName = Subject::find($subjectId)?->name;
-                                //  dd('id_subject', $subjectId, 'subjectName', $subjectName);
                                 return !in_array(strtolower($subjectName), ['reunião', 'tee']);
                             })
                             ->helperText('Selecione a(s) turma(s) que vão assistir à aula')
@@ -284,16 +277,13 @@ class ScheduleResource extends Resource
                                     return [];
                                 }
 
-                                // Cursos associados à disciplina
                                 $courseIds = $subject->courses()->pluck('courses.id');
 
-                                // Turmas associadas ao curso e ao edifício
                                 return Classes::whereIn('id_course', $courseIds)
-                                    ->where('id_building', $buildingId) // 👈 filtro pelo prédio da turma
+                                    ->where('id_building', $buildingId)
                                     ->pluck('name', 'id');
                             }),
 
-                        //---
                         Grid::make(2)
                             ->schema([
                                 Toggle::make('filtrar_por_turma')
@@ -310,7 +300,6 @@ class ScheduleResource extends Resource
                             ->label('Alunos matriculados na disciplina')
                             ->helperText('Selecione os alunos que vão assistir à aula')
                             ->reactive()
-                            //----
                             ->afterStateHydrated(function (callable $set, ?Schedule $record) {
                                 if ($record && $record->exists) {
                                     $studentIds = $record->students()->pluck('students.id')->filter()->values()->toArray();
@@ -318,18 +307,16 @@ class ScheduleResource extends Resource
                                     if (!empty($studentIds)) {
                                         $set('students', $studentIds);
                                     } else {
-                                        $set('students', []); // 👈 Garante array vazio, não booleano
+                                        $set('students', []);
                                     }
                                 } else {
-                                    $set('students', []); // 👈 Criação de novo registo: valor seguro
+                                    $set('students', []);
                                 }
                             })
-                            //----
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $studentIds = is_array($state) ? $state : [];
 
                                 if (count($studentIds) > 0) {
-                                    // Define o turno sugerido
                                     $numeros = Student::whereIn('id', $studentIds)
                                         ->pluck('number')
                                         ->sort()
@@ -337,7 +324,6 @@ class ScheduleResource extends Resource
 
                                     $set('shift', $numeros);
 
-                                    // Se não estiver a filtrar por turma, atualiza as turmas com base nos alunos
                                     if (!$get('filtrar_por_turma')) {
                                         $classIds = Registration::whereIn('id_student', $studentIds)
                                             ->pluck('id_class')
@@ -360,7 +346,6 @@ class ScheduleResource extends Resource
                                 $classIds = $get('id_classes') ?? [];
                                 $filtrarPorTurma = $get('filtrar_por_turma');
                                 $filtrarUltimoAno = $get('filter_last_year_students');
-
 
                                 if (!$subjectId || !$schoolYear) return [];
 
@@ -389,13 +374,9 @@ class ScheduleResource extends Resource
                                     if ($studentIdsPermitidos->isNotEmpty()) {
                                         $query->whereIn('id_student', $studentIdsPermitidos);
                                     } else {
-                                        // Se não houver alunos, retorna vazio
                                         return [];
                                     }
                                 }
-
-
-
 
                                 return $query->get()->mapWithKeys(function ($registration) {
                                     $student = $registration->student;
@@ -408,19 +389,14 @@ class ScheduleResource extends Resource
                                 });
                             }),
 
-
-
-
-
                         Section::make('Turno')
                             ->description('Indique o turno da aula')
                             ->schema([
-                                // Campo mostrado quando NÃO há alunos selecionados
                                 Select::make('shift')
                                     ->label('Turno')
                                     ->visible(function (callable $get) {
                                         $students = $get('students');
-                                        return is_array($students) ? count($students) === 0 : true; // mostra se for array vazio ou não for array
+                                        return is_array($students) ? count($students) === 0 : true;
                                     })
                                     ->options(function () {
                                         $acronym = Auth::user()?->teacher?->acronym ?? '';
@@ -433,7 +409,6 @@ class ScheduleResource extends Resource
                                     })
                                     ->placeholder('Em caso de ser a turma toda, selecione o turno'),
 
-                                // Campo visível apenas quando há alunos selecionados
                                 TextInput::make('shift')
                                     ->label('Turno Gerado (automático)')
                                     ->visible(function (callable $get) {
@@ -459,7 +434,6 @@ class ScheduleResource extends Resource
                         ->modalSubmitActionLabel('Submeter Justificação')
                         ->modalCancelActionLabel('Cancelar')
                         ->form([
-
                             Textarea::make('justification')
                                 ->label('Escreva a justificação')
                                 ->required()
@@ -543,8 +517,6 @@ class ScheduleResource extends Resource
                     ->visible(fn() => Auth::user()?->isSuperAdmin()),
 
             ])
-
-
             ->bulkActions([
 
                 BulkAction::make('exportar_selecionados')
@@ -572,7 +544,6 @@ class ScheduleResource extends Resource
 
     public static function hoursCounterUpdate(Schedule $schedule, Bool $plusOrMinus): void
     {
-        //dd('Updating hours counter for schedule', ['schedule' => $schedule->id, 'plusOrMinus' => $plusOrMinus]);
         try {
             DB::transaction(function () use ($schedule, $plusOrMinus) {
 
@@ -632,8 +603,7 @@ class ScheduleResource extends Resource
         return [
             Actions\ViewAction::make(),
             Actions\EditAction::make(),
-            //  ->visible(fn($record) => !in_array($record->estado, ['Aprovado', 'Aprovado DP'])),
-            Actions\DeleteAction::make(), // ✅ Este permite o botão "Apagar"
+            Actions\DeleteAction::make(),
         ];
     }
 }

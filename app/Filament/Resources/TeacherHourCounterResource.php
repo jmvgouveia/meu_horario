@@ -4,9 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\TeacherHourCounterImporter;
 use App\Filament\Resources\TeacherHourCounterResource\Pages;
-use App\Filament\Resources\TeacherHourCounterResource\RelationManagers;
 use App\Models\TeacherHourCounter;
-use Filament\Forms;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -15,9 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Facades\Log;
 
 class TeacherHourCounterResource extends Resource
 {
@@ -37,7 +32,7 @@ class TeacherHourCounterResource extends Resource
     {
         return 'Cargas Horárias dos Professores';
     }
-    
+
     public static function form(Form $form): Form
     {
         return $form
@@ -58,8 +53,6 @@ class TeacherHourCounterResource extends Resource
                     ->numeric()
                     ->minValue(0)
                     ->maxValue(function (callable $get) {
-                        Log::info('Valor de authorized_overtime', ['valor' => $get('authorized_overtime')]);
-
                         return $get('authorized_overtime') === true ? 27 : 22;
                     })
                     ->reactive()
@@ -136,7 +129,6 @@ class TeacherHourCounterResource extends Resource
                     ->label('Import Teacher Hours')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success'),
-                // Tables\Actions\CreateAction::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
