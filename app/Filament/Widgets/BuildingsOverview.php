@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Building;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 
@@ -59,6 +60,6 @@ class BuildingsOverview extends ChartWidget
     {
         $user = Filament::auth()->user();
 
-        return $user instanceof \App\Models\User && $user->hasRole('Super Admin');
+        return $user instanceof User && $user->hasRole('Super Admin');
     }
 }

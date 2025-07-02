@@ -4,17 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\NationalityImporter;
 use App\Filament\Resources\NationalityResource\Pages;
-use App\Filament\Resources\NationalityResource\RelationManagers;
 use App\Models\Nationality;
-use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class NationalityResource extends Resource
 {

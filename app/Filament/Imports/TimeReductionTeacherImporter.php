@@ -33,8 +33,6 @@ class TimeReductionTeacherImporter extends Importer
                 ->label('Elegibilidade')
                 ->rules(['required', 'string', 'max:255'])
                 ->example('Feminino ou Masculino'),
-
-
         ];
     }
 
@@ -44,9 +42,9 @@ class TimeReductionTeacherImporter extends Importer
             return new TimeReduction();
         });
     }
+
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['name'] = trim($this->data['name'] ?? '');
         $this->data['description'] = trim($this->data['description'] ?? '');
         $this->data['eligibility'] = trim($this->data['eligibility'] ?? '');

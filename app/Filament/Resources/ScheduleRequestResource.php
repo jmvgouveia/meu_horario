@@ -3,19 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleRequestResource\Pages;
-use App\Models\Schedule;
 use App\Models\ScheduleRequest;
-use App\Models\User;
+use App\Models\Teacher;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -32,7 +27,7 @@ class ScheduleRequestResource extends Resource
     protected static ?string $navigationBadgeTooltip = 'Pedidos recebidos';
     protected static ?int $navigationSort = 2;
 
-    protected int|string|array $pollingInterval = '5s'; // ou 5000 (ms)
+    protected int|string|array $pollingInterval = '5s';
 
 
     public static function getLabel(): string
@@ -48,15 +43,9 @@ class ScheduleRequestResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $userId = Filament::auth()->id();
-        $user = Filament::auth()->user();
+        //    $user = Filament::auth()->user();
 
-        // --- VALIDAR COM PERMISSÕES ---
-        // ✅ Se for um gestor (por ID ou por papel), vê tudo
-        // if (in_array($user?->id, [1])) { //|| $user?->hasRole('admin')) {
-        //     return parent::getEloquentQuery();
-        // }
-
-        $teacher = \App\Models\Teacher::where('id_user', $userId)->first();
+        $teacher = Teacher::where('id_user', $userId)->first();
 
         return parent::getEloquentQuery()
             ->where(function ($query) use ($teacher) {
@@ -71,97 +60,12 @@ class ScheduleRequestResource extends Resource
 
     public static function form(Form $form): Form
     {
-        // return $form
-        // ->schema([
-        //     Section::make('Pedido de Troca de Horário')
-        //         ->description('Preencha os campos abaixo para solicitar uma troca de horário.')
-        //         ->columns(3)
-        //         ->schema([
-
-        //             Section::make('Justificação do Pedido')
-        //                 ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
-        //                 ->schema([
-        //                     Placeholder::make('solicitante')
-        //                         ->label('Pedido feito por:')
-        //                         ->content(fn($record) => $record->requester->name ?? '—'),
-
-        //                     Placeholder::make('data_pedido')
-        //                         ->label('Data do Pedido')
-        //                         ->content(fn($record) => optional($record->created_at)->format('d/m/Y H:i') ?? '—'),
-        //                     //->columnSpanFull(),
-        //                     Placeholder::make('status')
-        //                         ->label('Estado Atual')
-        //                         ->content(fn($record) => $record->status ?? '—'),
-
-        //                     Placeholder::make('justification')
-        //                         ->label('Justificação do Pedido')
-        //                         ->content(fn($record) => $record->justification ?? '—')
-        //                         ->columnSpanFull(),
-        //                 ])
-        //                 ->columns(3)
-        //                 ->extraAttributes([
-        //                     'class' => 'bg-white border border-gray-300 rounded-xl shadow-sm',
-        //                 ]),
-
-
-        //             Grid::make(2)
-        //                 ->schema([]),
-
-        //             Section::make('Resposta do Professor Original')
-        //                 ->description('Resposta ao pedido.')
-        //                 ->schema([
-        //                     Grid::make(2)
-        //                         ->schema([
-        //                             Placeholder::make('professor_respondeu')
-        //                                 ->label('Resposta de:')
-        //                                 ->content(fn($record) => $record->scheduleConflict->teacher->name ?? '—'),
-
-        //                             Placeholder::make('data_pedido')
-        //                                 ->label('Data da Resposta')
-        //                                 ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—'),
-
-        //                         ])
-        //                         ->columns(2),
-
-        //                     Placeholder::make('response')
-        //                         ->label('Motivo da Recusa')
-        //                         ->content(fn($record) => $record->response ?? '—')
-        //                         ->disabled()
-        //                         ->columnSpanFull(),
-        //                 ])
-        //                 ->extraAttributes([
-        //                     'class' => 'bg-white border border-gray-300 rounded-xl shadow-sm',
-        //                 ]),
-
-
-
-
-
-
-
-
-
-        //             Textarea::make('response_coord')
-        //                 ->label('Notas de Aprovação')
-        //                 ->visible(fn($get) => $get('status') === 'Aprovado')
-        //                 ->disabled()
-        //                 ->columnSpanFull(),
-        //             Textarea::make('scaled_justification')
-        //                 ->label('Notas de Aprovação')
-        //                 ->visible(fn($get) => $get('status') === 'Escalado')
-        //                 ->disabled()
-        //                 ->columnSpanFull(),
-
-        //         ]),
-
-        // ]);
 
         return $form->schema([
             Section::make('Pedido de Troca de Horário')
                 ->description('Preencha os campos abaixo para visualizar os detalhes do pedido.')
                 ->schema([
 
-                    // Linha superior com 3 campos
                     Grid::make(3)->schema([
                         Placeholder::make('solicitante')
                             ->label('Pedido feito por')
@@ -178,7 +82,6 @@ class ScheduleRequestResource extends Resource
 
                     ]),
 
-                    // Justificação destacada
                     Section::make('Justificação do Pedido')
                         ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
                         ->schema([
@@ -189,7 +92,6 @@ class ScheduleRequestResource extends Resource
                         ])
                         ->columns(1),
 
-                    // Campos condicionais com estilo uniforme
                     Placeholder::make('response')
                         ->label('Motivo da Recusa')
                         ->content(fn($record) => $record->response ?? '—')
@@ -221,7 +123,7 @@ class ScheduleRequestResource extends Resource
     public static function table(Table $table): Table
     {
         $userId = Filament::auth()->id();
-        $isGestor = in_array($userId, [1]); // ou usa uma função global/policy
+        $isGestor = in_array($userId, [1]); // DANIEL VERIFICAR
 
         $columns = [
             TextColumn::make('id')
@@ -233,7 +135,6 @@ class ScheduleRequestResource extends Resource
                 ->wrap()
                 ->toggleable()
                 ->limit(25),
-
             TextColumn::make('scheduleConflict.weekday.weekday')
                 ->label('Dia da Semana')
                 ->wrap()
@@ -257,7 +158,7 @@ class ScheduleRequestResource extends Resource
                 ->label('Estado do Pedido')
                 ->toggleable()
                 ->badge()
-                ->color(fn(string $state): string => match ($state) {
+                ->color(fn(string $state): string => match ($state) { //DANIEL CORESSSSS
                     'Pendente' => 'warning',
                     'Aprovado' => 'success',
                     'Recusado' => 'danger',
@@ -267,8 +168,6 @@ class ScheduleRequestResource extends Resource
                     default => 'gray',
                 })
                 ->sortable()
-
-
         ];
 
         if ($isGestor) {
@@ -327,11 +226,7 @@ class ScheduleRequestResource extends Resource
             ])
             ->actions([])
             ->bulkActions(
-                [
-                    // Tables\Actions\BulkActionGroup::make([
-                    //     Tables\Actions\DeleteBulkAction::make(),
-                    // ])
-                ],
+                [],
             );
     }
 
@@ -350,47 +245,4 @@ class ScheduleRequestResource extends Resource
             'edit' => Pages\EditScheduleRequest::route('/{record}/edit'),
         ];
     }
-
-    // Apresentar o total de pedidos recebidos pendentes
-    // public static function getNavigationBadge(): ?string
-    // {
-    //     $user = Filament::auth()->user();
-
-    //     if (!$user || !$user->teacher) {
-    //         return null;
-    //     }
-
-    //     $teacherId = $user->teacher->id;
-
-    //     $conflictingSchedules = Schedule::where('id_teacher', $teacherId)
-    //         ->get(['id_schoolyear', 'id_timeperiod', 'id_room', 'id_weekday']);
-
-    //     if ($conflictingSchedules->isEmpty()) {
-    //         return null;
-    //     }
-
-    //     $query = \App\Models\ScheduleRequest::where('status', 'Pendente')
-    //         // Apenas pedidos feitos por OUTROS (não pelo utilizador atual)
-    //         ->where('id_teacher', '!=', $teacherId)
-    //         ->where(function ($query) use ($conflictingSchedules, $teacherId) {
-    //             foreach ($conflictingSchedules as $schedule) {
-    //                 $query->orWhere(function ($sub) use ($schedule, $teacherId) {
-    //                     $sub->whereHas('scheduleConflict', function ($q) use ($schedule, $teacherId) {
-    //                         $q->where('id_teacher', $teacherId) // confirmar que o horário-alvo é do utilizador atual
-    //                             ->where('id_schoolyear', $schedule->id_schoolyear)
-    //                             ->where('id_timeperiod', $schedule->id_timeperiod)
-    //                             ->where('id_room', $schedule->id_room)
-    //                             ->where('id_weekday', $schedule->id_weekday);
-    //                     });
-    //                 });
-    //             }
-    //         });
-
-    //     return (string) $query->count();
-    // }
-
-    // public static function getPermissionPrefixes(): array
-    // {
-    //     return ['schedule_request'];
-    // }
 }

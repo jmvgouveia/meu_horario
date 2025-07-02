@@ -37,9 +37,7 @@ class RoomsRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
             ])

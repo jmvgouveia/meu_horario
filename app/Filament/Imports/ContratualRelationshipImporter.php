@@ -26,21 +26,17 @@ class ContratualRelationshipImporter extends Importer
                     Rule::unique(ContratualRelationship::class, 'name'),
                 ])
                 ->example('Edifício Central'),
-
-
         ];
     }
 
     public function resolveRecord(): ?ContratualRelationship
     {
-
         return DB::transaction(function () {
             return new ContratualRelationship();
         });
     }
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['name'] = trim($this->data['name'] ?? '');
     }
 

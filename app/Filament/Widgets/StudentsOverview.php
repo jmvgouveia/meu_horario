@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Student;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 
@@ -14,10 +15,10 @@ class StudentsOverview extends ChartWidget
 
     protected function getData(): array
     {
-        // Buscar a distribuição de students por gênero
+
         $students = Student::selectRaw('genders.gender, COUNT(*) as total')
-            ->join('genders', 'students.id_gender', '=', 'genders.id')  // Junção com a tabela 'genders'
-            ->groupBy('genders.gender')  // Agrupar por gênero
+            ->join('genders', 'students.id_gender', '=', 'genders.id')
+            ->groupBy('genders.gender')
             ->get();
 
         return [
@@ -25,10 +26,10 @@ class StudentsOverview extends ChartWidget
                 [
                     'label' => 'Número de Alunos',
                     'data' => $students->pluck('total')->toArray(),
-                    'backgroundColor' => ['#e864ba', '#2563EB'], // Azul e Vermelho (exemplo)
+                    'backgroundColor' => ['#e864ba', '#2563EB'],
                 ],
             ],
-            'labels' => $students->pluck('gender')->toArray(), // Labels com os nomes dos gêneros
+            'labels' => $students->pluck('gender')->toArray(),
         ];
     }
 
@@ -54,7 +55,7 @@ class StudentsOverview extends ChartWidget
     {
         $user = Filament::auth()->user();
 
-        return $user instanceof \App\Models\User
+        return $user instanceof User
             && $user->hasAnyRole(['Super Admin', 'Área Pedagógica']);
     }
 }

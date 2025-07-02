@@ -4,12 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\RegistrationImporter;
 use App\Filament\Resources\RegistrationResource\Pages;
-use App\Filament\Resources\RegistrationResource\RelationManagers;
 use App\Models\Classes;
 use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Subject;
-use Filament\Forms;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -18,8 +16,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
 
 class RegistrationResource extends Resource

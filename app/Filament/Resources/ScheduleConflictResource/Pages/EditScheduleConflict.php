@@ -5,9 +5,6 @@ namespace App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Filament\Resources\ScheduleConflictResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Models\Room;
-
-use App\Models\User;
-
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
@@ -15,11 +12,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Container\Attributes\Log;
-use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log as FacadesLog;
 
 
 class EditScheduleConflict extends EditRecord
@@ -37,13 +31,12 @@ class EditScheduleConflict extends EditRecord
             'requester',
         ]);
 
-
         return $data;
     }
 
 
     protected function getFormActions(): array
-    {  // USER CLASSS
+    {
         $actions = [];
 
         if (Auth::user()?->isGestorConflitos()) {
@@ -172,7 +165,6 @@ class EditScheduleConflict extends EditRecord
 
                 try {
                     DB::transaction(function () {
-                        // Verifica se o registro tem um scheduleConflict e scheduleNew
 
                         if ($this->record->status === 'Aprovado DP') {
 
@@ -189,7 +181,6 @@ class EditScheduleConflict extends EditRecord
                             $this->record->delete();
 
                             if (Auth::user()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
-                                // Se o usuário for o professor do horário, elimina o scheduleConflict
                                 $this->record->scheduleConflict?->delete();
                                 ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
 
@@ -202,10 +193,6 @@ class EditScheduleConflict extends EditRecord
                                 'status' => 'Aprovado',
                             ]);
                         }
-
-
-
-
 
                         Notification::make()
                             ->title("Horário Eliminado")
@@ -257,13 +244,4 @@ class EditScheduleConflict extends EditRecord
             ->pluck('name', 'id')
             ->toArray();
     }
-
-
-    // protected function getHeaderActions(): array
-    // {
-    //     return [
-
-
-    //     ];
-    // }
 }

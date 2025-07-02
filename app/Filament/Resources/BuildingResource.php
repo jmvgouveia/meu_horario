@@ -17,9 +17,9 @@ use Filament\Tables\Table;
 class BuildingResource extends Resource
 {
     protected static ?string $model = Building::class;
-    protected static ?string $navigationGroup = 'Pólos e Núcleos';              // Grupo de navegação
-    protected static ?string $navigationLabel = 'Edifícios';                    // Label
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';  // Icon apresentadp
+    protected static ?string $navigationGroup = 'Pólos e Núcleos';
+    protected static ?string $navigationLabel = 'Edifícios';
+    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 
     public static function getLabel(): string
     {

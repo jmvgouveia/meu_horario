@@ -35,14 +35,12 @@ class TeacherHourCounterImporter extends Importer
             ImportColumn::make('authorized_overtime')
                 ->label('Horas Extras Autorizadas')
                 ->rule(Rule::in([1, 2])),
-
-            //
         ];
     }
 
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
+
         $this->data['teacher_id'] = trim($this->data['teacher_id'] ?? '');
         $this->data['workload'] = trim($this->data['workload'] ?? '');
         $this->data['teaching_load'] = trim($this->data['teaching_load'] ?? '');
@@ -52,8 +50,6 @@ class TeacherHourCounterImporter extends Importer
 
     public function resolveRecord(): ?TeacherHourCounter
     {
-        // Create a new instance of TeacherHourCounter
-
         return DB::transaction(function () {
 
             return new TeacherHourCounter([

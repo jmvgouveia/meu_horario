@@ -40,14 +40,12 @@ class BuildingImporter extends Importer
 
     public function resolveRecord(): ?Building
     {
-        // Use a transaction to ensure atomicity
         return DB::transaction(function () {
             return new Building();
         });
     }
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['name'] = trim($this->data['name'] ?? '');
         $this->data['address'] = trim($this->data['address'] ?? '');
     }

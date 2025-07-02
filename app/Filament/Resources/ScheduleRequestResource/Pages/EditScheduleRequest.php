@@ -6,17 +6,14 @@ use App\Filament\Resources\ScheduleRequestResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Models\Room;
-use App\Models\ScheduleRequest;
 use Filament\Actions\Action;
 use Filament\Notifications\Actions\Action as NotificationAction;
-
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Container\Attributes\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EditScheduleRequest extends EditRecord
@@ -86,7 +83,7 @@ class EditScheduleRequest extends EditRecord
                             ->body("O professor {$ownername} aprovou o seu pedido para a troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->success()
                             ->actions([
-                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                NotificationAction::make('Ver Pedido')
                                     ->url(route('filament.admin.resources.schedule-requests.edit', [
                                         'record' => $this->record->getKey(),
                                     ]))
@@ -173,7 +170,7 @@ class EditScheduleRequest extends EditRecord
                             ->body("O professor {$requestername} escalou o pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
                             ->warning()
                             ->actions([
-                                NotificationAction::make('Ver Pedido') // << usa o alias aqui
+                                NotificationAction::make('Ver Pedido')
                                     ->url(route('filament.admin.resources.schedule-requests.edit', [
                                         'record' => $this->record->getKey(),
                                     ]))
@@ -256,10 +253,6 @@ class EditScheduleRequest extends EditRecord
             ->label('Eliminar Horário')
             ->color('danger')
             ->requiresConfirmation()
-            // ->visible(function () {
-            //     $user = Filament::auth()->user();
-            //     return $user?->teacher?->id === $this->record->id_teacher;
-            // })
             ->action(function () {
 
 
@@ -275,20 +268,16 @@ class EditScheduleRequest extends EditRecord
                         $deletedSchedule = null;
                         $scheduleToApprove = null;
 
-                        // Verifica quem está a apagar
                         if ($teacherId === $scheduleRequest->id_teacher) {
-                            // O requerente (B) apaga a sua marcação proposta
                             $deletedSchedule = $scheduleNew;
                             $scheduleToApprove = $scheduleConflict;
                         } elseif ($teacherId === $scheduleConflict?->id_teacher) {
-                            // O destinatário (A) apaga a sua marcação original
                             $deletedSchedule = $scheduleConflict;
                             $scheduleToApprove = $scheduleNew;
                         } else {
                             throw new \Exception('Não tem permissão para eliminar esta marcação.');
                         }
 
-                        // Apagar a marcação do utilizador atual
                         if ($deletedSchedule) {
                             if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
                                 ScheduleResource::hoursCounterUpdate($deletedSchedule, true);
@@ -297,7 +286,6 @@ class EditScheduleRequest extends EditRecord
                             $deletedSchedule->delete();
                         }
 
-                        // Aprovar automaticamente a outra marcação
                         if ($scheduleToApprove && $scheduleToApprove->status !== 'Aprovado') {
                             $scheduleToApprove->update([
                                 'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
@@ -306,7 +294,6 @@ class EditScheduleRequest extends EditRecord
                             ScheduleResource::hoursCounterUpdate($scheduleToApprove, false);
                         }
 
-                        // Atualizar o pedido de troca
                         $scheduleRequest->update([
                             'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
                             'responded_at' => now(),
@@ -328,9 +315,6 @@ class EditScheduleRequest extends EditRecord
                         ->send();
                 }
             });
-
-
-
 
         return $actions;
     }

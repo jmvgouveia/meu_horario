@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ScheduleResource\Traits;
 
 use App\Models\SchoolYear;
-use App\Models\SchoolYears;
 use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
 use Carbon\Carbon;

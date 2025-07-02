@@ -6,7 +6,6 @@ use App\Models\Schedule;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherHourCounter;
-use App\Models\Schedules;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
@@ -59,7 +58,7 @@ trait ChecksScheduleConflicts
         $query = Schedule::where('id_teacher', $idTeacher)
             ->where('id_weekday', $weekday)
             ->where('id_timeperiod', $timeperiod)
-            ->where('status', '!=', 'Recusado DP') // Exclude pending schedules
+            ->where('status', '!=', 'Recusado DP')
             ->where('status', '!=', 'Eliminado')
             ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId));
 
@@ -88,7 +87,6 @@ trait ChecksScheduleConflicts
                 ->send();
 
             throw new Halt("Erro: O Aluno {$student->name} já tem uma atividade neste horário.");
-            // impede erro visual no Filament
         }
 
         // 2. Verificar se esse aluno tem marcação nesse dia/período

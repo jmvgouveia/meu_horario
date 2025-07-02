@@ -5,7 +5,6 @@ namespace App\Filament\Resources\TeacherResource\Pages;
 use App\Filament\Resources\TeacherResource;
 use App\Models\TeacherHourCounter;
 use App\Models\User;
-use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +19,6 @@ class CreateTeacher extends CreateRecord
     {
         $userData = $data['user'];
 
-        // Validação
         $validator = Validator::make([
             'name' => $data['name'],
             'email' => $userData['email'],
@@ -44,17 +42,14 @@ class CreateTeacher extends CreateRecord
             throw ValidationException::withMessages($validator->errors()->toArray());
         }
 
-        // Criar o User
         $user = User::create([
             'name' => $data['name'],
             'email' => $userData['email'],
             'password' => Hash::make($userData['password']),
         ]);
 
-        // Atribuir a role de Professor ao novo Professor/User
         $user->assignRole('Professor');
 
-        // Associar id_user ao professor
         $data['id_user'] = $user->id;
 
         return $data;
@@ -65,15 +60,10 @@ class CreateTeacher extends CreateRecord
         $record = $this->record;
 
         TeacherHourCounter::create([
-            'id_teacher' => $record->id, // Agora já existe!
+            'id_teacher' => $record->id,
             'workload' => 26,
             'teaching_load' => 22,
             'non_teaching_load' => 4,
         ]);
     }
-
-/*     protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    } */
 }

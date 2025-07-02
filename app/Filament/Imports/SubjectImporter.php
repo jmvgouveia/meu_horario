@@ -25,7 +25,6 @@ class SubjectImporter extends Importer
     }
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['name'] = trim($this->data['name'] ?? '');
         $this->data['acronym'] = trim($this->data['acronym'] ?? '');
     }

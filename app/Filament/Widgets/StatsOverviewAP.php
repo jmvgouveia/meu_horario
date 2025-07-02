@@ -2,13 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Building;
 use App\Models\Classes;
 use App\Models\Course;
-use App\Models\Department;
-use App\Models\Room;
 use App\Models\Student;
-use App\Models\Teacher;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -43,7 +40,7 @@ class StatsOverviewAP extends BaseWidget
     {
         $user = Filament::auth()->user();
 
-        return $user instanceof \App\Models\User
+        return $user instanceof User
             && $user->hasAnyRole(['Super Admin', 'Área Pedagógica']);
     }
 }

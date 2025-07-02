@@ -9,7 +9,6 @@ use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
 use App\Models\Schedule;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
-use Filament\Actions;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -26,10 +25,8 @@ class CreateSchedule extends CreateRecord
     protected $listeners = ['botaoSolicitarTrocaClicado' => 'onSolicitarTrocaClicado'];
     public ?string $justification = null;
 
-    //  Armazena estado interno da página
     public ?Schedule $conflictingSchedule = null;
 
-    //preencher automaticamente ano letivo e professor
     protected function mutateFormDataBeforeCreate(array $data): array
     {
 
@@ -50,21 +47,11 @@ class CreateSchedule extends CreateRecord
     protected function beforeCreate(): void
     {
 
-        //try {
 
         DB::transaction(function () {
             $this->validateScheduleWindow();
             $this->checkScheduleConflictsAndAvailability($this->data);
         });
-        // } catch (\Exception $e) {
-
-        //     Notification::make()
-        //         ->title('Erro ao criar o horário321')
-        //         ->body($e->getMessage())
-        //         ->danger()
-        //         ->send();
-        //     throw $e; // Re-throw the exception to prevent saving
-        // }
     }
 
     protected function beforeSave(): void
@@ -78,7 +65,6 @@ class CreateSchedule extends CreateRecord
 
         try {
             DB::transaction(function () {
-                //$this->afterSave();
                 $this->record->classes()->sync($this->data['id_classes'] ?? []);
                 $this->record->students()->sync($this->data['students'] ?? []);
                 ScheduleResource::hoursCounterUpdate($this->record, false);
@@ -89,7 +75,7 @@ class CreateSchedule extends CreateRecord
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
-            throw $e; // Re-throw the exception to prevent saving
+            throw $e;
         }
     }
 
@@ -100,15 +86,4 @@ class CreateSchedule extends CreateRecord
             'id_timeperiod' => request('timeperiod'),
         ]);
     }
-
-
-    // ADICIONADO NO BEFORE SAVE
-    // protected function afterSave(): void 
-    // {
-    //     $record = $this->record;
-    //     //     // Sincroniza as turmas (many-to-many)
-    //     $record->classes()->sync($this->data['id_classes'] ?? []);
-    //     // Sincroniza os alunos (many-to-many)
-    //     $record->students()->sync($this->data['students'] ?? []);
-    // }
 }

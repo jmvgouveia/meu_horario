@@ -4,17 +4,11 @@ namespace App\Filament\Resources\ScheduleResource\Traits;
 
 use App\Models\Schedule;
 use App\Models\Teacher;
-use App\Models\SchoolYears;
-use App\Models\Schedules;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
-//use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
-
-use Filament\Notifications\Actions\Action as NotificationAction;
-
 use Illuminate\Support\Facades\DB;
 
 trait HandlesScheduleSwap
@@ -90,7 +84,7 @@ trait HandlesScheduleSwap
                 ->body($e->getMessage())
                 ->danger()
                 ->send();
-            throw $e; // Re-throw the exception to prevent saving
+            throw $e;
         }
     }
 }

@@ -6,6 +6,7 @@ use App\Filament\Resources\TeacherResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Model;
 
 class EditTeacher extends EditRecord
 {
@@ -26,17 +27,13 @@ class EditTeacher extends EditRecord
         return $data;
     }
 
-    protected function handleRecordUpdate(\Illuminate\Database\Eloquent\Model $record, array $data): \Illuminate\Database\Eloquent\Model
+    protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        // Atualizar campos do utilizador, se existir
         if ($record->user) {
-            // Atualizar o nome do utilizador com o nome do professor
-            $record->user->name = $data['name']; // Atualiza o nome do utilizador com o nome do professor
+            $record->user->name = $data['name'];
 
-            // Atualizar o email do utilizador
             $record->user->email = $data['user']['email'];
 
-            // Atualizar a senha, se fornecida
             if (!empty($data['user']['password'])) {
                 $record->user->password = Hash::make($data['user']['password']);
             }
@@ -48,7 +45,6 @@ class EditTeacher extends EditRecord
 
         $record->updateOrFail($data);
 
-        //Atualizar o contador de horas com base nas posições e reduções
         $record->load(['positions', 'timeReductions']);
         $record->updateHourCounterFromReductions();
 

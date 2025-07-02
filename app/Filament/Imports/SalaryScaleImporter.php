@@ -40,7 +40,6 @@ class SalaryScaleImporter extends Importer
     }
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['scale'] = trim($this->data['scale'] ?? '');
     }
 

@@ -4,9 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\RoomImporter;
 use App\Filament\Resources\RoomResource\Pages;
-use App\Filament\Resources\RoomResource\RelationManagers;
 use App\Models\Room;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -15,8 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RoomResource extends Resource
 {
@@ -52,10 +48,10 @@ class RoomResource extends Resource
                     ->searchable()
                     ->preload(),
                 Textarea::make('description')
-                        ->label('Descrição')
-                        ->maxLength(1000)
-                        ->placeholder('Introduza descrição')
-                        ->columnSpan(2),
+                    ->label('Descrição')
+                    ->maxLength(1000)
+                    ->placeholder('Introduza descrição')
+                    ->columnSpan(2),
             ])->columns(2);
     }
 

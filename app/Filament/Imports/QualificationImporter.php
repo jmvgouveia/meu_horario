@@ -39,7 +39,6 @@ class QualificationImporter extends Importer
     }
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['name'] = trim($this->data['name'] ?? '');
     }
 

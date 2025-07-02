@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources;
 
-
 use App\Filament\Resources\ScheduleResource\Pages;
-
 use App\Models\Building;
 use App\Models\Classes;
 use App\Models\Registration;
@@ -14,14 +12,11 @@ use App\Models\Subject;
 use App\Models\Timeperiod;
 use App\Models\Weekday;
 use App\Models\Teacher;
-
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Models\TeacherHourCounter;
-use Filament\Facades\Filament;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
@@ -29,31 +24,21 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\DB;
-
-
-
 use Filament\Forms\Components\Section;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\CheckboxList;
-
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Actions as ActionGroup;
-
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
-
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions;
-use Mockery\Matcher\Not;
-
 
 class ScheduleResource extends Resource
 {

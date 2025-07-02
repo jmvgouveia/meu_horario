@@ -41,7 +41,6 @@ class TeacherSubjectsImporter extends Importer
 
     protected function beforeFill(): void
     {
-        // Limpa espaços em branco
         $this->data['id_teacher'] = trim($this->data['id_teacher'] ?? '');
         $this->data['id_subject'] = trim($this->data['id_subject'] ?? '');
         $this->data['id_schoolyear'] = trim($this->data['id_schoolyear'] ?? '');

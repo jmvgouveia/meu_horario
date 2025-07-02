@@ -8,7 +8,6 @@ use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
 use App\Models\Schedule;
 use App\Models\ScheduleRequest;
-use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -49,7 +48,7 @@ class EditSchedule extends EditRecord
                 ->danger()
                 ->send();
 
-            throw $e; // Re-throw the exception to prevent saving
+            throw $e;
         }
     }
 
@@ -58,9 +57,9 @@ class EditSchedule extends EditRecord
         try {
             DB::transaction(function () {
                 $record = $this->record;
-                // Sincroniza as turmas (many-to-many)
+
                 $record->classes()->sync($this->data['id_classes'] ?? []);
-                // Sincroniza os alunos (many-to-many)
+
                 $record->students()->sync($this->data['students'] ?? []);
             });
         } catch (\Exception $e) {
@@ -70,7 +69,7 @@ class EditSchedule extends EditRecord
                 ->danger()
                 ->send();
 
-            throw $e; // Re-throw the exception to prevent saving
+            throw $e;
         }
     }
 
@@ -82,7 +81,6 @@ class EditSchedule extends EditRecord
 
 
             $this->getSaveFormAction(),
-            // ->visible(fn() => !in_array($record?->status, ['Aprovado', 'Aprovado DP'])),
 
             DeleteAction::make()
                 ->label('Eliminar Horário')
@@ -94,33 +92,24 @@ class EditSchedule extends EditRecord
                     try {
 
                         DB::transaction(function () {
-                            // Verifica se o horário está dentro da janela de agendamento
-
-
-                            // Verifica se o horário está dentro da janela de agendamento
                             $record = $this->record;
 
-                            // Verifica se este horário está envolvido num pedido como "alvo do conflito"
                             $pendingRequest = ScheduleRequest::where('id_schedule', $record->id)
                                 ->where('status', 'Recusado')
                                 ->first();
 
                             if ($pendingRequest) {
-                                // Aprovar automaticamente o pedido
                                 $scheduleNovo = $pendingRequest->scheduleNew;
 
                                 if ($scheduleNovo) {
                                     $scheduleNovo->status = 'Aprovado';
                                     $scheduleNovo->save();
 
-                                    // Atualizar contador de horas com base no novo horário aprovado
                                     ScheduleResource::hoursCounterUpdate($scheduleNovo, false);
 
-                                    // Atualizar o estado do pedido
                                     $pendingRequest->status = 'Aprovado';
                                     $pendingRequest->save();
 
-                                    // Notificar o requerente do pedido
                                     $requerente = $pendingRequest->requester?->user;
                                     $idNovo = $scheduleNovo->id;
                                     $idApagado = $record->id;
@@ -135,7 +124,6 @@ class EditSchedule extends EditRecord
                                 }
                             }
 
-                            // Atualizar contador se for horário previamente aprovado
                             if ($record->status !== 'Pendente') {
                                 ScheduleResource::hoursCounterUpdate($record, true);
                             }
@@ -191,9 +179,4 @@ class EditSchedule extends EditRecord
             ]),
         ];
     }
-
-    /* protected function getRedirectUrl(): string
-    {
-        return ScheduleResource::getUrl();
-    } */
 }

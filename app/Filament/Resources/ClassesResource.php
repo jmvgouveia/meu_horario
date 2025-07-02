@@ -4,9 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\ClassesImporter;
 use App\Filament\Resources\ClassesResource\Pages;
-use App\Filament\Resources\ClassesResource\RelationManagers;
 use App\Models\Classes;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -14,8 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ClassesResource extends Resource
 {

@@ -7,8 +7,7 @@ use Filament\Widgets\Widget;
 use Illuminate\Contracts\View\View;
 use App\Models\Teacher;
 use App\Models\TeacherHourCounter;
-use App\Models\Position;
-use App\Models\TimeReduction;
+use App\Models\User;
 use Filament\Facades\Filament;
 
 
@@ -16,9 +15,9 @@ class OverviewWidget extends Widget
 {
     protected static string $view = 'filament.widgets.overview-widget';
     protected static ?int $sort = 2;
-    protected static bool $isLazy = false; // Para garantir que carrega completamente
+    protected static bool $isLazy = false;
 
-    protected int|string|array $pollingInterval = '5s'; // ou 5000 (ms)
+    protected int|string|array $pollingInterval = '5s';
 
     protected int | string | array $columnSpan = [
         'sm' => 12,
@@ -43,15 +42,13 @@ class OverviewWidget extends Widget
 
         // Contador
         $counter = TeacherHourCounter::where('id_teacher', $teacher->id)->first();
-        //  $disponivel = $counter?->carga_horaria ?? 0;
+
         $letivaDisponivel = $counter?->teaching_load ?? 0;
         $naoLetivaDisponivel = $counter?->non_teaching_load ?? 0;
 
         // Aulas
         $aulasLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'letiva')->count();
         $aulasNaoLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'nao letiva')->count();
-
-
 
 
         // Cargos com redução
@@ -79,7 +76,7 @@ class OverviewWidget extends Widget
 
 
         $resumo = [
-            //    'disponivel' => $disponivel,
+
             'letiva' => $aulasLetivas,
             'nao_letiva' => $aulasNaoLetivas,
             'disponivel_letiva' => max(0, $letivaDisponivel),
@@ -95,6 +92,6 @@ class OverviewWidget extends Widget
     {
         $user = Filament::auth()->user();
 
-        return $user instanceof \App\Models\User && $user->hasRole('Professor');
+        return $user instanceof User && $user->hasRole('Professor');
     }
 }

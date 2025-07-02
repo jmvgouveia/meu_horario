@@ -46,7 +46,6 @@ class ClassesImporter extends Importer
 
     public function resolveRecord(): ?Classes
     {
-        // Use a transaction to ensure atomicity
         return DB::transaction(function () {
             return new Classes();
         });

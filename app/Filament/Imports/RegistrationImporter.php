@@ -41,7 +41,7 @@ class RegistrationImporter extends Importer
                 ->label('IDs das Disciplinas (separados por vírgulas)')
                 ->rules(['required', 'string'])
                 ->example('1,2,3')
-                ->fillRecordUsing(null), // Ignorar este campo no modelo
+                ->fillRecordUsing(null),
         ];
     }
 

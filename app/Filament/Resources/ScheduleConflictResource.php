@@ -3,27 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleConflictResource\Pages;
-
-use App\Models\ScheduleConflict;
 use App\Models\ScheduleRequest;
-use App\Models\Teacher;
-use App\Models\User;
-use Filament\Facades\Filament;
-use Filament\Forms;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\MultiSelectFilter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ScheduleConflictResource extends Resource
 {
@@ -113,13 +100,10 @@ class ScheduleConflictResource extends Resource
                     Placeholder::make('solicitante')
                         ->label('Pedido feito por:')
                         ->content(fn($record) => $record->requester->name ?? '—'),
+
                     Placeholder::make('updated_at')
                         ->label('Data da Resposta')
                         ->content(fn($record) => optional($record->justification_at)->format('d/m/Y H:i') ?? '—'),
-
-                    // Placeholder::make('status')
-                    //     ->label('Estado Atual')
-                    //     ->content(fn($record) => $record->status ?? '—'),
 
                     Placeholder::make('justification_escalada')
                         ->label('Justificação para Escalada')
@@ -138,42 +122,35 @@ class ScheduleConflictResource extends Resource
 
         return $table
             ->columns([
-                // 0. ID
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable()
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                // 1. Quem fez a marcação original (professor com conflito)
                 TextColumn::make('scheduleConflict.teacher.name')
                     ->label('Professor com Marcações')
                     ->sortable()
                     ->searchable(),
 
-                // 2. Quem fez o pedido
                 TextColumn::make('requester.name')
                     ->label('Solicitante')
                     ->sortable()
                     ->searchable(),
 
-                // 3. Sala
                 TextColumn::make('scheduleConflict.room.name')
                     ->label('Sala')
                     ->sortable()
                     ->searchable(),
 
-                // 4. Hora
                 TextColumn::make('scheduleConflict.timePeriod.description')
                     ->label('Hora')
                     ->sortable(),
 
-                // 5. Dia da semana
                 TextColumn::make('scheduleConflict.weekday.weekday')
                     ->label('Dia da Semana')
                     ->sortable(),
 
-                // 6. Estado
                 TextColumn::make('status')
                     ->label('Estado')
                     ->badge()
@@ -187,7 +164,7 @@ class ScheduleConflictResource extends Resource
                         default => 'gray',
                     })
                     ->sortable(),
-            ]) // vamos preencher depois
+            ])
             ->filters([
                 SelectFilter::make('status')
                     ->label('Estado')
@@ -220,27 +197,4 @@ class ScheduleConflictResource extends Resource
             'edit' => Pages\EditScheduleConflict::route('/{record}/edit'),
         ];
     }
-
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     $userId = Filament::auth()->id();
-    //     $user = Filament::auth()->user();
-
-    //     if ($user instanceof \App\Models\User && $user->hasRole('Super Admin')) {
-    //         return parent::getEloquentQuery();
-    //     }
-
-    //     $teacher = Teacher::where('id_user', $userId)->first();
-
-    //     return parent::getEloquentQuery()
-    //         ->where(function ($query) use ($teacher) {
-    //             $query
-    //                 ->where('id_teacher_requester', $teacher?->id)
-    //                 ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
-    //                     $subQuery->where('id_teacher', $teacher?->id);
-    //                 });
-    //         });
-    // }
-
-
 }
