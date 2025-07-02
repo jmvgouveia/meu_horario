@@ -35,6 +35,7 @@ return new class extends Migration
             ])->default('Pendente');
             $table->text('response')->nullable();
             $table->timestamp('responded_at')->nullable();
+            $table->timestamp('justification_at')->nullable();
             $table->text('response_coord')->nullable();
             $table->text('scaled_justification')->nullable();
             $table->timestamps();
