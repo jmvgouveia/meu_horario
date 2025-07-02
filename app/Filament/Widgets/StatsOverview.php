@@ -41,25 +41,25 @@ class StatsOverview extends BaseWidget
             //     ->color('danger'),
 
 
-            Stat::make('Número de Alunos', Student::count())
-                ->description('Número total de Alunos')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('warning'),
+            // Stat::make('Número de Alunos', Student::count())
+            //     ->description('Número total de Alunos')
+            //     ->descriptionIcon('heroicon-m-user-group')
+            //     ->color('warning'),
 
             // Stat::make('Número de Deparmentos', Department::count())
             //     ->description('Número total de Departamentos')
             //     ->descriptionIcon('heroicon-m-user-group')
             //     ->color('success'),
 
-            Stat::make('Número de Cursos', Course::count())
-                ->description('Número total de Cursos')
-                ->descriptionIcon('heroicon-m-academic-cap')
-                ->color('success'),
+            // Stat::make('Número de Cursos', Course::count())
+            //     ->description('Número total de Cursos')
+            //     ->descriptionIcon('heroicon-m-academic-cap')
+            //     ->color('success'),
 
-            Stat::make('Número de Turmas', Classes::count())
-                ->description('Número total de Turmas')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('success'),
+            // Stat::make('Número de Turmas', Classes::count())
+            //     ->description('Número total de Turmas')
+            //     ->descriptionIcon('heroicon-m-user-group')
+            //     ->color('success'),
 
         ];
     }
