@@ -352,42 +352,42 @@ class ScheduleRequestResource extends Resource
     }
 
     // Apresentar o total de pedidos recebidos pendentes
-    public static function getNavigationBadge(): ?string
-    {
-        $user = Filament::auth()->user();
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     $user = Filament::auth()->user();
 
-        if (!$user || !$user->teacher) {
-            return null;
-        }
+    //     if (!$user || !$user->teacher) {
+    //         return null;
+    //     }
 
-        $teacherId = $user->teacher->id;
+    //     $teacherId = $user->teacher->id;
 
-        $conflictingSchedules = Schedule::where('id_teacher', $teacherId)
-            ->get(['id_schoolyear', 'id_timeperiod', 'id_room', 'id_weekday']);
+    //     $conflictingSchedules = Schedule::where('id_teacher', $teacherId)
+    //         ->get(['id_schoolyear', 'id_timeperiod', 'id_room', 'id_weekday']);
 
-        if ($conflictingSchedules->isEmpty()) {
-            return null;
-        }
+    //     if ($conflictingSchedules->isEmpty()) {
+    //         return null;
+    //     }
 
-        $query = \App\Models\ScheduleRequest::where('status', 'Pendente')
-            // Apenas pedidos feitos por OUTROS (não pelo utilizador atual)
-            ->where('id_teacher', '!=', $teacherId)
-            ->where(function ($query) use ($conflictingSchedules, $teacherId) {
-                foreach ($conflictingSchedules as $schedule) {
-                    $query->orWhere(function ($sub) use ($schedule, $teacherId) {
-                        $sub->whereHas('scheduleConflict', function ($q) use ($schedule, $teacherId) {
-                            $q->where('id_teacher', $teacherId) // confirmar que o horário-alvo é do utilizador atual
-                                ->where('id_schoolyear', $schedule->id_schoolyear)
-                                ->where('id_timeperiod', $schedule->id_timeperiod)
-                                ->where('id_room', $schedule->id_room)
-                                ->where('id_weekday', $schedule->id_weekday);
-                        });
-                    });
-                }
-            });
+    //     $query = \App\Models\ScheduleRequest::where('status', 'Pendente')
+    //         // Apenas pedidos feitos por OUTROS (não pelo utilizador atual)
+    //         ->where('id_teacher', '!=', $teacherId)
+    //         ->where(function ($query) use ($conflictingSchedules, $teacherId) {
+    //             foreach ($conflictingSchedules as $schedule) {
+    //                 $query->orWhere(function ($sub) use ($schedule, $teacherId) {
+    //                     $sub->whereHas('scheduleConflict', function ($q) use ($schedule, $teacherId) {
+    //                         $q->where('id_teacher', $teacherId) // confirmar que o horário-alvo é do utilizador atual
+    //                             ->where('id_schoolyear', $schedule->id_schoolyear)
+    //                             ->where('id_timeperiod', $schedule->id_timeperiod)
+    //                             ->where('id_room', $schedule->id_room)
+    //                             ->where('id_weekday', $schedule->id_weekday);
+    //                     });
+    //                 });
+    //             }
+    //         });
 
-        return (string) $query->count();
-    }
+    //     return (string) $query->count();
+    // }
 
     // public static function getPermissionPrefixes(): array
     // {
