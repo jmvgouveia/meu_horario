@@ -34,7 +34,6 @@ class WeekdayResource extends Resource
         return 'Dias da Semana';
     }
 
-
     public static function form(Form $form): Form
     {
         return $form
@@ -55,10 +54,8 @@ class WeekdayResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label("ID"),
                 TextColumn::make('weekday')
-                    ->label('Dia da semana')
+                    ->label('Dia da semana'),
             ])
             ->filters([
                 //

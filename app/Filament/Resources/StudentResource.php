@@ -40,8 +40,6 @@ class StudentResource extends Resource
         return 'Alunos';
     }
 
-
-
     public static function form(Form $form): Form
     {
         return $form

@@ -106,7 +106,7 @@ class ScheduleConflictResource extends Resource
                 ->columns(2),
 
 
-            Section::make('🔴 Passo 4:Situacßão Escalada para Direção Pedagógica')
+            Section::make('🔴 Passo 4: Situação Escalada para Direção Pedagógica')
                 ->description('Situação escalada para análise superior.')
                 ->schema([
 

@@ -23,6 +23,7 @@ class TimeperiodResource extends Resource
     protected static ?string $navigationLabel = 'Períodos de tempo';
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?int $navigationSort = 4;
+
     public static function getLabel(): string
     {
         return 'Hora de Aula';
@@ -32,6 +33,7 @@ class TimeperiodResource extends Resource
     {
         return 'Horas de Aula';
     }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -51,8 +53,6 @@ class TimeperiodResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label("ID"),
                 TextColumn::make('description')
                     ->label("Descrição")
                     ->searchable(),

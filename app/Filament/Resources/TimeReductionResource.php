@@ -24,6 +24,7 @@ class TimeReductionResource extends Resource
     protected static ?string $navigationLabel = 'Reduções de Horário';
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?int $navigationSort = 7;
+
     public static function getLabel(): string
     {
         return 'Redução de Horário';
@@ -33,6 +34,7 @@ class TimeReductionResource extends Resource
     {
         return 'Reduções de Horário';
     }
+    
     public static function form(Form $form): Form
     {
         return $form

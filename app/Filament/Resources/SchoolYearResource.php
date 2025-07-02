@@ -37,6 +37,7 @@ class SchoolYearResource extends Resource
     {
         return 'Anos Letivos';
     }
+    
     public static function form(Form $form): Form
     {
         return $form

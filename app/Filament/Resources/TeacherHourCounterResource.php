@@ -37,6 +37,7 @@ class TeacherHourCounterResource extends Resource
     {
         return 'Cargas Horárias dos Professores';
     }
+    
     public static function form(Form $form): Form
     {
         return $form
