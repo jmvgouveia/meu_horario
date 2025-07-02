@@ -21,6 +21,7 @@ use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugi
 use App\Filament\Widgets\BuildingsOverview;
 use App\Filament\Widgets\OverviewWidget;
 use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\StatsOverviewRH;
 use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Filament\Widgets\StudentsOverview;
 use App\Filament\Widgets\TeachersOverview;
@@ -62,17 +63,20 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            //   ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                /* WeeklyScheduleWidget::class,
+                WeeklyScheduleWidget::class,
                 OverviewWidget::class,
                 StatsOverview::class,
+                StatsOverviewRH::class,
                 TeachersOverview::class,
                 StudentsOverview::class,
-                BuildingsOverview::class, */
+                BuildingsOverview::class,
+
 
                 /* Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class, */])
+                Widgets\FilamentInfoWidget::class, */
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

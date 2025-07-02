@@ -54,6 +54,7 @@ class StudentsOverview extends ChartWidget
     {
         $user = Filament::auth()->user();
 
-        return $user instanceof \App\Models\User && $user->hasRole('Super Admin');
+        return $user instanceof \App\Models\User
+            && $user->hasAnyRole(['Super Admin', 'Área Pedagógica']);
     }
 }

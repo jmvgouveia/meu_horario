@@ -14,23 +14,22 @@ class TeachersOverview extends ChartWidget
 
     protected function getData(): array
     {
-       // Buscar a distribuição de docentes por gênero
-       $docentes = Teacher::selectRaw('genders.gender, COUNT(*) as total')
-       ->join('genders', 'teachers.id_gender', '=', 'genders.id')  // Junção com a tabela 'genders'
-       ->groupBy('genders.gender')  // Agrupar por gênero
-       ->get();
+        // Buscar a distribuição de docentes por gênero
+        $docentes = Teacher::selectRaw('genders.gender, COUNT(*) as total')
+            ->join('genders', 'teachers.id_gender', '=', 'genders.id')  // Junção com a tabela 'genders'
+            ->groupBy('genders.gender')  // Agrupar por gênero
+            ->get();
 
-    return [
-        'datasets' => [
-            [
-                'label' => 'Número de Professores',
-                'data' => $docentes->pluck('total')->toArray(),
-                'backgroundColor' => ['#2563EB', '#DC2626'], // Azul e Vermelho (exemplo)
+        return [
+            'datasets' => [
+                [
+                    'label' => 'Número de Professores',
+                    'data' => $docentes->pluck('total')->toArray(),
+                    'backgroundColor' => ['#2563EB', '#DC2626'], // Azul e Vermelho (exemplo)
+                ],
             ],
-        ],
-        'labels' => $docentes->pluck('gender')->toArray(), // Labels com os nomes dos gêneros
-    ];
-
+            'labels' => $docentes->pluck('gender')->toArray(), // Labels com os nomes dos gêneros
+        ];
     }
 
     protected function getType(): string
@@ -55,6 +54,7 @@ class TeachersOverview extends ChartWidget
     {
         $user = Filament::auth()->user();
 
-        return $user instanceof \App\Models\User && $user->hasRole('Super Admin');
+        return $user instanceof \App\Models\User
+            && $user->hasAnyRole(['Super Admin', 'Recursos Humanos']);
     }
 }
