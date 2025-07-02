@@ -56,7 +56,7 @@ class UserResource extends Resource
                     ->nullable()
                     ->minLength(5)
                     ->regex(ValidationRules::PASSWORD_REGEX)
-                    ->helperText('Deve conter pelo menos 1 letra maiúscula, 1 número e 1 símbolo especial (! @ # $ %, etc.)'),
+                    ->helperText(ValidationRules::PASSWORD_HELPER_MSG),
                 Select::make('roles')->multiple()->relationship('roles', 'name')->preload()
             ]);
     }

@@ -127,7 +127,7 @@ class TeacherResource extends Resource
                             ->minLength(5)
                             ->placeholder('Deixe em branco para manter a atual')
                             ->regex(ValidationRules::PASSWORD_REGEX)
-                            ->helperText('Deve conter pelo menos 1 letra maiúscula, 1 número e 1 símbolo especial (! @ # $ %, etc.)'),
+                            ->helperText(ValidationRules::PASSWORD_HELPER_MSG),
                     ]),
 
             ]);
