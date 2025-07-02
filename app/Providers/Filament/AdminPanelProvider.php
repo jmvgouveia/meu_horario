@@ -21,6 +21,7 @@ use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugi
 use App\Filament\Widgets\BuildingsOverview;
 use App\Filament\Widgets\OverviewWidget;
 use App\Filament\Widgets\StatsOverview;
+use App\Filament\Widgets\StatsOverviewAP;
 use App\Filament\Widgets\StatsOverviewRH;
 use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Filament\Widgets\StudentsOverview;
@@ -69,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
                 OverviewWidget::class,
                 StatsOverview::class,
                 StatsOverviewRH::class,
+                StatsOverviewAP::class,
                 TeachersOverview::class,
                 StudentsOverview::class,
                 BuildingsOverview::class,
