@@ -493,12 +493,12 @@ class ScheduleResource extends Resource
                     ->toggleable()
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
-                        'Pendente' => 'warning',
-                        'Aprovado' => 'success',
-                        'Recusado' => 'danger',
-                        'Escalado' => 'info',
-                        'Aprovado DP' => 'success',
-                        'Recusado DP' => 'danger',
+                        'Pendente' => 'yellow_pendente',
+                        'Aprovado' => 'green_aprovado',
+                        'Recusado' => 'red_rejeitado',
+                        'Escalado' => 'purple_escalado',
+                        'Aprovado DP' => 'green_aprovado',
+                        'Recusado DP' => 'red_rejeitado',
                         default => 'gray',
                     })
                     ->searchable(),

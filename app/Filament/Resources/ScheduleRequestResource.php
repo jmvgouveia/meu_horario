@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ScheduleRequestResource\Pages;
 use App\Models\ScheduleRequest;
 use App\Models\Teacher;
+use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
@@ -122,8 +123,8 @@ class ScheduleRequestResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $userId = Filament::auth()->id();
-        $isGestor = in_array($userId, [1]); // DANIEL VERIFICAR
+        $user = Filament::auth()->user();
+        $isGestor = $user instanceof User && $user->hasRole('Gestor Conflitos'); 
 
         $columns = [
             TextColumn::make('id')
@@ -158,13 +159,13 @@ class ScheduleRequestResource extends Resource
                 ->label('Estado do Pedido')
                 ->toggleable()
                 ->badge()
-                ->color(fn(string $state): string => match ($state) { //DANIEL CORESSSSS
-                    'Pendente' => 'warning',
-                    'Aprovado' => 'success',
-                    'Recusado' => 'danger',
-                    'Escalado' => 'info',
-                    'Aprovado DP' => 'success',
-                    'Recusado DP' => 'danger',
+                ->color(fn(string $state): string => match ($state) { 
+                    'Pendente' => 'yellow_pendente',
+                    'Aprovado' => 'green_aprovado',
+                    'Recusado' => 'red_rejeitado',
+                    'Escalado' => 'purple_escalado',
+                    'Aprovado DP' => 'green_aprovado',
+                    'Recusado DP' => 'red_rejeitado',
                     default => 'gray',
                 })
                 ->sortable()
