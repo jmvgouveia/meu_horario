@@ -21,6 +21,16 @@ class BuildingResource extends Resource
     protected static ?string $navigationLabel = 'Edifícios';                    // Label
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';  // Icon apresentadp
 
+    public static function getLabel(): string
+    {
+        return 'Edifício';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return 'Edifícios';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
