@@ -159,6 +159,7 @@ class EditScheduleConflict extends EditRecord
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
             ->color('danger')
+            ->visible(fn() => !Auth::user()->isgestorConflitos())
             ->requiresConfirmation()
             ->action(function () {
 
