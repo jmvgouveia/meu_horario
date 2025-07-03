@@ -35,12 +35,12 @@ class PositionImporter extends Importer
 
             ImportColumn::make('reduction_l')
                 ->label('Reducao Componente Letiva')
-                ->rules(['nullable', 'integer', 'min:1', 'max:12'])
+                ->rules(['nullable', 'integer', 'min:0', 'max:12'])
                 ->example('1'),
 
             ImportColumn::make('reduction_nl')
                 ->label('Reducao Componente Não Letiva')
-                ->rules(['nullable', 'integer', 'min:1', 'max:12'])
+                ->rules(['nullable', 'integer', 'min:0', 'max:12'])
                 ->example('2'),
         ];
     }
