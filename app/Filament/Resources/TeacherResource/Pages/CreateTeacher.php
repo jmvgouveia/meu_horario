@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TeacherResource\Pages;
 
 use App\Filament\Resources\TeacherResource;
+use App\Models\SchoolYear;
 use App\Models\TeacherHourCounter;
 use App\Models\User;
 use Filament\Notifications\Notification;
@@ -59,11 +60,14 @@ class CreateTeacher extends CreateRecord
     {
         $record = $this->record;
 
+        $activeSchoolYear = SchoolYear::where('active', true)->first();
+
         TeacherHourCounter::create([
             'id_teacher' => $record->id,
             'workload' => 26,
             'teaching_load' => 22,
             'non_teaching_load' => 4,
+            'id_schoolyears' => $activeSchoolYear->id ?? null,
         ]);
     }
 }

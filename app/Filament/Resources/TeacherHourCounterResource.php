@@ -83,6 +83,13 @@ class TeacherHourCounterResource extends Resource
                             ($record->teaching_load ?? 0) + ($record->non_teaching_load ?? 0)
                         );
                     }),
+
+                Select::make('id_schoolyear')
+                    ->label('Ano Letivo')
+                    ->relationship('schoolyear', 'schoolyear')
+                    ->required()
+                    ->placeholder('Selecione o ano letivo')
+
             ])->columns(3);
     }
 
