@@ -22,6 +22,6 @@ class TeacherHourCounter extends Model
 
     public function schoolyear()
     {
-        return $this->belongsTo(SchoolYear::class, 'id_schoolyear');
+        return $this->belongsTo(SchoolYear::class, 'id_schoolyears');
     }
 }
