@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('id_position')
                 ->constrained('positions')
                 ->cascadeOnDelete();
-            $table->foreignId('id_schoolyear')
-                ->constrained('schoolyear')
+            $table->foreignId('id_schoolyears')
+                ->constrained('schoolyears')
                 ->cascadeOnDelete();
             $table->timestamps();
         });
