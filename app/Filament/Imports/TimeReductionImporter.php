@@ -8,7 +8,7 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\DB;
 
-class TimeReductionTeacherImporter extends Importer
+class TimeReductionImporter extends Importer
 {
     protected static ?string $model = TimeReduction::class;
 

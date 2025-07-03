@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\TimeReductionImporter;
 use App\Filament\Resources\TimeReductionResource\Pages;
 use App\Models\TimeReduction;
 use Filament\Forms\Components\Select;
@@ -113,6 +114,13 @@ class TimeReductionResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(TimeReductionImporter::class)
+                    ->label('Importar Reduções de Horário')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

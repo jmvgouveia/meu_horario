@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\ProfessionalRelationshipImporter;
 use App\Filament\Resources\ProfessionalRelationshipResource\Pages;
 use App\Models\ProfessionalRelationship;
 use Filament\Forms\Components\TextInput;
@@ -56,6 +57,13 @@ class ProfessionalRelationshipResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(ProfessionalRelationshipImporter::class)
+                    ->label('Importar Relações Profissionais')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
