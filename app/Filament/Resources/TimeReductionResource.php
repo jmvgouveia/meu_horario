@@ -102,9 +102,9 @@ class TimeReductionResource extends Resource
                     ->label('Elegibilidade')
                     ->badge()
                     ->color(fn(string $state): string => match (strtolower($state)) {
-                        'feminino' => 'primary',
-                        'masculino' => 'success',
-                        'ambos' => 'info',
+                        'feminino' => 'danger',
+                        'masculino' => 'info',
+                        'ambos' => 'success',
                     })
                     ->sortable()
                     ->toggleable(),
