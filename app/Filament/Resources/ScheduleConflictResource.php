@@ -4,6 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Models\ScheduleRequest;
+use App\Models\SchoolYear;
+use App\Models\Teacher;
+use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
@@ -29,6 +33,38 @@ class ScheduleConflictResource extends Resource
     {
         return 'Gestão de Conflitos de Horário';
     }
+
+
+    public static function getEloquentQuery(): Builder
+    {
+        $userId = Filament::auth()->id();
+        $teacher = Teacher::where('id_user', $userId)->first();
+        $anoLetivoAtivo = SchoolYear::where('active', true)->first();
+
+
+        if (! $teacher || ! $anoLetivoAtivo) {
+            return parent::getEloquentQuery()->whereRaw('0 = 1');
+        }
+
+        return parent::getEloquentQuery()
+            ->where(function ($query) use ($teacher) {
+                $query
+                    ->where('id_teacher', $teacher->id)
+                    ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
+                        $subQuery->where('id_teacher', $teacher->id);
+                    });
+            })
+            ->where(function ($query) use ($anoLetivoAtivo) {
+                $query
+                    ->whereHas('scheduleNew', function ($q) use ($anoLetivoAtivo) {
+                        $q->where('id_schoolyear', $anoLetivoAtivo->id);
+                    })
+                    ->orWhereHas('scheduleConflict', function ($q) use ($anoLetivoAtivo) {
+                        $q->where('id_schoolyear', $anoLetivoAtivo->id);
+                    });
+            });
+    }
+
 
     public static function form(Form $form): Form
     {

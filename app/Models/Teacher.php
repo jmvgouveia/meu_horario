@@ -70,12 +70,12 @@ class Teacher extends Model
 
     public function positions()
     {
-        return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position');
+        return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position')->withPivot('id_schoolyear');
     }
 
     public function timeReductions()
     {
-        return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction');
+        return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction')->withPivot('id_schoolyear');
     }
     public function hourCounter()
     {

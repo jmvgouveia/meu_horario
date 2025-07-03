@@ -63,14 +63,27 @@ class ScheduleResource extends Resource
     }
     public static function exportSchedules(?Collection $records = null): StreamedResponse
     {
+        $anoLetivoAtivoId = \App\Models\SchoolYear::where('active', true)->value('id');
+
         if ($records) {
-
-            $schedules = $records->load(['teacher', 'room', 'subject', 'weekday', 'timePeriod', 'classes', 'students'])
-                ->whereIn('status', ['Aprovado', 'Aprovado DP']);
+            // Aplica filtro de status e ano letivo diretamente no collection
+            $schedules = $records->load([
+                'teacher',
+                'room',
+                'subject',
+                'weekday',
+                'timePeriod',
+                'classes',
+                'students'
+            ])->filter(function ($item) use ($anoLetivoAtivoId) {
+                return in_array($item->status, ['Aprovado', 'Aprovado DP'])
+                    && $item->id_schoolyear === $anoLetivoAtivoId;
+            });
         } else {
-
+            // Filtro direto via query
             $schedules = Schedule::query()
                 ->whereIn('status', ['Aprovado', 'Aprovado DP'])
+                ->where('id_schoolyear', $anoLetivoAtivoId)
                 ->with(['teacher', 'room', 'subject', 'weekday', 'timePeriod', 'classes', 'students'])
                 ->get();
         }
@@ -146,10 +159,22 @@ class ScheduleResource extends Resource
     {
         $query = parent::getEloquentQuery();
 
+        // Verifica se está autenticado e tem professor associado
         if (Auth::check() && Auth::user()->teacher) {
             $teacherId = Auth::user()->teacher->id;
 
+            // Filtra pelo professor
             $query->where('id_teacher', $teacherId);
+        }
+
+        // Obtém o ano letivo ativo (ajusta conforme o teu modelo)
+        $anoLetivoAtivo = \App\Models\SchoolYear::where('active', true)->first();
+
+        if ($anoLetivoAtivo) {
+            $query->where('id_schoolyear', $anoLetivoAtivo->id);
+        } else {
+            // Se não houver ano letivo ativo, retorna vazio para segurança
+            $query->whereRaw('0 = 1');
         }
 
         return $query;
@@ -365,11 +390,27 @@ class ScheduleResource extends Resource
 
                                 if ($filtrarUltimoAno) {
                                     $professorId = Auth::user()?->teacher?->id;
-                                    $studentIdsPermitidos = DB::table('last_year_students')
+
+                                    // Procurar ano letivo anterior com base no campo 'ano'
+                                    $anoAnterior = $schoolYear->id - 1;
+                                    $anoLetivoAnterior = \App\Models\SchoolYear::where('id', $anoAnterior)->first();
+
+                                    // Se não existir ano letivo anterior, não filtra nada
+                                    if (!$anoLetivoAnterior) {
+                                        return [];
+                                    }
+
+                                    // Horários do professor no ano letivo anterior
+                                    $scheduleIds = DB::table('schedules')
                                         ->where('id_teacher', $professorId)
                                         ->where('id_subject', $subjectId)
-                                        ->where('id_schoolyear', $schoolYear->id)
-                                        ->pluck('id_student');
+                                        ->where('id_schoolyear', $anoLetivoAnterior->id)
+                                        ->pluck('id');
+
+                                    // Alunos que estiveram nesses horários
+                                    $studentIdsPermitidos = DB::table('schedule_students')
+                                        ->whereIn('schedule_id', $scheduleIds)
+                                        ->pluck('student_id');
 
                                     if ($studentIdsPermitidos->isNotEmpty()) {
                                         $query->whereIn('id_student', $studentIdsPermitidos);
@@ -493,12 +534,12 @@ class ScheduleResource extends Resource
                     ->toggleable()
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
-                        'Pendente' => 'yellow_pendente',
-                        'Aprovado' => 'green_aprovado',
-                        'Recusado' => 'red_rejeitado',
-                        'Escalado' => 'purple_escalado',
-                        'Aprovado DP' => 'green_aprovado',
-                        'Recusado DP' => 'red_rejeitado',
+                        'Pendente' => 'warning',
+                        'Aprovado' => 'success',
+                        'Recusado' => 'danger',
+                        'Escalado' => 'info',
+                        'Aprovado DP' => 'success',
+                        'Recusado DP' => 'danger',
                         default => 'gray',
                     })
                     ->searchable(),

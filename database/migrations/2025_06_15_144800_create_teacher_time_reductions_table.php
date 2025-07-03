@@ -19,6 +19,9 @@ return new class extends Migration
             $table->foreignId('id_time_reduction')
                 ->constrained('time_reductions')
                 ->cascadeOnDelete();
+            $table->foreignId('id_schoolyear')
+                ->constrained('schoolyear')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

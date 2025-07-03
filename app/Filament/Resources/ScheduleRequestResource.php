@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleRequestResource\Pages;
 use App\Models\ScheduleRequest;
+use App\Models\SchoolYear;
 use App\Models\Teacher;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -41,22 +42,36 @@ class ScheduleRequestResource extends Resource
         return 'Pedidos de Troca de Horário';
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $userId = Filament::auth()->id();
-        //    $user = Filament::auth()->user();
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     $userId = Filament::auth()->id();
+    //     $teacher = Teacher::where('id_user', $userId)->first();
+    //     $anoLetivoAtivo = SchoolYear::where('active', true)->first();
 
-        $teacher = Teacher::where('id_user', $userId)->first();
 
-        return parent::getEloquentQuery()
-            ->where(function ($query) use ($teacher) {
-                $query
-                    ->where('id_teacher', $teacher?->id)
-                    ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
-                        $subQuery->where('id_teacher', $teacher?->id);
-                    });
-            });
-    }
+    //     if (! $teacher || ! $anoLetivoAtivo) {
+    //         return parent::getEloquentQuery()->whereRaw('0 = 1');
+    //     }
+
+    //     return parent::getEloquentQuery()
+    //         ->where(function ($query) use ($teacher) {
+    //             $query
+    //                 ->where('id_teacher', $teacher->id)
+    //                 ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
+    //                     $subQuery->where('id_teacher', $teacher->id);
+    //                 });
+    //         })
+    //         ->where(function ($query) use ($anoLetivoAtivo) {
+    //             $query
+    //                 ->whereHas('scheduleNew', function ($q) use ($anoLetivoAtivo) {
+    //                     $q->where('id_schoolyear', $anoLetivoAtivo->id);
+    //                 })
+    //                 ->orWhereHas('scheduleConflict', function ($q) use ($anoLetivoAtivo) {
+    //                     $q->where('id_schoolyear', $anoLetivoAtivo->id);
+    //                 });
+    //         });
+    // }
+
 
 
     public static function form(Form $form): Form
@@ -124,7 +139,7 @@ class ScheduleRequestResource extends Resource
     public static function table(Table $table): Table
     {
         $user = Filament::auth()->user();
-        $isGestor = $user instanceof User && $user->hasRole('Gestor Conflitos'); 
+        $isGestor = $user instanceof User && $user->hasRole('Gestor Conflitos');
 
         $columns = [
             TextColumn::make('id')
@@ -159,13 +174,13 @@ class ScheduleRequestResource extends Resource
                 ->label('Estado do Pedido')
                 ->toggleable()
                 ->badge()
-                ->color(fn(string $state): string => match ($state) { 
-                    'Pendente' => 'yellow_pendente',
-                    'Aprovado' => 'green_aprovado',
-                    'Recusado' => 'red_rejeitado',
-                    'Escalado' => 'purple_escalado',
-                    'Aprovado DP' => 'green_aprovado',
-                    'Recusado DP' => 'red_rejeitado',
+                ->color(fn(string $state): string => match ($state) {
+                    'Pendente' => 'warning',
+                    'Aprovado' => 'success',
+                    'Recusado' => 'danger',
+                    'Escalado' => 'info',
+                    'Aprovado DP' => 'success',
+                    'Recusado DP' => 'danger',
                     default => 'gray',
                 })
                 ->sortable()

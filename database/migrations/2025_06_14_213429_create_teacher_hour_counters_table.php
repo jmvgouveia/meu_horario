@@ -20,6 +20,9 @@ return new class extends Migration
             $table->integer('teaching_load'); // Carga componente letiva
             $table->integer('non_teaching_load'); // Carga componente não-letiva
             $table->boolean('authorized_overtime')->default(false); // Autorizado a fazer horas extra
+            $table->foreignId('id_schoolyear')
+                ->constrained('schoolyear')
+                ->cascadeOnDelete();
             $table->timestamps();
         });
     }

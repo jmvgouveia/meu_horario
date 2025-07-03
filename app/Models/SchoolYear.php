@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class SchoolYear extends Model
 {
     protected $table = 'schoolyears';
-    
+
     protected $fillable = [
         'schoolyear',
         'start_date',
         'end_date',
         'active'
     ];
+
 
     public function courseSubjects()
     {
