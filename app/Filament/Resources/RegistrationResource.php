@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\RegistrationImporter;
 use App\Filament\Resources\RegistrationResource\Pages;
 use App\Models\Classes;
+use App\Models\Course;
 use App\Models\Registration;
 use App\Models\Student;
 use App\Models\Subject;
@@ -47,6 +48,7 @@ class RegistrationResource extends Resource
                     ->required()
                     ->default(fn() => DB::table('schoolyears')->where('active', true)->value('id'))
                     ->placeholder('Selecione o ano letivo'),
+
                 Select::make('id_student')
                     ->label('Aluno')
                     ->required()
@@ -62,12 +64,19 @@ class RegistrationResource extends Resource
                     ->placeholder('Selecione o aluno'),
                 Select::make('id_course')
                     ->label('Curso')
-                    ->relationship('course', 'name')
                     ->required()
                     ->reactive()
+                    ->options(function () {
+                        return Course::orderBy('id')
+                            ->get()
+                            ->mapWithKeys(fn($course) => [
+                                $course->id => "{$course->name}"
+                            ]);
+                    })
                     ->searchable()
                     ->afterStateUpdated(fn(callable $set) => $set('id_class', null))
                     ->placeholder('Selecione o curso'),
+
                 Select::make('id_class')
                     ->label('Turma')
                     ->required()
