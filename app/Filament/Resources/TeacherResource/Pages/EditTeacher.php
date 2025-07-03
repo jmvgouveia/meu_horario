@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class EditTeacher extends EditRecord
 {
@@ -46,6 +47,24 @@ class EditTeacher extends EditRecord
         $record->updateOrFail($data);
 
         $record->load(['positions', 'timeReductions']);
+
+
+        // ✅ Atualizar o ano letivo nas tabelas pivot
+        $schoolYearId = \App\Models\SchoolYear::where('active', true)->value('id');
+
+        foreach ($record->positions as $position) {
+            DB::table('teacher_positions') // ou o nome real da pivot
+                ->where('id_teacher', $record->id)
+                ->where('id_position', $position->id)
+                ->update(['id_schoolyears' => $schoolYearId]);
+        }
+
+        foreach ($record->timeReductions as $reduction) {
+            DB::table('teacher_time_reductions') // ou o nome real da pivot
+                ->where('id_teacher', $record->id)
+                ->where('id_time_reduction', $reduction->id)
+                ->update(['id_schoolyears' => $schoolYearId]);
+        }
         $record->updateHourCounterFromReductions();
 
         return $record;

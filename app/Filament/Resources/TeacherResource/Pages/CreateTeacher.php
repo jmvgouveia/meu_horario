@@ -8,6 +8,7 @@ use App\Models\TeacherHourCounter;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -69,5 +70,25 @@ class CreateTeacher extends CreateRecord
             'non_teaching_load' => 4,
             'id_schoolyears' => $activeSchoolYear->id ?? null,
         ]);
+
+        $this->syncPivotWithSchoolYear($this->record);
+    }
+    protected function syncPivotWithSchoolYear($teacher): void
+    {
+        $schoolYearId = \App\Models\SchoolYear::where('active', true)->value('id');
+
+        foreach ($teacher->positions as $position) {
+            DB::table('teacher_positions')
+                ->where('id_teacher', $teacher->id)
+                ->where('id_position', $position->id)
+                ->update(['id_schoolyears' => $schoolYearId]);
+        }
+
+        foreach ($teacher->timeReductions as $reduction) {
+            DB::table('teacher_time_reductions')
+                ->where('id_teacher', $teacher->id)
+                ->where('id_time_reduction', $reduction->id)
+                ->update(['id_schoolyears' => $schoolYearId]);
+        }
     }
 }
