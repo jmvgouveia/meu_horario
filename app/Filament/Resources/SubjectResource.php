@@ -67,7 +67,7 @@ class SubjectResource extends Resource
                     ->label('ID')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
                     ->label('Disciplina')
                     ->sortable()

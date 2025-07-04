@@ -16,6 +16,7 @@ use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Models\TeacherHourCounter;
+use Dom\Text;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Actions\Action;
@@ -321,6 +322,11 @@ class ScheduleResource extends Resource
                                     ->default(true)
                                     ->reactive(),
                             ]),
+                        TextInput::make('filter_student_name')
+                            ->label('Filtrar por nome do aluno')
+                            ->placeholder('Digite parte do nome...')
+                            ->reactive(),
+
                         CheckboxList::make('students')
                             ->label('Alunos matriculados na disciplina')
                             ->helperText('Selecione os alunos que vão assistir à aula')
@@ -362,7 +368,6 @@ class ScheduleResource extends Resource
                                 } else {
                                     $set('shift', null);
                                 }
-                                Log::debug('State dos alunos após update', ['state' => $state]);
                             })
                             ->columns(4)
                             ->options(function (callable $get) {
@@ -371,6 +376,7 @@ class ScheduleResource extends Resource
                                 $classIds = $get('id_classes') ?? [];
                                 $filtrarPorTurma = $get('filtrar_por_turma');
                                 $filtrarUltimoAno = $get('filter_last_year_students');
+                                $filtroNome = trim($get('filter_student_name'));
 
                                 if (!$subjectId || !$schoolYear) return [];
 
@@ -390,33 +396,33 @@ class ScheduleResource extends Resource
 
                                 if ($filtrarUltimoAno) {
                                     $professorId = Auth::user()?->teacher?->id;
-
-                                    // Procurar ano letivo anterior com base no campo 'ano'
                                     $anoAnterior = $schoolYear->id - 1;
-                                    $anoLetivoAnterior = \App\Models\SchoolYear::where('id', $anoAnterior)->first();
+                                    $anoLetivoAnterior = \App\Models\SchoolYear::find($anoAnterior);
 
-                                    // Se não existir ano letivo anterior, não filtra nada
-                                    if (!$anoLetivoAnterior) {
-                                        return [];
-                                    }
+                                    if (!$anoLetivoAnterior) return [];
 
-                                    // Horários do professor no ano letivo anterior
                                     $scheduleIds = DB::table('schedules')
                                         ->where('id_teacher', $professorId)
                                         ->where('id_subject', $subjectId)
                                         ->where('id_schoolyear', $anoLetivoAnterior->id)
                                         ->pluck('id');
 
-                                    // Alunos que estiveram nesses horários
-                                    $studentIdsPermitidos = DB::table('schedule_students')
-                                        ->whereIn('schedule_id', $scheduleIds)
-                                        ->pluck('student_id');
+                                    $studentIdsPermitidos = DB::table('schedules_students')
+                                        ->whereIn('id_schedule', $scheduleIds)
+                                        ->pluck('id_student');
 
                                     if ($studentIdsPermitidos->isNotEmpty()) {
                                         $query->whereIn('id_student', $studentIdsPermitidos);
                                     } else {
                                         return [];
                                     }
+                                }
+
+                                // 🔍 Aplica filtro por nome (se preenchido)
+                                if (!empty($filtroNome)) {
+                                    $query->whereHas('student', function ($q) use ($filtroNome) {
+                                        $q->where('name', 'like', '%' . $filtroNome . '%');
+                                    });
                                 }
 
                                 return $query->get()->mapWithKeys(function ($registration) {
@@ -429,6 +435,71 @@ class ScheduleResource extends Resource
                                     ];
                                 });
                             }),
+                        // ->options(function (callable $get) {
+                        //     $subjectId = $get('id_subject');
+                        //     $schoolYear = SchoolYear::where('active', true)->first();
+                        //     $classIds = $get('id_classes') ?? [];
+                        //     $filtrarPorTurma = $get('filtrar_por_turma');
+                        //     $filtrarUltimoAno = $get('filter_last_year_students');
+
+                        //     if (!$subjectId || !$schoolYear) return [];
+
+                        //     $registrationIds = DB::table('registrations_subjects')
+                        //         ->where('id_subject', $subjectId)
+                        //         ->pluck('id_registration');
+
+                        //     if ($registrationIds->isEmpty()) return [];
+
+                        //     $query = Registration::with(['student', 'class'])
+                        //         ->whereIn('id', $registrationIds)
+                        //         ->where('id_schoolyear', $schoolYear->id);
+
+                        //     if ($filtrarPorTurma && !empty($classIds)) {
+                        //         $query->whereIn('id_class', $classIds);
+                        //     }
+
+                        //     if ($filtrarUltimoAno) {
+                        //         $professorId = Auth::user()?->teacher?->id;
+
+                        //         // Procurar ano letivo anterior com base no campo 'ano'
+                        //         $anoAnterior = $schoolYear->id - 1;
+                        //         $anoLetivoAnterior = \App\Models\SchoolYear::where('id', $anoAnterior)->first();
+
+                        //         // Se não existir ano letivo anterior, não filtra nada
+                        //         if (!$anoLetivoAnterior) {
+                        //             return [];
+                        //         }
+
+                        //         // Horários do professor no ano letivo anterior
+                        //         $scheduleIds = DB::table('schedules')
+                        //             ->where('id_teacher', $professorId)
+                        //             ->where('id_subject', $subjectId)
+                        //             ->where('id_schoolyear', $anoLetivoAnterior->id)
+                        //             ->pluck('id');
+
+                        //         // Alunos que estiveram nesses horários
+                        //         $studentIdsPermitidos = DB::table('schedules_students')
+                        //             ->whereIn('id_schedule', $scheduleIds)
+                        //             ->pluck('id_student');
+
+                        //         if ($studentIdsPermitidos->isNotEmpty()) {
+                        //             $query->whereIn('id_student', $studentIdsPermitidos);
+                        //         } else {
+                        //             return [];
+                        //         }
+                        //     }
+
+
+                        //     return $query->get()->mapWithKeys(function ($registration) {
+                        //         $student = $registration->student;
+                        //         $turma = $registration->class?->name ?? '—';
+                        //         if (!$student) return [];
+
+                        //         return [
+                        //             $registration->id_student => "{$student->number} - {$student->name} - {$turma}",
+                        //         ];
+                        //     });
+                        // }),
 
                         Section::make('Turno')
                             ->description('Indique o turno da aula')

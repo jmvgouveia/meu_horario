@@ -46,11 +46,6 @@ class GenderResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->sortable()
-                    ->searchable(),
-
                 TextColumn::make('gender')
                     ->label('Género')
                     ->searchable()
