@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\TeacherResource\Pages;
 
 use App\Filament\Resources\TeacherResource;
+use App\Models\Position;
+use App\Models\SchoolYear;
+use App\Models\TimeReduction;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Hash;
@@ -48,24 +51,25 @@ class EditTeacher extends EditRecord
 
         $record->load(['positions', 'timeReductions']);
 
-
-        // ✅ Atualizar o ano letivo nas tabelas pivot
-        $schoolYearId = \App\Models\SchoolYear::where('active', true)->value('id');
+        $schoolYearId = SchoolYear::where('active', true)->value('id');
 
         foreach ($record->positions as $position) {
-            DB::table('teacher_positions') // ou o nome real da pivot
+            DB::table('teacher_positions')
                 ->where('id_teacher', $record->id)
                 ->where('id_position', $position->id)
                 ->update(['id_schoolyears' => $schoolYearId]);
         }
 
         foreach ($record->timeReductions as $reduction) {
-            DB::table('teacher_time_reductions') // ou o nome real da pivot
+            DB::table('teacher_time_reductions')
                 ->where('id_teacher', $record->id)
                 ->where('id_time_reduction', $reduction->id)
                 ->update(['id_schoolyears' => $schoolYearId]);
         }
-        $record->updateHourCounterFromReductions();
+
+        $record->loadMissing(['positions', 'timeReductions']); // garante que relações estão atualizadas
+        $record->updateHourCounterFromReductions($schoolYearId);
+
 
         return $record;
     }

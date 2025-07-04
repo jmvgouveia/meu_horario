@@ -26,69 +26,6 @@ class OverviewWidget extends Widget
         'lg' => 'full',
     ];
 
-    // public function render(): View
-    // {
-    //     $userId = Filament::auth()->id();
-    //     $teacher = Teacher::where('id_user', $userId)->first();
-
-    //     if (! $teacher) {
-    //         return view(static::$view, ['resumo' => []]);
-    //     }
-
-    //     // Marcações aprovadas
-    //     $schedules = Schedule::with('subject')
-    //         ->whereIn('status', ['Aprovado', 'Aprovado DP'])
-    //         ->where('id_teacher', $teacher->id)
-    //         ->get();
-
-    //     // Contador
-    //     $counter = TeacherHourCounter::where('id_teacher', $teacher->id)->first();
-
-    //     $letivaDisponivel = $counter?->teaching_load ?? 0;
-    //     $naoLetivaDisponivel = $counter?->non_teaching_load ?? 0;
-
-    //     // Aulas
-    //     $aulasLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'letiva')->count();
-    //     $aulasNaoLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'nao letiva')->count();
-
-
-    //     // Cargos com redução
-    //     $cargos = $teacher->positions->map(function ($cargo) {
-    //         return [
-    //             'nome' => $cargo->name,
-    //             'descricao' => $cargo->description ?? 'Cargo sem descrição',
-    //             'redução_letiva' => $cargo->reduction_l ?? 0,
-    //             'redução_naoletiva' => $cargo->reduction_nl ?? 0,
-    //         ];
-    //     })->toArray();
-
-
-
-
-    //     // Reduções por tempo de serviço
-    //     $tempoReducoes =  $teacher->timeReductions->map(function ($tempoReducoes) {
-    //         return [
-    //             'nome' => $tempoReducoes->name,
-    //             'descricao' => $tempoReducoes->description ?? 'Cargo sem descrição',
-    //             'redução_letiva' => $tempoReducoes->value_l ?? 0,
-    //             'redução_naoletiva' => $tempoReducoes->value_nl ?? 0,
-    //         ];
-    //     })->toArray();
-
-
-    //     $resumo = [
-
-    //         'letiva' => $aulasLetivas,
-    //         'nao_letiva' => $aulasNaoLetivas,
-    //         'disponivel_letiva' => max(0, $letivaDisponivel),
-    //         'disponivel_naoletiva' => max(0, $naoLetivaDisponivel),
-    //         'cargos' => $cargos,
-    //         'tempo_reducoes' => $tempoReducoes,
-    //     ];
-
-    //     return view(static::$view, compact('resumo'));
-    // }
-
     public function render(): View
     {
         $userId = Filament::auth()->id();
@@ -112,7 +49,7 @@ class OverviewWidget extends Widget
             ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->get();
 
-        // Contador de carga horária (se tiver campo de ano letivo, filtrar também)
+        // Contador de carga horária
         $counter = TeacherHourCounter::where('id_teacher', $teacher->id)
             ->where('id_schoolyears', $anoLetivoAtivo->id)
             ->first();

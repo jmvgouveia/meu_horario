@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Teacher extends Model
 {
@@ -70,12 +71,13 @@ class Teacher extends Model
 
     public function positions()
     {
-        return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position');
+        return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position')->withPivot('id_schoolyears');
     }
 
     public function timeReductions()
     {
-        return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction');
+        return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction')
+            ->withPivot('id_schoolyears');
     }
     public function hourCounter()
     {
@@ -85,29 +87,38 @@ class Teacher extends Model
     {
         return $this->hasMany(Schedule::class, 'id_teacher');
     }
-    public function updateHourCounterFromReductions(): void
+    public function updateHourCounterFromReductions(?int $schoolYearId = null): void
     {
-        $letiva = 0;
-        $naoLetiva = 0;
 
-        // Reduções por cargo
-        foreach ($this->positions as $position) {
-            $letiva += $position->reduction_l ?? 0;
-            $naoLetiva += $position->reduction_nl ?? 0;
+        // $schoolYearId ??= SchoolYear::where('active', true)->value('id');
+
+        // $totalReduction = $this->positions->sum('reduction_l')
+        //     + $this->timeReductions->sum('value_l');
+
+        // DB::table('teacher_hour_counters')
+        //     ->where('id_teacher', $this->id)
+        //     ->where('id_schoolyears', $schoolYearId)
+        //     ->update([
+        //         'teaching_load' => DB::raw("teaching_load - {$totalReduction}")
+        //     ]);
+
+        $schoolYearId ??= SchoolYear::where('active', true)->value('id');
+
+        $totalReduction = $this->positions->sum('reduction_l')
+            + $this->timeReductions->sum('value_l');
+
+        $baseLoad = DB::table('teacher_hour_counters')
+            ->where('id_teacher', $this->id)
+            ->where('id_schoolyears', $schoolYearId)
+            ->value('workload');
+
+        if ($baseLoad !== null) {
+            DB::table('teacher_hour_counters')
+                ->where('id_teacher', $this->id)
+                ->where('id_schoolyears', $schoolYearId)
+                ->update([
+                    'teaching_load' => 22 - $totalReduction,
+                ]);
         }
-
-        // Reduções por tempo de serviço
-        foreach ($this->timeReductions as $reduction) {
-            $letiva += $reduction->value_l ?? 0;
-            $naoLetiva += $reduction->value_nl ?? 0;
-        }
-
-        // Atualiza o contador
-        $counter = $this->hourCounter()->firstOrCreate([]);
-
-        $counter->update([
-            'teaching_load' => max(0, $counter->default_teaching_load - $letiva),
-            'non_teaching_load' => max(0, $counter->default_non_teaching_load - $naoLetiva),
-        ]);
     }
 }
