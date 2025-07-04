@@ -6,6 +6,7 @@ use App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
+use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
@@ -96,6 +97,7 @@ class ScheduleConflictResource extends Resource
         return $form->schema([
 
             Section::make('🟢 Passo 1: Marcação original')
+                ->collapsible()
                 ->description('O professor que fez a marcação inicial no horário.')
                 ->schema([
                     Placeholder::make('professor_original')
@@ -117,6 +119,8 @@ class ScheduleConflictResource extends Resource
                 ->columns(2),
 
             Section::make('🟡 Passo 2: Pedido de alteração')
+                ->collapsible()
+
                 ->description('Solicitação feita por outro professor.')
                 ->schema([
                     Placeholder::make('solicitante')
@@ -135,6 +139,8 @@ class ScheduleConflictResource extends Resource
                 ->columns(2),
 
             Section::make('🔵 Passo 3: Resposta do professor original')
+                ->collapsible()
+
                 ->description('Resposta ao pedido.')
                 ->schema([
                     Placeholder::make('professor_respondeu')
@@ -143,7 +149,11 @@ class ScheduleConflictResource extends Resource
 
                     Placeholder::make('responded_at')
                         ->label('Data da Resposta')
-                        ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—'),
+                        ->content(fn($record) => $record->responded_at
+                            ? Carbon::parse($record->responded_at)->format('d/m/Y H:i')
+                            : '—'),
+
+
 
                     Placeholder::make('response')
                         ->label('Resposta:')
@@ -154,6 +164,8 @@ class ScheduleConflictResource extends Resource
 
 
             Section::make('🔴 Passo 4: Situação Escalada para Direção Pedagógica')
+                ->collapsible()
+
                 ->description('Situação escalada para análise superior.')
                 ->schema([
 
@@ -161,14 +173,23 @@ class ScheduleConflictResource extends Resource
                         ->label('Pedido feito por:')
                         ->content(fn($record) => $record->requester->name ?? '—'),
 
-                    Placeholder::make('updated_at')
+
+                    Placeholder::make('justification_at')
                         ->label('Data da Resposta')
-                        ->content(fn($record) => optional($record->justification_at)->format('d/m/Y H:i') ?? '—'),
+                        ->content(fn($record) => $record->justification_at
+                            ? Carbon::parse($record->justification_at)->format('d/m/Y H:i')
+                            : '—'),
 
                     Placeholder::make('justification_escalada')
                         ->label('Justificação para Escalada')
                         ->content(fn($record) => $record->scaled_justification ?? '—')
                         ->visible(fn($record) => $record->status === 'Escalado')
+                        ->columnSpanFull(),
+
+                    Placeholder::make('response_coord')
+                        ->label('Justificação para Escalada')
+                        ->content(fn($record) => $record->response_coord ?? '—')
+                        ->visible(fn($record) => $record->status === 'Aprovado DP' || $record->status === 'Recusado DP')
                         ->columnSpanFull(),
                 ])
                 ->columns(2),

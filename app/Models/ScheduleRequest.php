@@ -16,6 +16,7 @@ class ScheduleRequest extends Model
         'responded_at',
         'response_coord',
         'scaled_justification',
+        'justification_at',
     ];
 
     public function scheduleConflict()
