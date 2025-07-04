@@ -18,6 +18,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
+use App\Filament\Resources\TeacherResource;
+use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\BuildingsOverview;
 use App\Filament\Widgets\OverviewWidget;
 use App\Filament\Widgets\StatsOverview;
@@ -34,7 +36,7 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationItem;
-use Filament\Support\Facades\Filament;
+//use Filament\Support\Facades\Filament;
 
 use Filament\Notifications\NotificationsPlugin;
 
@@ -51,9 +53,21 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Minha Conta')
-                    ->url(fn() => \App\Filament\Resources\UserResource::getUrl('edit', ['record' => FacadesFilament::auth()->id()]))
-                    ->icon('heroicon-o-user'),
+                    ->url(function () {
+                        $user = \Filament\Facades\Filament::auth()->user();
+
+                        // Verifica se é professor e tem registo correspondente na tabela `teachers`
+                        if ($user->hasRole('Professor') && $user->teacher) {
+                            return TeacherResource::getUrl('edit', ['record' => $user->teacher->id]);
+                        }
+
+                        // Caso contrário, redireciona para edição do próprio user
+                        return UserResource::getUrl('edit', ['record' => $user->id]);
+                    })
+                    ->icon('heroicon-o-user')
             ])
+
+
             ->colors([
                 'primary' => '#0094ee', // Cor do Texto
             ])

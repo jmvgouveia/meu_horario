@@ -31,6 +31,7 @@ class UserResource extends Resource
         return 'Utilizadores';
     }
 
+
     public static function form(Form $form): Form
     {
         return $form
@@ -55,6 +56,7 @@ class UserResource extends Resource
                     ->regex(ValidationRules::PASSWORD_REGEX)
                     ->helperText(ValidationRules::PASSWORD_HELPER_MSG),
                 Select::make('roles')->multiple()->relationship('roles', 'name')->preload()
+
             ]);
     }
 

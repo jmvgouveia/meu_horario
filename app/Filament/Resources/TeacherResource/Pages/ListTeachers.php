@@ -16,4 +16,13 @@ class ListTeachers extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+    protected function authorizeAccess(): void
+    {
+        $user = auth()->user();
+
+        // Se for professor, nega acesso à listagem
+        if ($user->hasRole('Professor')) {
+            abort(403);
+        }
+    }
 }

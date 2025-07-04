@@ -6,6 +6,7 @@ use App\Filament\Imports\TeacherImporter;
 use App\Filament\Resources\TeacherResource\Pages;
 use App\Helpers\ValidationRules;
 use App\Models\Teacher;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -36,7 +37,17 @@ class TeacherResource extends Resource
     {
         return 'Professores';
     }
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
 
+        // Oculta da navegação apenas se for professor
+        if ($user && $user->hasRole('Professor')) {
+            return false;
+        }
+
+        return true; // visível para admins, superadmins, etc.
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -67,18 +78,22 @@ class TeacherResource extends Resource
                             ->placeholder('Selecione o Nacionalidade'),
                     ])->columns(3),
                 Section::make('Dados professor')
+                    ->collapsible()
+                    ->collapsed(fn() => Filament::auth()->user()?->hasRole('Professor'))
                     ->description('Dados de professor')
                     ->schema([
                         TextInput::make('number')
                             ->label('Número de professor')
                             ->required()
                             ->numeric()
-                            ->placeholder('Introduza número de professor'),
+                            ->placeholder('Introduza número de professor')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         TextInput::make('acronym')
                             ->label('Sigla')
                             ->required()
                             ->maxLength(20)
-                            ->placeholder('Introduza sigla'),
+                            ->placeholder('Introduza sigla')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         DatePicker::make('startingdate')
                             ->label('Data de início de funções')
                             ->required()
@@ -92,39 +107,47 @@ class TeacherResource extends Resource
                             })
                             ->validationMessages([
                                 'after_or_equal' => 'A data de início deve ser pelo menos 18 anos após a data de nascimento.',
-                            ]),
+                            ])
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('id_qualification')
                             ->relationship('qualification', 'name')
                             ->label('Habilitações')
-                            ->placeholder('Selecione a Habilitação'),
+                            ->placeholder('Selecione a Habilitação')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('id_department')
                             ->relationship('department', 'name')
                             ->label('Departamento')
-                            ->placeholder('Selecione a departamento'),
+                            ->placeholder('Selecione a departamento')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('id_professionalrelationship')
                             ->relationship('professionalrelationship', 'name')
                             ->label('Relação Profissional')
-                            ->placeholder('Selecione a Relação Profissional'),
+                            ->placeholder('Selecione a Relação Profissional')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('id_contractualrelationship')
                             ->relationship('contractualrelationship', 'name')
                             ->label('Relação Contratual')
-                            ->placeholder('Selecione a Relação Contratual'),
+                            ->placeholder('Selecione a Relação Contratual')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('id_salaryscale')
                             ->relationship('salaryscale', 'scale')
                             ->label('Escalão Salarial')
-                            ->placeholder('Selecione a Escalão Salarial'),
+                            ->placeholder('Selecione a Escalão Salarial')
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('positions')
                             ->label('Cargos')
                             ->relationship('positions', 'name')
                             ->multiple()
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
                         Select::make('time_reductions')
                             ->label('Reduções de Horário')
                             ->relationship('timeReductions', 'name')
                             ->multiple()
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->disabled(fn() => Filament::auth()->user()?->hasRole('Professor')),
 
                     ]),
                 Section::make('Dados utilizador')
