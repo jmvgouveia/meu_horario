@@ -57,14 +57,14 @@ class EditTeacher extends EditRecord
             DB::table('teacher_positions')
                 ->where('id_teacher', $record->id)
                 ->where('id_position', $position->id)
-                ->update(['id_schoolyears' => $schoolYearId]);
+                ->update(['id_schoolyear' => $schoolYearId]);
         }
 
         foreach ($record->timeReductions as $reduction) {
             DB::table('teacher_time_reductions')
                 ->where('id_teacher', $record->id)
                 ->where('id_time_reduction', $reduction->id)
-                ->update(['id_schoolyears' => $schoolYearId]);
+                ->update(['id_schoolyear' => $schoolYearId]);
         }
 
         $record->loadMissing(['positions', 'timeReductions']); // garante que relações estão atualizadas

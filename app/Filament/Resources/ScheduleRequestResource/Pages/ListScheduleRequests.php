@@ -17,14 +17,14 @@ class ListScheduleRequests extends ListRecords
 
     public string $filtroAtual = 'recebidos';
 
-    public function mount(): void
-    {
-        parent::mount();
+    // public function mount(): void
+    // {
+    //     parent::mount();
 
-        if ($this->isGestorConflitos()) {
-            $this->filtroAtual = 'todos';
-        }
-    }
+    //     if ($this->isGestorConflitos()) {
+    //         $this->filtroAtual = 'todos';
+    //     }
+    // }
 
     protected function isGestorConflitos(): bool
     {
@@ -33,33 +33,27 @@ class ListScheduleRequests extends ListRecords
 
     protected function getCounts(): array
     {
-        if ($this->isGestorConflitos()) {
-            return [
-                'todos' => ScheduleRequest::count(),
-                'meus' => 0,
-                'recebidos' => 0,
-            ];
-        }
-
         $teacher = $this->getCurrentTeacher(); // ou o que usares
 
         if (!$teacher) {
-            return ['todos' => 0, 'meus' => 0, 'recebidos' => 0];
+            return ['meus' => 0, 'recebidos' => 0];
         }
 
         $schoolYearId = SchoolYear::where('active', true)->value('id');
 
         if (!$schoolYearId) {
-            return ['todos' => 0, 'meus' => 0, 'recebidos' => 0];
+            return ['meus' => 0, 'recebidos' => 0];
         }
 
         // Meus pedidos
         $meus = ScheduleRequest::where('id_teacher', $teacher->id)
             ->where(function ($query) use ($schoolYearId) {
                 $query
+
                     ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $schoolYearId))
                     ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $schoolYearId));
             })
+            ->where('status', '!=', 'Escalado')
             ->count();
 
         // Pedidos recebidos
@@ -67,6 +61,7 @@ class ListScheduleRequests extends ListRecords
             $q->where('id_teacher', $teacher->id);
         })
             ->where('status', '!=', 'Cancelado')
+            ->where('status', '!=', 'Escalado')
             ->where(function ($query) use ($schoolYearId) {
                 $query
                     ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $schoolYearId))
@@ -74,22 +69,7 @@ class ListScheduleRequests extends ListRecords
             })
             ->count();
 
-        // Todos (meus + recebidos)
-        $todos = ScheduleRequest::where(function ($query) use ($teacher) {
-            $query->where('id_teacher', $teacher->id)
-                ->orWhere(function ($sub) use ($teacher) {
-                    $sub->whereHas('scheduleConflict', fn($conf) => $conf->where('id_teacher', $teacher->id))
-                        ->where('status', '!=', 'Cancelado');
-                });
-        })
-            ->where(function ($query) use ($schoolYearId) {
-                $query
-                    ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $schoolYearId))
-                    ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $schoolYearId));
-            })
-            ->count();
-
-        return compact('todos', 'meus', 'recebidos');
+        return compact('meus', 'recebidos');
     }
 
     protected function getHeaderActions(): array
@@ -114,36 +94,6 @@ class ListScheduleRequests extends ListRecords
         ];
     }
 
-    // protected function getTableQuery(): ?Builder
-    // {
-    //     if ($this->isGestorConflitos()) {
-    //         return ScheduleRequest::query();
-    //     }
-
-    //     $teacher = $this->getCurrentTeacher();
-
-    //     if (!$teacher) {
-    //         return ScheduleRequest::query()->whereRaw('0 = 1');
-    //     }
-
-    //     return match ($this->filtroAtual) {
-    //         'meus' => ScheduleRequest::query()
-    //             ->where('id_teacher', $teacher->id),
-
-    //         'recebidos' => ScheduleRequest::query()
-    //             ->whereHas('scheduleConflict', fn($q) => $q->where('id_teacher', $teacher->id))
-    //             ->where('status', '!=', 'Cancelado'),
-
-    //         default => ScheduleRequest::query()
-    //             ->where(function ($q) use ($teacher) {
-    //                 $q->where('id_teacher', $teacher->id)
-    //                     ->orWhere(function ($sub) use ($teacher) {
-    //                         $sub->whereHas('scheduleConflict', fn($conf) => $conf->where('id_teacher', $teacher->id))
-    //                             ->where('status', '!=', 'Cancelado');
-    //                     });
-    //             }),
-    //     };
-    // }
 
     protected function getTableQuery(): ?Builder
     {
@@ -165,6 +115,7 @@ class ListScheduleRequests extends ListRecords
         return match ($this->filtroAtual) {
             'meus' => ScheduleRequest::query()
                 ->where('id_teacher', $teacher->id)
+                ->where('status', '!=', 'Escalado')
                 ->where(function ($query) {
                     $query
                         ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()))
@@ -173,6 +124,7 @@ class ListScheduleRequests extends ListRecords
 
             'recebidos' => ScheduleRequest::query()
                 ->whereHas('scheduleConflict', fn($q) => $q->where('id_teacher', $teacher->id))
+                ->where('status', '!=', 'Escalado')
                 ->where('status', '!=', 'Cancelado')
                 ->where(function ($query) {
                     $query

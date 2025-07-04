@@ -37,16 +37,40 @@ class ScheduleConflictResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $userId = Filament::auth()->id();
+        $user = Filament::auth()->user();
+        $userId = $user->id;
         $teacher = Teacher::where('id_user', $userId)->first();
         $anoLetivoAtivo = SchoolYear::where('active', true)->first();
 
+        if (! $anoLetivoAtivo) {
+            return parent::getEloquentQuery()->whereRaw('0 = 1');
+        }
 
-        if (! $teacher || ! $anoLetivoAtivo) {
+        // Estados válidos para visualização
+        $estadosVisiveis = ['Escalado', 'Aprovado DP', 'Recusado DP'];
+
+        // ✅ Gestor de conflito: vê tudo do ano letivo ativo com os estados definidos
+        if ($user->hasRole('Gestor Conflitos')) {
+            return parent::getEloquentQuery()
+                ->whereIn('status', $estadosVisiveis)
+                ->where(function ($query) use ($anoLetivoAtivo) {
+                    $query
+                        ->whereHas('scheduleNew', function ($q) use ($anoLetivoAtivo) {
+                            $q->where('id_schoolyear', $anoLetivoAtivo->id);
+                        })
+                        ->orWhereHas('scheduleConflict', function ($q) use ($anoLetivoAtivo) {
+                            $q->where('id_schoolyear', $anoLetivoAtivo->id);
+                        });
+                });
+        }
+
+        // ✅ Professor: vê apenas os seus pedidos com os estados e ano letivo ativos
+        if (! $teacher) {
             return parent::getEloquentQuery()->whereRaw('0 = 1');
         }
 
         return parent::getEloquentQuery()
+            ->whereIn('status', $estadosVisiveis)
             ->where(function ($query) use ($teacher) {
                 $query
                     ->where('id_teacher', $teacher->id)

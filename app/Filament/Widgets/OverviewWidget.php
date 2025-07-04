@@ -51,7 +51,7 @@ class OverviewWidget extends Widget
 
         // Contador de carga horária
         $counter = TeacherHourCounter::where('id_teacher', $teacher->id)
-            ->where('id_schoolyears', $anoLetivoAtivo->id)
+            ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->first();
 
         $letivaDisponivel = $counter?->teaching_load ?? 0;
@@ -62,7 +62,7 @@ class OverviewWidget extends Widget
         $aulasNaoLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'nao letiva')->count();
 
         $cargos = $teacher->positions()
-            ->where('id_schoolyears', $anoLetivoAtivo->id)
+            ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->get()
             ->map(function ($cargo) {
                 return [
@@ -74,7 +74,7 @@ class OverviewWidget extends Widget
             })->toArray();
 
         $tempoReducoes = $teacher->timeReductions()
-            ->where('id_schoolyears', $anoLetivoAtivo->id)
+            ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->get()
             ->map(function ($tempoReducoes) {
                 return [

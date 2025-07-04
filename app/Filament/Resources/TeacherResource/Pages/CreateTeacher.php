@@ -68,7 +68,7 @@ class CreateTeacher extends CreateRecord
             'workload' => 26,
             'teaching_load' => 22,
             'non_teaching_load' => 4,
-            'id_schoolyears' => $activeSchoolYear->id ?? null,
+            'id_schoolyear' => $activeSchoolYear->id ?? null,
         ]);
 
         $this->syncPivotWithSchoolYear($this->record);
@@ -81,14 +81,14 @@ class CreateTeacher extends CreateRecord
             DB::table('teacher_positions')
                 ->where('id_teacher', $teacher->id)
                 ->where('id_position', $position->id)
-                ->update(['id_schoolyears' => $schoolYearId]);
+                ->update(['id_schoolyear' => $schoolYearId]);
         }
 
         foreach ($teacher->timeReductions as $reduction) {
             DB::table('teacher_time_reductions')
                 ->where('id_teacher', $teacher->id)
                 ->where('id_time_reduction', $reduction->id)
-                ->update(['id_schoolyears' => $schoolYearId]);
+                ->update(['id_schoolyear' => $schoolYearId]);
         }
     }
 }

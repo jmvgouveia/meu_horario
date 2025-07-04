@@ -114,7 +114,7 @@ class TeacherResource extends Resource
                             ->label('Escalão Salarial')
                             ->placeholder('Selecione a Escalão Salarial'),
                         Select::make('positions')
-                            ->label('Posições')
+                            ->label('Cargos')
                             ->relationship('positions', 'name')
                             ->multiple()
                             ->preload()

@@ -12,7 +12,7 @@ class TeacherHourCounter extends Model
         'teaching_load',
         'non_teaching_load',
         'authorized_overtime',
-        'id_schoolyears',
+        'id_schoolyear',
     ];
 
     public function teacher()
@@ -22,6 +22,6 @@ class TeacherHourCounter extends Model
 
     public function schoolyear()
     {
-        return $this->belongsTo(SchoolYear::class, 'id_schoolyears');
+        return $this->belongsTo(SchoolYear::class, 'id_schoolyear');
     }
 }

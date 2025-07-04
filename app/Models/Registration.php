@@ -17,12 +17,12 @@ class Registration extends Model
     {
         return $this->belongsTo(Student::class, 'id_student');
     }
-    
+
     public function course()
     {
         return $this->belongsTo(Course::class, 'id_course');
     }
-    
+
     public function schoolyear()
     {
         return $this->belongsTo(SchoolYear::class, 'id_schoolyear');

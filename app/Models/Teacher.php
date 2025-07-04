@@ -71,13 +71,13 @@ class Teacher extends Model
 
     public function positions()
     {
-        return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position')->withPivot('id_schoolyears');
+        return $this->belongsToMany(Position::class, 'teacher_positions', 'id_teacher', 'id_position')->withPivot('id_schoolyear');
     }
 
     public function timeReductions()
     {
         return $this->belongsToMany(TimeReduction::class, 'teacher_time_reductions', 'id_teacher', 'id_time_reduction')
-            ->withPivot('id_schoolyears');
+            ->withPivot('id_schoolyear');
     }
     public function hourCounter()
     {
@@ -97,7 +97,7 @@ class Teacher extends Model
 
         // DB::table('teacher_hour_counters')
         //     ->where('id_teacher', $this->id)
-        //     ->where('id_schoolyears', $schoolYearId)
+        //     ->where('id_schoolyear', $schoolYearId)
         //     ->update([
         //         'teaching_load' => DB::raw("teaching_load - {$totalReduction}")
         //     ]);
@@ -109,13 +109,13 @@ class Teacher extends Model
 
         $baseLoad = DB::table('teacher_hour_counters')
             ->where('id_teacher', $this->id)
-            ->where('id_schoolyears', $schoolYearId)
+            ->where('id_schoolyear', $schoolYearId)
             ->value('workload');
 
         if ($baseLoad !== null) {
             DB::table('teacher_hour_counters')
                 ->where('id_teacher', $this->id)
-                ->where('id_schoolyears', $schoolYearId)
+                ->where('id_schoolyear', $schoolYearId)
                 ->update([
                     'teaching_load' => 22 - $totalReduction,
                 ]);
