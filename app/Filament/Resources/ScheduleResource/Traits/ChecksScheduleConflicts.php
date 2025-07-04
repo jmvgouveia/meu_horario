@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ScheduleResource\Traits;
 
 use App\Models\Schedule;
+use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -11,7 +12,7 @@ use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
 use App\Models\Student;
-
+use Illuminate\Validation\ValidationException;
 
 trait ChecksScheduleConflicts
 {

@@ -169,8 +169,15 @@ class EditScheduleConflict extends EditRecord
 
                         if ($this->record->status === 'Aprovado DP') {
 
-                            $this->record->delete();
-                            $this->record->scheduleNew?->delete();
+                            // NODEL
+                            // $this->record->delete();
+                            // $this->record->scheduleNew?->delete();
+                            $this->record->update([
+                                'status' => 'Eliminado',
+                            ]);
+                            $this->record->scheduleNew?->update([
+                                'status' => 'Eliminado',
+                            ]);
                             $this->record->scheduleConflict?->update([
                                 'status' => 'Aprovado',
                             ]);
@@ -179,15 +186,24 @@ class EditScheduleConflict extends EditRecord
 
                         if ($this->record->status === 'Escalado') {
 
-                            $this->record->delete();
+                            //$this->record->delete();
+                            $this->record->update([
+                                'status' => 'Eliminado',
+                            ]);
 
                             if (Auth::user()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
-                                $this->record->scheduleConflict?->delete();
+                                // $this->record->scheduleConflict?->delete();
+                                $this->record->scheduleConflict?->update([
+                                    'status' => 'Eliminado',
+                                ]);
                                 ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
 
                                 ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
                             } else {
-                                $this->record->scheduleNew?->delete();
+                                // $this->record->scheduleNew?->delete();
+                                $this->record->scheduleNew?->update([
+                                    'status' => 'Eliminado',
+                                ]);
                             }
 
                             $this->record->scheduleNew?->update([

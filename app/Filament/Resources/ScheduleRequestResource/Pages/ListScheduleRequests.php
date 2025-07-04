@@ -54,13 +54,14 @@ class ListScheduleRequests extends ListRecords
                     ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $schoolYearId));
             })
             ->where('status', '!=', 'Escalado')
+            ->where('status', '!=', 'Eliminado')
             ->count();
 
         // Pedidos recebidos
         $recebidos = ScheduleRequest::whereHas('scheduleConflict', function ($q) use ($teacher) {
             $q->where('id_teacher', $teacher->id);
         })
-            ->where('status', '!=', 'Cancelado')
+            ->where('status', '!=', 'Eliminado')
             ->where('status', '!=', 'Escalado')
             ->where(function ($query) use ($schoolYearId) {
                 $query
@@ -125,7 +126,7 @@ class ListScheduleRequests extends ListRecords
             'recebidos' => ScheduleRequest::query()
                 ->whereHas('scheduleConflict', fn($q) => $q->where('id_teacher', $teacher->id))
                 ->where('status', '!=', 'Escalado')
-                ->where('status', '!=', 'Cancelado')
+                ->where('status', '!=', 'Eliminado')
                 ->where(function ($query) {
                     $query
                         ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()))

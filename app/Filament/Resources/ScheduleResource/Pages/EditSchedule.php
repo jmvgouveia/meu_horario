@@ -129,7 +129,8 @@ class EditSchedule extends EditRecord
                             }
 
                             ScheduleResource::rollbackScheduleRequest($this->record);
-                            $record->delete();
+                            //$record->delete();
+                            $record->update(['status' => 'Eliminado']);
 
                             Notification::make()
                                 ->title("Horário Eliminado")

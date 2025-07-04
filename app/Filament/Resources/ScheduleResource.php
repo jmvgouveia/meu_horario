@@ -40,6 +40,8 @@ use Illuminate\Support\Collection;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Model;
 
 class ScheduleResource extends Resource
 {
@@ -155,6 +157,8 @@ class ScheduleResource extends Resource
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
+
+
 
     public static function getEloquentQuery(): Builder
     {
@@ -585,6 +589,13 @@ class ScheduleResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
+                TextColumn::make('teacher.name')
+                    ->label('Professor')
+                    ->sortable()
+                    ->toggleable()
+                    ->searchable()
+                    ->visible(fn() => Auth::user()?->isSuperAdmin())
+                    ->wrap(),
                 TextColumn::make('weekday.weekday')
                     ->label('Dia da Semana')
                     ->sortable()
@@ -635,7 +646,47 @@ class ScheduleResource extends Resource
 
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->label('Estado')
+                    ->options([
+                        'Pendente' => 'Pendente',
+                        'Aprovado' => 'Aprovado',
+                        'Recusado' => 'Recusado',
+                        'Escalado' => 'Escalado',
+                        'Aprovado DP' => 'Aprovado DP',
+                        'Recusado DP' => 'Recusado DP',
+                        'Eliminado' => 'Eliminado',
+                    ]),
+
+                SelectFilter::make('teacher_id')
+                    ->label('Professor')
+                    ->relationship('teacher', 'name')
+                    ->searchable()
+                    ->visible(fn() => auth()->user()?->isSuperAdmin()),
+
+                SelectFilter::make('weekday_id')
+                    ->label('Dia da Semana')
+                    ->relationship('weekday', 'weekday'),
+
+                SelectFilter::make('timeperiod_id')
+                    ->label('Hora da Aula')
+                    ->relationship('timeperiod', 'description'),
+
+                SelectFilter::make('subject_id')
+                    ->label('Disciplina')
+                    ->relationship('subject', 'name'),
+
+                SelectFilter::make('classes_id')
+                    ->label('Turma')
+                    ->relationship('classes', 'name'),
+
+                SelectFilter::make('room_id')
+                    ->label('Sala')
+                    ->relationship('room', 'name'),
+
+                SelectFilter::make('room.building_id')
+                    ->label('Pólo')
+                    ->relationship('room.building', 'name'),
             ])
             ->headerActions([
                 Tables\Actions\Action::make('exportar_selecionados')
@@ -661,7 +712,8 @@ class ScheduleResource extends Resource
     public static function rollbackScheduleRequest(Schedule $schedule): void
     {
         try {
-            ScheduleRequest::where('id_new_schedule', $schedule->id)->delete();
+            //ScheduleRequest::where('id_new_schedule', $schedule->id)->delete();
+            ScheduleRequest::where('id_new_schedule', $schedule->id)->update(['status' => 'Eliminado']);
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Erro ao eliminar o pedido de troca de horário')

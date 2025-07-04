@@ -38,4 +38,8 @@ class ScheduleRequest extends Model
     {
         return $this->belongsTo(Teacher::class, 'id_teacher');
     }
+    public function schoolyear()
+    {
+        return $this->belongsTo(SchoolYear::class, 'id_schoolyear');
+    }
 }

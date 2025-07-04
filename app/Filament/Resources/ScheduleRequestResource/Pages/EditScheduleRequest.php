@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ScheduleRequestResource\Pages;
 use App\Filament\Resources\ScheduleRequestResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
+use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Models\Room;
 use Filament\Actions\Action;
 use Filament\Notifications\Actions\Action as NotificationAction;
@@ -14,13 +15,18 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Exceptions\Halt;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Mockery\Matcher\Not;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class EditScheduleRequest extends EditRecord
 {
     protected static string $resource = ScheduleRequestResource::class;
 
     use CheckScheduleWindow;
+    // use ChecksScheduleConflicts;
 
     protected function getFormActions(): array
     {
@@ -52,6 +58,19 @@ class EditScheduleRequest extends EditRecord
                         ->required(),
                 ])
                 ->action(function (array $data) use ($isGestor) {
+
+
+                    if ($this->record->status === 'Eliminado') {
+
+                        Notification::make()
+                            ->title('Pedido já eliminado')
+                            ->body('Este pedido já foi eliminado por outro utilizador.')
+                            ->danger()
+                            ->send();
+
+                        return redirect(filament()->getUrl());
+                    }
+
                     DB::transaction(function () use ($data, $isGestor) {
                         $this->validateScheduleWindow();
 
@@ -104,6 +123,18 @@ class EditScheduleRequest extends EditRecord
                     Textarea::make('response')->label('Justificação para Recusa')->required(),
                 ])
                 ->action(function (array $data) use ($isGestor) {
+
+                    if ($this->record->status === 'Eliminado') {
+
+                        Notification::make()
+                            ->title('Pedido já eliminado')
+                            ->body('Este pedido já foi eliminado por outro utilizador.')
+                            ->danger()
+                            ->send();
+
+                        return redirect(filament()->getUrl());
+                    }
+
                     DB::transaction(function () use ($data, $isGestor) {
                         $this->validateScheduleWindow();
 
@@ -147,6 +178,17 @@ class EditScheduleRequest extends EditRecord
                     Textarea::make('scaled_justification')->label('Justificação')->required(),
                 ])
                 ->action(function (array $data) {
+
+                    if ($this->record->status === 'Eliminado') {
+
+                        Notification::make()
+                            ->title('Pedido já eliminado')
+                            ->body('Este pedido já foi eliminado por outro utilizador.')
+                            ->danger()
+                            ->send();
+
+                        return redirect(filament()->getUrl());
+                    }
                     DB::transaction(function () use ($data) {
                         $this->validateScheduleWindow();
 
@@ -195,55 +237,60 @@ class EditScheduleRequest extends EditRecord
         }
 
         // Cancelar pedido
-        if (($isRequestOwner || $isGestor) && $status === 'Pendente') {
-            $actions[] = Action::make('cancelRequest')
-                ->label('Cancelar Pedido')
-                ->color('danger')
-                ->requiresConfirmation()
-                ->modalHeading('Cancelar este pedido?')
-                ->action(function () {
-                    DB::transaction(function () {
-                        $this->validateScheduleWindow();
+        // if (($isRequestOwner || $isGestor) && $status === 'Pendente') {
+        //     $actions[] = Action::make('cancelRequest')
+        //         ->label('Cancelar Pedido')
+        //         ->color('danger')
+        //         ->requiresConfirmation()
+        //         ->modalHeading('Cancelar este pedido?')
+        //         ->action(function () {
 
-                        $this->record->update(['status' => 'Cancelado']);
-                        $this->record->scheduleNew?->update(['status' => 'Cancelado']);
 
-                        extract($this->getScheduleDetails());
 
-                        Notification::make()
-                            ->title("Pedido cancelado")
-                            ->body("Cancelou o pedido de troca com {$ownername}, relativo à aula na sala {$currentRoom} ({$dayName}, {$timePeriod}).")
-                            ->success()
-                            ->send();
+        //             DB::transaction(function () {
+        //                 $this->validateScheduleWindow();
 
-                        Notification::make()
-                            ->title("Pedido cancelado")
-                            ->body("O professor {$requestername} cancelou o pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
-                            ->success()
-                            ->actions([
-                                NotificationAction::make('Ver Pedido')
-                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
-                                        'record' => $this->record->getKey(),
-                                    ]))
-                            ])
-                            ->sendToDatabase($owner);
+        //                 $this->record->update(['status' => 'Cancelado']);
+        //                 $this->record->scheduleNew?->update(['status' => 'Cancelado']);
 
-                        Notification::make()
-                            ->title("Pedido cancelado com sucesso")
-                            ->body("Cancelou o pedido de troca com {$ownername}.")
-                            ->success()
-                            ->actions([
-                                NotificationAction::make('Ver Pedido')
-                                    ->url(route('filament.admin.resources.schedule-requests.edit', [
-                                        'record' => $this->record->getKey(),
-                                    ]))
-                            ])
-                            ->sendToDatabase($requester);
-                    });
+        //                 extract($this->getScheduleDetails());
 
-                    return redirect($this->getResource()::getUrl('index'));
-                });
-        }
+        //                 Notification::make()
+        //                     ->title("Pedido cancelado")
+        //                     ->body("Cancelou o pedido de troca com {$ownername}, relativo à aula na sala {$currentRoom} ({$dayName}, {$timePeriod}).")
+        //                     ->success()
+        //                     ->send();
+
+        //                 Notification::make()
+        //                     ->title("Pedido cancelado")
+        //                     ->body("O professor {$requestername} cancelou o pedido de troca da aula na sala {$currentRoom}, no {$dayName} às {$timePeriod}.")
+        //                     ->success()
+        //                     ->actions([
+        //                         NotificationAction::make('Ver Pedido')
+        //                             ->url(route('filament.admin.resources.schedule-requests.edit', [
+        //                                 'record' => $this->record->getKey(),
+        //                             ]))
+        //                     ])
+        //                     ->sendToDatabase($owner);
+
+        //                 Notification::make()
+        //                     ->title("Pedido cancelado com sucesso")
+        //                     ->body("Cancelou o pedido de troca com {$ownername}.")
+        //                     ->success()
+        //                     ->actions([
+        //                         NotificationAction::make('Ver Pedido')
+        //                             ->url(route('filament.admin.resources.schedule-requests.edit', [
+        //                                 'record' => $this->record->getKey(),
+        //                             ]))
+        //                     ])
+        //                     ->sendToDatabase($requester);
+        //             });
+
+        //             return redirect($this->getResource()::getUrl('index'));
+        //         });
+        // }
+
+
         $actions[] = Action::make('cancel')
             ->label('Cancelar')
             ->url($this->getResource()::getUrl('index'))
@@ -255,6 +302,16 @@ class EditScheduleRequest extends EditRecord
             ->requiresConfirmation()
             ->action(function () {
 
+                if ($this->record->status === 'Eliminado') {
+
+                    Notification::make()
+                        ->title('Pedido já eliminado')
+                        ->body('Este pedido já foi eliminado por outro utilizador.')
+                        ->danger()
+                        ->send();
+
+                    return redirect(filament()->getUrl());
+                }
 
                 try {
                     DB::transaction(function () {
@@ -283,7 +340,9 @@ class EditScheduleRequest extends EditRecord
                                 ScheduleResource::hoursCounterUpdate($deletedSchedule, true);
                             }
 
-                            $deletedSchedule->delete();
+                            //NODEL
+                            //$deletedSchedule->delete();
+                            $deletedSchedule->update(['status' => 'Eliminado']);
                         }
 
                         if ($scheduleToApprove && $scheduleToApprove->status !== 'Aprovado') {
