@@ -71,7 +71,7 @@ class CreateSchedule extends CreateRecord
             });
         } catch (\Exception $e) {
             Notification::make()
-                ->title('Erro ao criar o horário123')
+                ->title('Erro ao criar o horário')
                 ->body($e->getMessage())
                 ->danger()
                 ->send();

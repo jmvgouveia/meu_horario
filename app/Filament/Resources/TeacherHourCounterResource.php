@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\TeacherHourCounterImporter;
 use App\Filament\Resources\TeacherHourCounterResource\Pages;
 use App\Models\TeacherHourCounter;
+use Dom\Text;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -97,6 +98,11 @@ class TeacherHourCounterResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('schoolyear.schoolyear')
+                    ->label('Ano Letivo')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('teacher.name')
                     ->label('Professor')
                     ->searchable()

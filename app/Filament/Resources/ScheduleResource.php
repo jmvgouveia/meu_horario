@@ -189,6 +189,7 @@ class ScheduleResource extends Resource
             ->schema([
 
                 Section::make('Dia / Hora')
+                    ->collapsible()
                     ->description('Informe quando a aula será realizada')
                     ->schema([
                         Grid::make(2)
@@ -210,6 +211,7 @@ class ScheduleResource extends Resource
                             ]),
                     ]),
                 Section::make('Local da Aula')
+                    ->collapsible()
                     ->description('Selecione o núcleo/pólo e a sala onde será dada a aula')
                     ->schema([
                         Grid::make(2)
@@ -230,6 +232,11 @@ class ScheduleResource extends Resource
                                 Select::make('id_room')
                                     ->label('Sala')
                                     ->required()
+                                    //   ->live()
+                                    ->disabled(fn(callable $get) => blank($get('id_building')))
+                                    //->hint('Preencha o campo anterior primeiro)')
+                                    ->placeholder('Tem que preencher o Núcleo/Pólo')
+                                    //->hint('Tem que preencher o Núcleo/Pólo primeiro')
                                     ->options(function (callable $get, ?Schedule $record) {
                                         $buildingId = $get('id_building') ?? $record?->room?->id_building;
 
@@ -238,7 +245,7 @@ class ScheduleResource extends Resource
                                         return Room::where('id_building', $buildingId)->pluck('name', 'id');
                                     })
                                     ->searchable()
-                                    ->placeholder('Selecione a sala')
+
                                     ->reactive()
                                     ->afterStateHydrated(function (callable $set, ?Schedule $record) {
                                         if ($record && $record->id_room) {
@@ -250,12 +257,17 @@ class ScheduleResource extends Resource
 
 
                 Section::make('Composição da Aula')
+                    ->collapsible()
                     ->description('Defina a disciplina, turmas e alunos envolvidos')
                     ->schema([
                         Select::make('id_subject')
                             ->label('Disciplina')
                             ->required()
                             ->reactive()
+                            ->searchable()
+                            ->disabled(fn(callable $get) => blank($get('id_room')))
+                            //  ->hint('Tem que preencher a Sala primeiro')
+                            ->placeholder('Tem que preencher a Sala')
                             ->options(function () {
                                 $userId = Auth::id();
                                 $teacher = Teacher::where('id_user', $userId)->first();
@@ -270,7 +282,7 @@ class ScheduleResource extends Resource
                                     ? collect(['' => 'Nenhuma disciplina atribuída neste ano letivo'])
                                     : $subjects;
                             })
-                            ->placeholder('Escolha a disciplina')
+
                             ->afterStateUpdated(function ($state, callable $set) {
                                 $set('id_subject', $state);
                                 $set('id_classes', []);
@@ -279,6 +291,9 @@ class ScheduleResource extends Resource
 
                         Select::make('id_classes')
                             ->label('Turmas')
+                            ->disabled(fn(callable $get) => blank($get('id_subject')))
+                            //->hint('Tem que preencher a disciplina primeiro')
+                            ->placeholder('Tem que preencher a disciplina primeiro')
                             ->multiple()
                             ->required(function (callable $get) {
                                 $subjectId = $get('id_subject');
@@ -356,7 +371,9 @@ class ScheduleResource extends Resource
                                     $set('shift', $numeros);
 
                                     if (!$get('filtrar_por_turma')) {
+                                        $schoolYear = SchoolYear::where('active', true)->first();
                                         $classIds = Registration::whereIn('id_student', $studentIds)
+                                            ->where('id_schoolyear', $schoolYear->id)
                                             ->pluck('id_class')
                                             ->unique()
                                             ->filter()
@@ -502,6 +519,7 @@ class ScheduleResource extends Resource
                         // }),
 
                         Section::make('Turno')
+                            ->collapsible()
                             ->description('Indique o turno da aula')
                             ->schema([
                                 Select::make('shift')
@@ -663,7 +681,10 @@ class ScheduleResource extends Resource
 
                 $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
 
-                $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)->first();
+                $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)
+                    ->where('id_schoolyear', $schedule->id_schoolyear)
+                    ->first();
+
                 if (!$counter) {
                     return;
                 }

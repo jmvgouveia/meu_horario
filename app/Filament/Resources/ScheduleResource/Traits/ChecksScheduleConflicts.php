@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ScheduleResource\Traits;
 
 use App\Models\Schedule;
+use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherHourCounter;
@@ -60,6 +61,7 @@ trait ChecksScheduleConflicts
             ->where('id_timeperiod', $timeperiod)
             ->where('status', '!=', 'Recusado DP')
             ->where('status', '!=', 'Eliminado')
+            ->where('id_schoolyear', SchoolYear::where('active', true)->value('id'))
             ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId));
 
         if ($query->exists()) {
@@ -97,6 +99,7 @@ trait ChecksScheduleConflicts
         )
             ->where('id_weekday', $weekday)
             ->where('id_timeperiod', $timeperiod)
+            ->where('id_schoolyear', SchoolYear::where('active', true)->value('id'))
             ->whereNotIn('status', ['Recusado DP', 'Eliminado'])
             ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
             ->exists();
@@ -121,6 +124,7 @@ trait ChecksScheduleConflicts
         $query = Schedule::where('id_room', $idRoom)
             ->where('id_weekday', $weekday)
             ->where('id_timeperiod', $timeperiod)
+            ->where('id_schoolyear', SchoolYear::where('active', true)->value('id'))
             ->whereNotIn('status', ['Recusado DP', 'Eliminado'])
             ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId));
 
@@ -143,7 +147,22 @@ trait ChecksScheduleConflicts
 
     private function checkWorkload(int $idTeacher, string $tipo): void
     {
-        $counter = TeacherHourCounter::where('id_teacher', $idTeacher)->first();
+        $activeSchoolYear = SchoolYear::where('active', true)->first();
+
+        if (!$activeSchoolYear) {
+            Notification::make()
+                ->title('Ano letivo ativo não encontrado')
+                ->body('Não há ano letivo ativo definido no sistema.')
+                ->danger()
+                ->persistent()
+                ->send();
+
+            throw new Halt('Ano letivo ativo não encontrado.');
+        }
+
+        $counter = TeacherHourCounter::where('id_teacher', $idTeacher)
+            ->where('id_schoolyear', $activeSchoolYear->id)
+            ->first();
 
         if (!$counter) {
             Notification::make()
