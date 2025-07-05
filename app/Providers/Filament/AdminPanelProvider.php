@@ -31,6 +31,7 @@ use App\Filament\Widgets\TeachersOverview;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\User;
 use Filament\Facades\Filament as FacadesFilament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Support\Facades\FilamentAsset;
@@ -57,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
                         $user = \Filament\Facades\Filament::auth()->user();
 
                         // Verifica se é professor e tem registo correspondente na tabela `teachers`
-                        if ($user->hasRole('Professor') && $user->teacher) {
+                        if ($user instanceof User && $user->hasRole('Professor') && $user->teacher) {
                             return TeacherResource::getUrl('edit', ['record' => $user->teacher->id]);
                         }
 
