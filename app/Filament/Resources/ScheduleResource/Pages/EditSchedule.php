@@ -6,6 +6,7 @@ use App\Filament\Resources\ScheduleResource;
 use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
+use App\Filament\Resources\ScheduleResource\Traits\HourCounter;
 use App\Models\Schedule;
 use App\Models\ScheduleRequest;
 use Filament\Actions\Action;
@@ -16,6 +17,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\DatabaseHelper AS DBHelper;
+use App\Helpers\MensagensErro AS MSGErro;
 
 class EditSchedule extends EditRecord
 {
@@ -23,7 +26,7 @@ class EditSchedule extends EditRecord
 
     public ?Schedule $conflictingSchedule = null;
 
-    use CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap;
+    use CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap, HourCounter;
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
@@ -95,21 +98,17 @@ class EditSchedule extends EditRecord
                         DB::transaction(function () {
                             $record = $this->record;
 
-                            $pendingRequest = ScheduleRequest::where('id_schedule', $record->id)
-                                ->where('status', 'Recusado')
-                                ->first();
+                            $pendingRequest = DBHelper::getScheduleRequestByStatus($record->id, 'Recusado');
 
                             if ($pendingRequest) {
                                 $scheduleNovo = $pendingRequest->scheduleNew;
 
                                 if ($scheduleNovo) {
-                                    $scheduleNovo->status = 'Aprovado';
-                                    $scheduleNovo->save();
+                                    DBHelper::updateScheduleStatus($scheduleNovo->id, 'Aprovado', MSGErro::ERRO_APROVAR_SCHEDULE);
 
-                                    ScheduleResource::hoursCounterUpdate($scheduleNovo, false);
+                                    $this->hoursCounterUpdate($scheduleNovo, false);
 
-                                    $pendingRequest->status = 'Aprovado';
-                                    $pendingRequest->save();
+                                    DBHelper::updateScheduleRequestStatus($pendingRequest->id, false, 'Aprovado', MSGErro::ERRO_APROVAR_SCHEDULE);
 
                                     $requerente = $pendingRequest->requester?->user;
                                     $idNovo = $scheduleNovo->id;
@@ -126,12 +125,12 @@ class EditSchedule extends EditRecord
                             }
 
                             if ($record->status !== 'Pendente') {
-                                ScheduleResource::hoursCounterUpdate($record, true);
+                                $this->hoursCounterUpdate($record, true);
                             }
 
-                            ScheduleResource::rollbackScheduleRequest($this->record);
-                            //$record->delete();
-                            $record->update(['status' => 'Eliminado']);
+                            // Alterar estado de pedido para eliminado
+                            DBHelper::updateScheduleRequestStatus($this->record->id, true, 'Eliminado', MSGErro::ERRO_ELIMINAR_SCHEDULE);
+                            DBHelper::updateScheduleStatus($this->record->id, 'Eliminado', MSGErro::ERRO_ELIMINAR_SCHEDULE);
 
                             Notification::make()
                                 ->title("Horário Eliminado")
@@ -149,8 +148,6 @@ class EditSchedule extends EditRecord
                             ->send();
                     }
                 }),
-
-
 
             $this->getCancelFormAction(),
         ];

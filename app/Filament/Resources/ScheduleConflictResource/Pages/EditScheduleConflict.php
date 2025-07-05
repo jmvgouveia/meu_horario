@@ -4,6 +4,8 @@ namespace App\Filament\Resources\ScheduleConflictResource\Pages;
 
 use App\Filament\Resources\ScheduleConflictResource;
 use App\Filament\Resources\ScheduleResource;
+use App\Filament\Resources\ScheduleResource\Traits\HourCounter;
+use App\Helpers\UserHelper;
 use App\Models\Room;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 
 class EditScheduleConflict extends EditRecord
 {
+    use HourCounter;
     protected static string $resource = ScheduleConflictResource::class;
 
     protected function mutateFormDataBeforeFill(array $data): array
@@ -40,7 +43,7 @@ class EditScheduleConflict extends EditRecord
     {
         $actions = [];
 
-        if (currentUser()?->isGestorConflitos()) {
+        if (UserHelper::currentUser()?->isGestorConflitos()) {
             $actions[] = Action::make('aprovar')
                 ->label('Aprovar Pedido')
                 ->color('success')
@@ -111,7 +114,9 @@ class EditScheduleConflict extends EditRecord
                             ->body("Aprovou o pedido de {$requestername} na troca da sala {$salaAntiga} para {$salaNova}.")
                             ->sendToDatabase($owner);
 
-                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        //ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        $this->hoursCounterUpdate($this->record->scheduleNew, false);
+
                     });
                 });
 
@@ -186,7 +191,7 @@ class EditScheduleConflict extends EditRecord
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
             ->color('danger')
-            ->visible(fn() => !currentUser()->isgestorConflitos())
+            ->visible(fn() => !UserHelper::currentUser()->isgestorConflitos())
             ->visible(fn() => $this->record->status !== 'Eliminado')
             ->mountUsing(function () {
                 if ($this->record->status === 'Eliminado') {
@@ -229,14 +234,15 @@ class EditScheduleConflict extends EditRecord
                                 'status' => 'Eliminado',
                             ]);
 
-                            if (currentUser()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
+                            if (UserHelper::currentUser()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
                                 // $this->record->scheduleConflict?->delete();
                                 $this->record->scheduleConflict?->update([
                                     'status' => 'Eliminado',
                                 ]);
-                                ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-
-                                ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                                //ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
+                                $this->hoursCounterUpdate($this->record->scheduleConflict, true);
+                                //ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                                $this->hoursCounterUpdate($this->record->scheduleNew, false);
                             } else {
                                 // $this->record->scheduleNew?->delete();
                                 $this->record->scheduleNew?->update([
@@ -244,7 +250,7 @@ class EditScheduleConflict extends EditRecord
                                 ]);
                             }
 
-                            if (currentUser()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
+                            if (UserHelper::currentUser()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
 
                                 $this->record->scheduleConflict?->update([
                                     'status' => 'Aprovado',
@@ -309,7 +315,7 @@ class EditScheduleConflict extends EditRecord
                     ->where('id_weekday', $idWeekday);
             })
             ->get()
-            ->unique('name')
+            //->unique('name')
             ->pluck('name', 'id')
             ->toArray();
     }

@@ -6,6 +6,7 @@ use App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,8 +53,8 @@ class ScheduleConflictResource extends Resource
         // Estados válidos para visualização
         $estadosVisiveis = ['Escalado', 'Aprovado DP', 'Recusado DP'];
 
-        // ✅ Gestor de conflito: vê tudo do ano letivo ativo com os estados definidos
-        if ($user->hasRole('Gestor Conflitos')) {
+        // Gestor de conflito: vê tudo do ano letivo ativo com os estados definidos
+        if ($user instanceof User && $user->hasRole('Gestor Conflitos')) {
             return parent::getEloquentQuery()
                 ->whereIn('status', $estadosVisiveis)
                 ->where(function ($query) use ($anoLetivoAtivo) {
@@ -67,7 +68,7 @@ class ScheduleConflictResource extends Resource
                 });
         }
 
-        // ✅ Professor: vê apenas os seus pedidos com os estados e ano letivo ativos
+        // Professor: vê apenas os seus pedidos com os estados e ano letivo ativos
         if (! $teacher) {
             return parent::getEloquentQuery()->whereRaw('0 = 1');
         }

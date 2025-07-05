@@ -6,6 +6,7 @@ use App\Filament\Resources\ScheduleRequestResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
+use App\Filament\Resources\ScheduleResource\Traits\HourCounter;
 use App\Models\Room;
 use Filament\Actions\Action;
 use Filament\Notifications\Actions\Action as NotificationAction;
@@ -18,15 +19,12 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Mockery\Matcher\Not;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class EditScheduleRequest extends EditRecord
 {
     protected static string $resource = ScheduleRequestResource::class;
 
-    use CheckScheduleWindow;
-    // use ChecksScheduleConflicts;
+    use CheckScheduleWindow, HourCounter;
 
     protected function getFormActions(): array
     {
@@ -102,7 +100,7 @@ class EditScheduleRequest extends EditRecord
 
                         $this->record->scheduleNew?->update(['status' => 'Aprovado']);
 
-                        ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
+                        $this->hoursCounterUpdate($this->record->scheduleNew, false);
 
                         extract($this->getScheduleDetails());
 
@@ -241,7 +239,6 @@ class EditScheduleRequest extends EditRecord
 
                         extract($this->getScheduleDetails());
 
-
                         Notification::make()
                             ->title('Pedido Escalado')
                             ->warning()
@@ -324,11 +321,10 @@ class EditScheduleRequest extends EditRecord
 
                         if ($deletedSchedule) {
                             if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
-                                ScheduleResource::hoursCounterUpdate($deletedSchedule, true);
+                                $this->hoursCounterUpdate($deletedSchedule, true);
                             }
 
                             //NODEL
-                            //$deletedSchedule->delete();
                             $deletedSchedule->update(['status' => 'Eliminado']);
                         }
 
@@ -337,7 +333,7 @@ class EditScheduleRequest extends EditRecord
                                 'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
                             ]);
 
-                            ScheduleResource::hoursCounterUpdate($scheduleToApprove, false);
+                            $this->hoursCounterUpdate($scheduleToApprove, false);
                         }
 
                         $scheduleRequest->update([

@@ -43,10 +43,11 @@ use Filament\Tables\Actions;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Model;
+use App\Helpers\UserHelper;
+use App\Helpers\DatabaseHelper AS DBHelper;
 
 class ScheduleResource extends Resource
 {
-
     protected static ?string $model = Schedule::class;
     protected static ?string $navigationGroup = 'Calendarização';
     protected static ?string $navigationLabel = 'Marcação de Horários';
@@ -67,7 +68,8 @@ class ScheduleResource extends Resource
     }
     public static function exportSchedules(?Collection $records = null): StreamedResponse
     {
-        $anoLetivoAtivoId = \App\Models\SchoolYear::where('active', true)->value('id');
+        //$anoLetivoAtivoId = \App\Models\SchoolYear::where('active', true)->value('id');
+        $anoLetivoAtivoId = DBHelper::getIDActiveSchoolyear();
 
         if ($records) {
             // Aplica filtro de status e ano letivo diretamente no collection
@@ -182,8 +184,7 @@ class ScheduleResource extends Resource
             // Se não houver ano letivo ativo, retorna vazio para segurança
             $query->whereRaw('0 = 1');
         }
-        //$query->where('status', '!=', 'Eliminado');
-
+    
         return $query;
     }
 
@@ -238,11 +239,8 @@ class ScheduleResource extends Resource
                                 Select::make('id_room')
                                     ->label('Sala')
                                     ->required()
-                                    //   ->live()
                                     ->disabled(fn(callable $get) => blank($get('id_building')))
-                                    //->hint('Preencha o campo anterior primeiro)')
                                     ->placeholder('Tem que preencher o Núcleo/Pólo')
-                                    //->hint('Tem que preencher o Núcleo/Pólo primeiro')
                                     ->options(function (callable $get, ?Schedule $record) {
                                         $buildingId = $get('id_building') ?? $record?->room?->id_building;
 
@@ -251,7 +249,6 @@ class ScheduleResource extends Resource
                                         return Room::where('id_building', $buildingId)->pluck('name', 'id');
                                     })
                                     ->searchable()
-
                                     ->reactive()
                                     ->afterStateHydrated(function (callable $set, ?Schedule $record) {
                                         if ($record && $record->id_room) {
@@ -272,7 +269,6 @@ class ScheduleResource extends Resource
                             ->reactive()
                             ->searchable()
                             ->disabled(fn(callable $get) => blank($get('id_room')))
-                            //  ->hint('Tem que preencher a Sala primeiro')
                             ->placeholder('Tem que preencher a Sala')
                             ->options(function () {
                                 $userId = Auth::id();
@@ -298,7 +294,6 @@ class ScheduleResource extends Resource
                         Select::make('id_classes')
                             ->label('Turmas')
                             ->disabled(fn(callable $get) => blank($get('id_subject')))
-                            //->hint('Tem que preencher a disciplina primeiro')
                             ->placeholder('Tem que preencher a disciplina primeiro')
                             ->multiple()
                             ->required(function (callable $get) {
@@ -531,7 +526,7 @@ class ScheduleResource extends Resource
                     ->sortable()
                     ->toggleable()
                     ->searchable()
-                    ->visible(fn() => isUserSuperAdmin())
+                    ->visible(fn() => UserHelper::isUserSuperAdmin())
                     ->wrap(),
                 TextColumn::make('weekday.weekday')
                     ->label('Dia da Semana')
@@ -599,7 +594,7 @@ class ScheduleResource extends Resource
                     ->label('Professor')
                     ->relationship('teacher', 'name')
                     ->searchable()
-                    ->visible(fn() => isUserSuperAdmin()),
+                    ->visible(fn() => UserHelper::isUserSuperAdmin()),
 
                 SelectFilter::make('weekday_id')
                     ->label('Dia da Semana')
@@ -644,7 +639,7 @@ class ScheduleResource extends Resource
                     ->action(fn() => self::exportSchedules())
                     ->color('primary')
                     ->requiresConfirmation()
-                    ->visible(fn() => isUserSuperAdmin()),
+                    ->visible(fn() => UserHelper::isUserSuperAdmin()),
 
             ])
             ->bulkActions([
@@ -653,69 +648,10 @@ class ScheduleResource extends Resource
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
-                    ->visible(fn() => isUserSuperAdmin()),
+                    ->visible(fn() => UserHelper::isUserSuperAdmin()),
 
             ]);
     }
-
-    public static function rollbackScheduleRequest(Schedule $schedule): void
-    {
-        try {
-            //ScheduleRequest::where('id_new_schedule', $schedule->id)->delete();
-            ScheduleRequest::where('id_new_schedule', $schedule->id)->update(['status' => 'Eliminado']);
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Erro ao eliminar o pedido de troca de horário')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
-
-
-    public static function hoursCounterUpdate(Schedule $schedule, Bool $plusOrMinus): void
-    {
-        try {
-            DB::transaction(function () use ($schedule, $plusOrMinus) {
-
-                $schedule->load('subject');
-
-                $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
-
-                $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)
-                    ->where('id_schoolyear', $schedule->id_schoolyear)
-                    ->first();
-
-                if (!$counter) {
-                    return;
-                }
-
-                if ($plusOrMinus) {
-                    if ($tipo === 'Não Letiva' || $tipo === 'nao letiva' || $tipo === 'não letiva') {
-                        $counter->non_teaching_load += 1;
-                    } else {
-                        $counter->teaching_load += 1;
-                    }
-                } else {
-                    if ($tipo === 'Não Letiva' || $tipo === 'nao letiva' || $tipo === 'não letiva') {
-                        $counter->non_teaching_load -= 1;
-                    } else {
-                        $counter->teaching_load -= 1;
-                    }
-                }
-
-                $counter->workload = $counter->teaching_load + $counter->non_teaching_load;
-                $counter->save();
-            });
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Erro ao atualizar a carga horária do professor')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
-
 
     public static function getRelations(): array
     {

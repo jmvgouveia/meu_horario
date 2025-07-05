@@ -6,6 +6,7 @@ use App\Filament\Resources\ScheduleResource;
 use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
+use App\Filament\Resources\ScheduleResource\Traits\HourCounter;
 use App\Models\Schedule;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
@@ -20,7 +21,7 @@ class CreateSchedule extends CreateRecord
 {
     protected static string $resource = ScheduleResource::class;
 
-    use InteractsWithActions, CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap;
+    use InteractsWithActions, CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap, HourCounter;
 
     protected $listeners = ['botaoSolicitarTrocaClicado' => 'onSolicitarTrocaClicado'];
     public ?string $justification = null;
@@ -46,8 +47,6 @@ class CreateSchedule extends CreateRecord
 
     protected function beforeCreate(): void
     {
-
-
         DB::transaction(function () {
             $this->validateScheduleWindow();
             $this->checkScheduleConflictsAndAvailability($this->data);
@@ -67,7 +66,8 @@ class CreateSchedule extends CreateRecord
             DB::transaction(function () {
                 $this->record->classes()->sync($this->data['id_classes'] ?? []);
                 $this->record->students()->sync($this->data['students'] ?? []);
-                ScheduleResource::hoursCounterUpdate($this->record, false);
+                //ScheduleResource::hoursCounterUpdate($this->record, false);
+                $this->hoursCounterUpdate($this->record, false);
             });
         } catch (\Exception $e) {
             Notification::make()

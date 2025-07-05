@@ -10,21 +10,13 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
+use App\Helpers\DatabaseHelper as DBHelper;
 
 class ListScheduleRequests extends ListRecords
 {
     protected static string $resource = ScheduleRequestResource::class;
 
     public string $filtroAtual = 'recebidos';
-
-    // public function mount(): void
-    // {
-    //     parent::mount();
-
-    //     if ($this->isGestorConflitos()) {
-    //         $this->filtroAtual = 'todos';
-    //     }
-    // }
 
     protected function isGestorConflitos(): bool
     {
@@ -33,7 +25,7 @@ class ListScheduleRequests extends ListRecords
 
     protected function getCounts(): array
     {
-        $teacher = $this->getCurrentTeacher(); // ou o que usares
+        $teacher = DBHelper::getCurrentTeacher();
 
         if (!$teacher) {
             return ['meus' => 0, 'recebidos' => 0];
@@ -90,8 +82,6 @@ class ListScheduleRequests extends ListRecords
                 ->label("Meus Pedidos ({$counts['meus']})")
                 ->action(fn() => $this->filtroAtual = 'meus')
                 ->color(fn() => $this->filtroAtual === 'meus' ? 'primary' : 'gray'),
-
-
         ];
     }
 
@@ -102,12 +92,12 @@ class ListScheduleRequests extends ListRecords
             return ScheduleRequest::query()
                 ->where(function ($query) {
                     $query
-                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()))
-                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()));
+                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()))
+                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()));
                 });
         }
 
-        $teacher = $this->getCurrentTeacher();
+        $teacher = DBHelper::getCurrentTeacher();
 
         if (!$teacher) {
             return ScheduleRequest::query()->whereRaw('0 = 1');
@@ -117,21 +107,19 @@ class ListScheduleRequests extends ListRecords
             'meus' => ScheduleRequest::query()
                 ->where('id_teacher', $teacher->id)
                 ->where('status', '!=', 'Escalado')
-                // ->where('status', '!=', 'Eliminado')
                 ->where(function ($query) {
                     $query
-                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()))
-                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()));
+                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()))
+                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()));
                 }),
 
             'recebidos' => ScheduleRequest::query()
                 ->whereHas('scheduleConflict', fn($q) => $q->where('id_teacher', $teacher->id))
                 ->where('status', '!=', 'Escalado')
-                // ->where('status', '!=', 'Eliminado')
                 ->where(function ($query) {
                     $query
-                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()))
-                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()));
+                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()))
+                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()));
                 }),
 
             default => ScheduleRequest::query()
@@ -144,19 +132,10 @@ class ListScheduleRequests extends ListRecords
                 })
                 ->where(function ($query) {
                     $query
-                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()))
-                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', $this->getActiveSchoolYearId()));
+                        ->whereHas('scheduleNew', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()))
+                        ->orWhereHas('scheduleConflict', fn($q) => $q->where('id_schoolyear', DBHelper::getIDActiveSchoolyear()));
                 }),
         };
     }
 
-    protected function getActiveSchoolYearId(): ?int
-    {
-        return \App\Models\SchoolYear::where('active', true)->value('id');
-    }
-
-    protected function getCurrentTeacher(): ?Teacher
-    {
-        return Teacher::where('id_user', Filament::auth()->id())->first();
-    }
 }
