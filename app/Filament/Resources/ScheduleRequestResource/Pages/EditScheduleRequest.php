@@ -46,7 +46,7 @@ class EditScheduleRequest extends EditRecord
             $actions[] = Action::make('accept')
                 ->label('Aceitar Troca')
                 ->color('success')
-                ->visible(fn() => $this->record->status !== 'Eliminado')
+
                 ->mountUsing(function () {
                     if ($this->record->status === 'Eliminado') {
                         Notification::make()
@@ -55,10 +55,13 @@ class EditScheduleRequest extends EditRecord
                             ->danger()
                             ->send();
 
+                        //return Action::halt();
+                        //throw new Halt('Pedido já eliminado');
                         // Previne a abertura do modal
                         redirect(request()->header('Referer') ?? url()->previous() ?? filament()->getUrl());
                     }
                 })
+                ->visible(fn() => $this->record->status !== 'Eliminado')
                 ->form([
 
                     Select::make('id_room_novo')
@@ -279,15 +282,96 @@ class EditScheduleRequest extends EditRecord
             ->url($this->getResource()::getUrl('index'))
             ->color('gray');
 
+        // $actions[] = DeleteAction::make()
+        //     ->label('Eliminar Horário')
+        //     ->color('danger')
+        //     ->visible(fn() => $this->record->status !== 'Eliminado')
+        //     ->requiresConfirmation()
+        //     ->action(function () {
+
+        //         if ($this->record->status === 'Eliminado') {
+
+        //             Notification::make()
+        //                 ->title('Pedido já eliminado')
+        //                 ->body('Este pedido já foi eliminado por outro utilizador.')
+        //                 ->danger()
+        //                 ->send();
+
+        //             return redirect(filament()->getUrl());
+        //         }
+
+        //         try {
+        //             DB::transaction(function () {
+        //                 $teacherId = Filament::auth()->user()?->teacher?->id;
+        //                 $isGestor = in_array(Filament::auth()->id(), [1]);
+
+        //                 $scheduleRequest = $this->record;
+        //                 $scheduleNew = $scheduleRequest->scheduleNew;
+        //                 $scheduleConflict = $scheduleRequest->scheduleConflict;
+
+        //                 $deletedSchedule = null;
+        //                 $scheduleToApprove = null;
+
+        //                 if ($teacherId === $scheduleRequest->id_teacher) {
+        //                     $deletedSchedule = $scheduleNew;
+        //                     $scheduleToApprove = $scheduleConflict;
+        //                 } elseif ($teacherId === $scheduleConflict?->id_teacher) {
+        //                     $deletedSchedule = $scheduleConflict;
+        //                     $scheduleToApprove = $scheduleNew;
+        //                 } else {
+        //                     throw new \Exception('Não tem permissão para eliminar esta marcação.');
+        //                 }
+
+        //                 if ($deletedSchedule) {
+        //                     if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
+        //                         $this->hoursCounterUpdate($deletedSchedule, true);
+        //                     }
+
+        //                     //NODEL
+        //                     $deletedSchedule->update(['status' => 'Eliminado']);
+        //                 }
+
+        //                 if ($scheduleToApprove && $scheduleToApprove->status !== 'Aprovado') {
+        //                     $scheduleToApprove->update([
+        //                         'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
+        //                     ]);
+
+        //                     $this->hoursCounterUpdate($scheduleToApprove, false);
+        //                 }
+
+
+
+
+        //                 $scheduleRequest->update([
+        //                     'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
+        //                     'responded_at' => now(),
+        //                 ]);
+
+        //                 Notification::make()
+        //                     ->title('Marcação eliminada e troca aprovada')
+        //                     ->body('A sua marcação foi eliminada. A marcação da outra parte foi automaticamente aprovada.')
+        //                     ->success()
+        //                     ->sendToDatabase(Filament::auth()->user());
+
+        //                 $this->redirect($this->getResource()::getUrl('index'));
+        //             });
+        //         } catch (\Exception $e) {
+        //             Notification::make()
+        //                 ->title('Erro ao eliminar o horário')
+        //                 ->body($e->getMessage())
+        //                 ->danger()
+        //                 ->send();
+        //         }
+        //     });
+
+
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
             ->color('danger')
             ->visible(fn() => $this->record->status !== 'Eliminado')
             ->requiresConfirmation()
             ->action(function () {
-
                 if ($this->record->status === 'Eliminado') {
-
                     Notification::make()
                         ->title('Pedido já eliminado')
                         ->body('Este pedido já foi eliminado por outro utilizador.')
@@ -299,16 +383,18 @@ class EditScheduleRequest extends EditRecord
 
                 try {
                     DB::transaction(function () {
-                        $teacherId = Filament::auth()->user()?->teacher?->id;
-                        $isGestor = in_array(Filament::auth()->id(), [1]);
+                        $user = Filament::auth()->user();
+                        $teacherId = $user?->teacher?->id;
+                        $isGestor = in_array($user->id, [1]); // Ajustar conforme necessário
 
-                        $scheduleRequest = $this->record;
+                        $scheduleRequest = $this->record->refresh();
                         $scheduleNew = $scheduleRequest->scheduleNew;
                         $scheduleConflict = $scheduleRequest->scheduleConflict;
 
                         $deletedSchedule = null;
                         $scheduleToApprove = null;
 
+                        // Determina quem está a eliminar e qual é a marcação dele
                         if ($teacherId === $scheduleRequest->id_teacher) {
                             $deletedSchedule = $scheduleNew;
                             $scheduleToApprove = $scheduleConflict;
@@ -319,15 +405,21 @@ class EditScheduleRequest extends EditRecord
                             throw new \Exception('Não tem permissão para eliminar esta marcação.');
                         }
 
-                        if ($deletedSchedule) {
+                        // Elimina a marcação, se ainda não estiver eliminada
+                        if ($deletedSchedule && $deletedSchedule->status !== 'Eliminado') {
                             if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
                                 $this->hoursCounterUpdate($deletedSchedule, true);
                             }
 
-                            //NODEL
                             $deletedSchedule->update(['status' => 'Eliminado']);
+
+                            // ✅ Atualiza o estado do pedido imediatamente após eliminação
+                            $scheduleRequest->status = $isGestor ? 'Aprovado DP' : 'Aprovado';
+                            $scheduleRequest->responded_at = now();
+                            $scheduleRequest->save();
                         }
 
+                        // Aprova a marcação da outra parte, se ainda não estiver aprovada
                         if ($scheduleToApprove && $scheduleToApprove->status !== 'Aprovado') {
                             $scheduleToApprove->update([
                                 'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
@@ -336,16 +428,12 @@ class EditScheduleRequest extends EditRecord
                             $this->hoursCounterUpdate($scheduleToApprove, false);
                         }
 
-                        $scheduleRequest->update([
-                            'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
-                            'responded_at' => now(),
-                        ]);
-
+                        // Notificação final de sucesso
                         Notification::make()
                             ->title('Marcação eliminada e troca aprovada')
                             ->body('A sua marcação foi eliminada. A marcação da outra parte foi automaticamente aprovada.')
                             ->success()
-                            ->sendToDatabase(Filament::auth()->user());
+                            ->sendToDatabase($user);
 
                         $this->redirect($this->getResource()::getUrl('index'));
                     });
@@ -357,6 +445,7 @@ class EditScheduleRequest extends EditRecord
                         ->send();
                 }
             });
+
 
         return $actions;
     }
