@@ -79,13 +79,14 @@ class EditSchedule extends EditRecord
 
         return [
 
-
-            $this->getSaveFormAction(),
+            $this->getSaveFormAction()
+                ->visible(fn($record) => $record->status !== 'Eliminado'),
 
             DeleteAction::make()
                 ->label('Eliminar Horário')
                 ->color('danger')
                 ->requiresConfirmation()
+                ->visible(fn($record) => $record->status !== 'Eliminado')
                 ->modalHeading('Eliminar Horário')
                 ->modalDescription('Ao eliminar este horário, qualquer pedido de troca que estava pendente com este registo será automaticamente aprovado.')
                 ->action(function () {

@@ -214,25 +214,32 @@ class ScheduleConflictResource extends Resource
                 TextColumn::make('scheduleConflict.teacher.name')
                     ->label('Professor com Marcações')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('requester.name')
                     ->label('Solicitante')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('scheduleConflict.room.name')
                     ->label('Sala')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('scheduleConflict.timePeriod.description')
                     ->label('Hora')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('scheduleConflict.weekday.weekday')
                     ->label('Dia da Semana')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('status')
                     ->label('Estado')
@@ -260,6 +267,7 @@ class ScheduleConflictResource extends Resource
                         'Aprovado DP' => 'Aprovado DP',
                         'Recusado DP' => 'Recusado DP',
                     ])
+
             ])
             ->actions([])
             ->bulkActions([]);

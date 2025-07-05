@@ -44,6 +44,19 @@ class EditScheduleConflict extends EditRecord
                 ->label('Aprovar Pedido')
                 ->color('success')
                 ->requiresConfirmation()
+                ->visible(fn() => $this->record->status !== 'Eliminado')
+                ->mountUsing(function () {
+                    if ($this->record->status === 'Eliminado') {
+                        Notification::make()
+                            ->title('Pedido já eliminado')
+                            ->body('Este pedido foi eliminado por outro utilizador.')
+                            ->danger()
+                            ->send();
+
+                        // Previne a abertura do modal
+                        redirect(request()->header('Referer') ?? url()->previous() ?? filament()->getUrl());
+                    }
+                })
                 ->form([
                     Select::make('id_room_novo')
                         ->label('Sala Nova')
@@ -105,6 +118,19 @@ class EditScheduleConflict extends EditRecord
                 ->label('Recusar Pedido')
                 ->color('danger')
                 ->requiresConfirmation()
+                ->visible(fn() => $this->record->status !== 'Eliminado')
+                ->mountUsing(function () {
+                    if ($this->record->status === 'Eliminado') {
+                        Notification::make()
+                            ->title('Pedido já eliminado')
+                            ->body('Este pedido foi eliminado por outro utilizador.')
+                            ->danger()
+                            ->send();
+
+                        // Previne a abertura do modal
+                        redirect(request()->header('Referer') ?? url()->previous() ?? filament()->getUrl());
+                    }
+                })
                 ->form([
                     Textarea::make('response_coord')
                         ->label('Justificação para Recusa DP')
@@ -160,6 +186,19 @@ class EditScheduleConflict extends EditRecord
             ->label('Eliminar Horário')
             ->color('danger')
             ->visible(fn() => !Auth::user()->isgestorConflitos())
+            ->visible(fn() => $this->record->status !== 'Eliminado')
+            ->mountUsing(function () {
+                if ($this->record->status === 'Eliminado') {
+                    Notification::make()
+                        ->title('Pedido já eliminado')
+                        ->body('Este pedido foi eliminado por outro utilizador.')
+                        ->danger()
+                        ->send();
+
+                    // Previne a abertura do modal
+                    redirect(request()->header('Referer') ?? url()->previous() ?? filament()->getUrl());
+                }
+            })
             ->requiresConfirmation()
             ->action(function () {
 
@@ -206,9 +245,23 @@ class EditScheduleConflict extends EditRecord
                                 ]);
                             }
 
-                            $this->record->scheduleNew?->update([
-                                'status' => 'Aprovado',
-                            ]);
+                            if (Auth::user()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
+
+                                $this->record->scheduleConflict?->update([
+                                    'status' => 'Aprovado',
+                                ]);
+                                $this->record->scheduleNew?->update([
+                                    'status' => 'Eliminado',
+                                ]);
+                            } else {
+
+                                $this->record->scheduleConflict?->update([
+                                    'status' => 'Eliminado',
+                                ]);
+                                $this->record->scheduleNew?->update([
+                                    'status' => 'Aprovado',
+                                ]);
+                            }
                         }
 
                         Notification::make()

@@ -7,6 +7,7 @@ use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
@@ -16,6 +17,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -83,11 +85,13 @@ class ScheduleRequestResource extends Resource
                         ->visible(fn($get) => $get('status') === 'Recusado')
                         ->columnSpanFull(),
 
+
                     Placeholder::make('responded_at')
                         ->label('Data da Resposta')
-                        ->content(fn($record) => optional($record->responded_at)->format('d/m/Y H:i') ?? '—')
                         ->visible(fn($get) => $get('status') === 'Recusado')
-                        ->columnSpanFull(),
+                        ->content(fn($record) => $record->responded_at
+                            ? Carbon::parse($record->responded_at)->format('d/m/Y H:i')
+                            : '—'),
 
                     Placeholder::make('response_coord')
                         ->label('Resposta do Docente')
@@ -100,6 +104,15 @@ class ScheduleRequestResource extends Resource
                         ->content(fn($record) => $record->scaled_justification ?? '—')
                         ->visible(fn($get) => $get('status') === 'Escalado')
                         ->columnSpanFull(),
+
+
+                    Placeholder::make('justification_at')
+                        ->label('Data da Resposta')
+                        ->visible(fn($get) => $get('status') === 'Escalado')
+                        ->content(fn($record) => $record->justification_at
+                            ? Carbon::parse($record->justification_at)->format('d/m/Y H:i')
+                            : '—'),
+
 
                 ]),
         ]);
@@ -208,6 +221,22 @@ class ScheduleRequestResource extends Resource
 
 
                 ] : []),
+
+                TernaryFilter::make('incluir_eliminados')
+                    ->label('Incluir Eliminados')
+                    ->placeholder('Ocultar Eliminados') // Valor nulo (default)
+                    ->trueLabel('Mostrar Eliminados')
+                    ->falseLabel('Ocultar Eliminados') // Mesmo que default
+                    ->queries(
+                        true: fn(Builder $query) => $query, // não aplica filtro → mostra todos
+                        false: fn(Builder $query) => $query->where('status', '!=', 'Eliminado'),
+                        blank: fn(Builder $query) => $query->where('status', '!=', 'Eliminado'),
+                    ),
+
+
+
+
+
             ])
             ->actions([])
             ->bulkActions(

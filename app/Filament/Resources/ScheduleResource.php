@@ -41,6 +41,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Model;
 
 class ScheduleResource extends Resource
@@ -181,6 +182,7 @@ class ScheduleResource extends Resource
             // Se não houver ano letivo ativo, retorna vazio para segurança
             $query->whereRaw('0 = 1');
         }
+        //$query->where('status', '!=', 'Eliminado');
 
         return $query;
     }
@@ -655,7 +657,7 @@ class ScheduleResource extends Resource
                         'Escalado' => 'Escalado',
                         'Aprovado DP' => 'Aprovado DP',
                         'Recusado DP' => 'Recusado DP',
-                        'Eliminado' => 'Eliminado',
+                        // 'Eliminado' => 'Eliminado',
                     ]),
 
                 SelectFilter::make('teacher_id')
@@ -687,6 +689,18 @@ class ScheduleResource extends Resource
                 SelectFilter::make('room.building_id')
                     ->label('Pólo')
                     ->relationship('room.building', 'name'),
+
+                TernaryFilter::make('incluir_eliminados')
+                    ->label('Incluir Eliminados')
+                    ->placeholder('Ocultar Eliminados') // Valor nulo (default)
+                    ->trueLabel('Mostrar Eliminados')
+                    ->falseLabel('Ocultar Eliminados') // Mesmo que default
+                    ->queries(
+                        true: fn(Builder $query) => $query, // não aplica filtro → mostra todos
+                        false: fn(Builder $query) => $query->where('status', '!=', 'Eliminado'),
+                        blank: fn(Builder $query) => $query->where('status', '!=', 'Eliminado'),
+                    ),
+
             ])
             ->headerActions([
                 Tables\Actions\Action::make('exportar_selecionados')
