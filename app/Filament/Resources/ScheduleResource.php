@@ -441,7 +441,7 @@ class ScheduleResource extends Resource
                                     }
                                 }
 
-                                // 🔍 Aplica filtro por nome (se preenchido)
+                                // Aplica filtro por nome (se preenchido)
                                 if (!empty($filtroNome)) {
                                     $query->whereHas('student', function ($q) use ($filtroNome) {
                                         $q->where('name', 'like', '%' . $filtroNome . '%');
@@ -458,71 +458,6 @@ class ScheduleResource extends Resource
                                     ];
                                 });
                             }),
-                        // ->options(function (callable $get) {
-                        //     $subjectId = $get('id_subject');
-                        //     $schoolYear = SchoolYear::where('active', true)->first();
-                        //     $classIds = $get('id_classes') ?? [];
-                        //     $filtrarPorTurma = $get('filtrar_por_turma');
-                        //     $filtrarUltimoAno = $get('filter_last_year_students');
-
-                        //     if (!$subjectId || !$schoolYear) return [];
-
-                        //     $registrationIds = DB::table('registrations_subjects')
-                        //         ->where('id_subject', $subjectId)
-                        //         ->pluck('id_registration');
-
-                        //     if ($registrationIds->isEmpty()) return [];
-
-                        //     $query = Registration::with(['student', 'class'])
-                        //         ->whereIn('id', $registrationIds)
-                        //         ->where('id_schoolyear', $schoolYear->id);
-
-                        //     if ($filtrarPorTurma && !empty($classIds)) {
-                        //         $query->whereIn('id_class', $classIds);
-                        //     }
-
-                        //     if ($filtrarUltimoAno) {
-                        //         $professorId = Auth::user()?->teacher?->id;
-
-                        //         // Procurar ano letivo anterior com base no campo 'ano'
-                        //         $anoAnterior = $schoolYear->id - 1;
-                        //         $anoLetivoAnterior = \App\Models\SchoolYear::where('id', $anoAnterior)->first();
-
-                        //         // Se não existir ano letivo anterior, não filtra nada
-                        //         if (!$anoLetivoAnterior) {
-                        //             return [];
-                        //         }
-
-                        //         // Horários do professor no ano letivo anterior
-                        //         $scheduleIds = DB::table('schedules')
-                        //             ->where('id_teacher', $professorId)
-                        //             ->where('id_subject', $subjectId)
-                        //             ->where('id_schoolyear', $anoLetivoAnterior->id)
-                        //             ->pluck('id');
-
-                        //         // Alunos que estiveram nesses horários
-                        //         $studentIdsPermitidos = DB::table('schedules_students')
-                        //             ->whereIn('id_schedule', $scheduleIds)
-                        //             ->pluck('id_student');
-
-                        //         if ($studentIdsPermitidos->isNotEmpty()) {
-                        //             $query->whereIn('id_student', $studentIdsPermitidos);
-                        //         } else {
-                        //             return [];
-                        //         }
-                        //     }
-
-
-                        //     return $query->get()->mapWithKeys(function ($registration) {
-                        //         $student = $registration->student;
-                        //         $turma = $registration->class?->name ?? '—';
-                        //         if (!$student) return [];
-
-                        //         return [
-                        //             $registration->id_student => "{$student->number} - {$student->name} - {$turma}",
-                        //         ];
-                        //     });
-                        // }),
 
                         Section::make('Turno')
                             ->collapsible()
@@ -596,7 +531,7 @@ class ScheduleResource extends Resource
                     ->sortable()
                     ->toggleable()
                     ->searchable()
-                    ->visible(fn() => Auth::user()?->isSuperAdmin())
+                    ->visible(fn() => isUserSuperAdmin())
                     ->wrap(),
                 TextColumn::make('weekday.weekday')
                     ->label('Dia da Semana')
@@ -664,7 +599,7 @@ class ScheduleResource extends Resource
                     ->label('Professor')
                     ->relationship('teacher', 'name')
                     ->searchable()
-                    ->visible(fn() => auth()->user()?->isSuperAdmin()),
+                    ->visible(fn() => isUserSuperAdmin()),
 
                 SelectFilter::make('weekday_id')
                     ->label('Dia da Semana')
@@ -709,7 +644,7 @@ class ScheduleResource extends Resource
                     ->action(fn() => self::exportSchedules())
                     ->color('primary')
                     ->requiresConfirmation()
-                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
+                    ->visible(fn() => isUserSuperAdmin()),
 
             ])
             ->bulkActions([
@@ -718,7 +653,7 @@ class ScheduleResource extends Resource
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
-                    ->visible(fn() => Auth::user()?->isSuperAdmin()),
+                    ->visible(fn() => isUserSuperAdmin()),
 
             ]);
     }

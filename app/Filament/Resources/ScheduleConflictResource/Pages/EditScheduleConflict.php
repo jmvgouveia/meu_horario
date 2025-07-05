@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ScheduleConflictResource\Pages;
 use App\Filament\Resources\ScheduleConflictResource;
 use App\Filament\Resources\ScheduleResource;
 use App\Models\Room;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Facades\Filament;
@@ -39,7 +40,7 @@ class EditScheduleConflict extends EditRecord
     {
         $actions = [];
 
-        if (Auth::user()?->isGestorConflitos()) {
+        if (currentUser()?->isGestorConflitos()) {
             $actions[] = Action::make('aprovar')
                 ->label('Aprovar Pedido')
                 ->color('success')
@@ -185,7 +186,7 @@ class EditScheduleConflict extends EditRecord
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
             ->color('danger')
-            ->visible(fn() => !Auth::user()->isgestorConflitos())
+            ->visible(fn() => !currentUser()->isgestorConflitos())
             ->visible(fn() => $this->record->status !== 'Eliminado')
             ->mountUsing(function () {
                 if ($this->record->status === 'Eliminado') {
@@ -201,8 +202,6 @@ class EditScheduleConflict extends EditRecord
             })
             ->requiresConfirmation()
             ->action(function () {
-
-
                 try {
                     DB::transaction(function () {
 
@@ -230,7 +229,7 @@ class EditScheduleConflict extends EditRecord
                                 'status' => 'Eliminado',
                             ]);
 
-                            if (Auth::user()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
+                            if (currentUser()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
                                 // $this->record->scheduleConflict?->delete();
                                 $this->record->scheduleConflict?->update([
                                     'status' => 'Eliminado',
@@ -245,7 +244,7 @@ class EditScheduleConflict extends EditRecord
                                 ]);
                             }
 
-                            if (Auth::user()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
+                            if (currentUser()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
 
                                 $this->record->scheduleConflict?->update([
                                     'status' => 'Aprovado',

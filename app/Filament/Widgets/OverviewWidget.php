@@ -54,8 +54,8 @@ class OverviewWidget extends Widget
             ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->first();
 
-        $letivaDisponivel = $counter?->teaching_load ?? 0;
-        $naoLetivaDisponivel = $counter?->non_teaching_load ?? 0;
+        //$letivaDisponivel = $counter?->teaching_load ?? 0;
+        //$naoLetivaDisponivel = $counter?->non_teaching_load ?? 0;
 
         // Aulas
         $aulasLetivas = $schedules->filter(fn($s) => strtolower($s->subject->type ?? '') === 'letiva')->count();
@@ -88,8 +88,8 @@ class OverviewWidget extends Widget
         $resumo = [
             'letiva' => $aulasLetivas,
             'nao_letiva' => $aulasNaoLetivas,
-            'disponivel_letiva' => max(0, $letivaDisponivel),
-            'disponivel_naoletiva' => max(0, $naoLetivaDisponivel),
+            'disponivel_letiva' => max(0, $counter?->teaching_load ?? 0),
+            'disponivel_naoletiva' => max(0, $counter?->non_teaching_load ?? 0),
             'cargos' => $cargos,
             'tempo_reducoes' => $tempoReducoes,
         ];
