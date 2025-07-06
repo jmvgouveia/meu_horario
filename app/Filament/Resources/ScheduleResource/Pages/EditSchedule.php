@@ -8,7 +8,6 @@ use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
 use App\Filament\Resources\ScheduleResource\Traits\HourCounter;
 use App\Models\Schedule;
-use App\Models\ScheduleRequest;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -17,8 +16,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\DatabaseHelper AS DBHelper;
-use App\Helpers\MensagensErro AS MSGErro;
+use App\Helpers\DatabaseHelper as DBHelper;
+use App\Helpers\MensagensErro as MSGErro;
 
 class EditSchedule extends EditRecord
 {
@@ -39,9 +38,10 @@ class EditSchedule extends EditRecord
             DB::transaction(function () {
                 $this->validateScheduleWindow();
                 $this->checkScheduleConflictsAndAvailability($this->data, $this->record?->id);
-                $this->form->fill([
-                    'status' => 'Aprovado',
-                ]);
+                // $this->form->fill([
+                //     'status' => 'Aprovado',
+                // ]);
+                $this->data['status'] = 'Aprovado';
             });
         } catch (\Exception $e) {
 
@@ -122,6 +122,9 @@ class EditSchedule extends EditRecord
                                             ->sendToDatabase($requerente);
                                     }
                                 }
+                                $pendingRequest->update([
+                                    'status' => 'Eliminado',
+                                ]);
                             }
 
                             if ($record->status !== 'Pendente') {
@@ -177,5 +180,9 @@ class EditSchedule extends EditRecord
                     })
             ]),
         ];
+    }
+    protected function getRedirectUrl(): string
+    {
+        return filament()->getUrl();
     }
 }

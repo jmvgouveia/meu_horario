@@ -86,4 +86,8 @@ class CreateSchedule extends CreateRecord
             'id_timeperiod' => request('timeperiod'),
         ]);
     }
+    protected function getRedirectUrl(): string
+    {
+        return filament()->getUrl();
+    }
 }

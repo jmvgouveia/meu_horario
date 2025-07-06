@@ -116,7 +116,6 @@ class EditScheduleConflict extends EditRecord
 
                         //ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
                         $this->hoursCounterUpdate($this->record->scheduleNew, false);
-
                     });
                 });
 
@@ -318,5 +317,9 @@ class EditScheduleConflict extends EditRecord
             //->unique('name')
             ->pluck('name', 'id')
             ->toArray();
+    }
+    protected function getRedirectUrl(): string
+    {
+        return filament()->getUrl();
     }
 }
