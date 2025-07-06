@@ -37,16 +37,16 @@ class RegistrationImporter extends Importer
                 ->example('12'),
 
             ImportColumn::make('id_subjects')
-                ->label('IDs das Disciplinas (separados por vírgulas)')
+                ->label('IDs das Disciplinas (separados por vírgulas, ponto e vírgula ou espaços)')
                 ->rules(['required', 'string'])
-                ->example('1,2,3')
-                ->fillRecordUsing(null),
+                ->example('59;144')
+                ->fillRecordUsing(null), // ⚠️ Impede que Laravel tente gravar esta coluna
         ];
     }
 
     protected function beforeFill(): void
     {
-
+        // ⚠️ Remove o campo que não pertence à tabela
         unset($this->data['id_subjects']);
 
         $this->data['id_student'] = intval($this->data['id_student'] ?? 0);
@@ -68,6 +68,7 @@ class RegistrationImporter extends Importer
                     'id_class' => $this->data['id_class'],
                 ]);
 
+                // ⚠️ Usa os dados originais para recuperar os subjects
                 if (!empty($this->originalData['id_subjects'])) {
                     $this->attachSubjectsToRegistration($registration, $this->originalData['id_subjects']);
                 }
@@ -86,7 +87,8 @@ class RegistrationImporter extends Importer
     private function attachSubjectsToRegistration(Registration $registration, string $subjectsList): void
     {
         try {
-            $subjectIds = collect(explode(',', $subjectsList))
+            // Aceita ; , espaço ou tabulação como separadores
+            $subjectIds = collect(preg_split('/[;,\s]+/', $subjectsList))
                 ->map(fn($id) => (int) trim($id))
                 ->filter(fn($id) => $id > 0)
                 ->unique()
