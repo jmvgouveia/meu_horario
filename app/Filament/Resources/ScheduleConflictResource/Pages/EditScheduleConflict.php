@@ -17,6 +17,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\DatabaseHelper as DBHelper;
+use App\Helpers\MensagensErro as MSGErro;
 
 
 class EditScheduleConflict extends EditRecord
@@ -48,7 +50,8 @@ class EditScheduleConflict extends EditRecord
                 ->label('Aprovar Pedido')
                 ->color('success')
                 ->requiresConfirmation()
-                ->visible(fn() => $this->record->status !== 'Eliminado')
+                ->visible(fn() => !in_array($this->record->status, ['Eliminado', 'Aprovado DP']))
+
                 ->mountUsing(function () {
                     if ($this->record->status === 'Eliminado') {
                         Notification::make()
@@ -75,19 +78,47 @@ class EditScheduleConflict extends EditRecord
                 ])
                 ->action(function (array $data) {
                     DB::transaction(function () use ($data) {
-                        $this->record->update([
-                            'status' => 'Aprovado DP',
-                            'response_coord' => $data['response_coord'],
-                        ]);
 
-                        $this->record->scheduleConflict?->update([
-                            'status' => 'Aprovado DP',
-                            'id_room' => $data['id_room_novo'],
-                        ]);
+                        DBHelper::updateScheduleRequestData(
+                            $this->record->id,
+                            [
+                                'status' => 'Aprovado DP',
 
-                        $this->record->scheduleNew?->update([
-                            'status' => 'Aprovado DP',
-                        ]);
+                                'response_coord' => $data['response_coord'],
+                            ],
+                            MSGErro::ERRO_APROVAR_SCHEDULE
+                        );
+                        // $this->record->update([
+                        //     'status' => 'Aprovado DP',
+                        //     'response_coord' => $data['response_coord'],
+                        // ]);
+
+                        DBHelper::updateScheduleData(
+                            $this->record->scheduleConflict->id,
+                            [
+                                'status' => 'Aprovado DP',
+                                'id_room' => $data['id_room_novo'],
+                            ],
+                            MSGErro::ERRO_APROVAR_SCHEDULE
+                        );
+                        // $this->record->scheduleConflict?->update([
+                        //     'status' => 'Aprovado DP',
+                        //     'id_room' => $data['id_room_novo'],
+                        // ]);
+
+                        DBHelper::updateScheduleData(
+                            $this->record->scheduleNew->id,
+                            [
+                                'status' => 'Aprovado DP',
+                            ],
+                            MSGErro::ERRO_APROVAR_SCHEDULE
+                        );
+
+                        // $this->record->scheduleNew?->update([
+                        //     'status' => 'Aprovado DP',
+                        // ]);
+
+
 
                         $salaAntiga = $this->record->scheduleConflict?->room?->name ?? 'desconhecida';
                         $salaNova = Room::find($data['id_room_novo'])?->name ?? 'desconhecida';
@@ -123,7 +154,8 @@ class EditScheduleConflict extends EditRecord
                 ->label('Recusar Pedido')
                 ->color('danger')
                 ->requiresConfirmation()
-                ->visible(fn() => $this->record->status !== 'Eliminado')
+                ->visible(fn() => !in_array($this->record->status, ['Eliminado', 'Aprovado DP']))
+
                 ->mountUsing(function () {
                     if ($this->record->status === 'Eliminado') {
                         Notification::make()
@@ -144,18 +176,44 @@ class EditScheduleConflict extends EditRecord
                 ])
                 ->action(function (array $data) {
                     DB::transaction(function () use ($data) {
-                        $this->record->update([
-                            'status' => 'Recusado DP',
-                            'response_coord' => $data['response_coord'],
-                        ]);
 
-                        $this->record->scheduleNew?->update([
-                            'status' => 'Recusado DP',
-                        ]);
+                        DBHelper::updateScheduleRequestData(
+                            $this->record->id,
+                            [
+                                'status' => 'Recusado DP',
+                                'response_coord' => $data['response_coord'],
+                            ],
+                            MSGErro::ERRO_ATUALIZAR_SCHEDULE
+                        );
 
-                        $this->record->scheduleConflict?->update([
-                            'status' => 'Aprovado',
-                        ]);
+                        // $this->record->update([
+                        //     'status' => 'Recusado DP',
+                        //     'response_coord' => $data['response_coord'],
+                        // ]);
+
+                        DBHelper::updateScheduleData(
+                            $this->record->scheduleNew?->id,
+                            [
+                                'status' => 'Recusado DP',
+                            ],
+                            MSGErro::ERRO_ATUALIZAR_SCHEDULE
+                        );
+
+                        // $this->record->scheduleNew?->update([
+                        //     'status' => 'Recusado DP',
+                        // ]);
+
+
+                        DBHelper::updateScheduleData(
+                            $this->record->scheduleConflict->id,
+                            ['status' => 'Aprovado'],
+                            MSGErro::ERRO_ATUALIZAR_SCHEDULE
+                        );
+
+
+                        // $this->record->scheduleConflict?->update([
+                        //     'status' => 'Aprovado',
+                        // ]);
 
                         $schedule = $this->record->scheduleConflict;
                         $salaAntiga = $schedule?->room?->name ?? 'desconhecida';
@@ -209,64 +267,118 @@ class EditScheduleConflict extends EditRecord
                 try {
                     DB::transaction(function () {
 
-                        if ($this->record->status === 'Aprovado DP') {
+                        switch ($this->record->status) {
+                            case 'Aprovado DP':
 
-                            // NODEL
-                            // $this->record->delete();
-                            // $this->record->scheduleNew?->delete();
-                            $this->record->update([
-                                'status' => 'Eliminado',
-                            ]);
-                            $this->record->scheduleNew?->update([
-                                'status' => 'Eliminado',
-                            ]);
-                            $this->record->scheduleConflict?->update([
-                                'status' => 'Aprovado',
-                            ]);
+                                DBHelper::updateScheduleRequestData(
+                                    $this->record->id,
+                                    ['status' => 'Eliminado'],
+                                    'Erro ao eliminar pedido Aprovado DP'
+                                );
+                                // $this->record->update(['status' => 'Eliminado']);
+
+                                DBHelper::updateScheduleData(
+                                    $this->record->scheduleNew->id,
+                                    ['status' => 'Eliminado'],
+                                    'Erro ao eliminar horário novo'
+                                );
+
+                                //$this->record->scheduleNew?->update(['status' => 'Eliminado']);
+
+                                DBHelper::updateScheduleData(
+                                    $this->record->scheduleConflict->id,
+                                    ['status' => 'Aprovado'],
+                                    'Erro ao reaprovar horário original'
+                                );
+                                //$this->record->scheduleConflict?->update(['status' => 'Aprovado']);
+
+
+                                break;
+
+                            case 'Escalado':
+
+                                DBHelper::updateScheduleRequestData(
+                                    $this->record->id,
+                                    ['status' => 'Eliminado'],
+                                    MSGErro::ERRO_ELIMINAR_SCHEDULE
+                                );
+                                // $this->record->update(['status' => 'Eliminado']);
+
+
+                                if (UserHelper::currentUser()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
+
+                                    DBHelper::updateScheduleData(
+                                        $this->record->scheduleConflict->id,
+                                        ['status' => 'Eliminado'],
+                                        MSGErro::ERRO_ELIMINAR_SCHEDULE
+                                    );
+
+                                    //$this->record->scheduleConflict?->update(['status' => 'Eliminado',]);
+
+                                    $this->hoursCounterUpdate($this->record->scheduleConflict, true);
+
+                                    $this->hoursCounterUpdate($this->record->scheduleNew, false);
+                                } else {
+
+
+                                    DBHelper::updateScheduleData(
+                                        $this->record->scheduleNew->id,
+                                        ['status' => 'Eliminado'],
+                                        MSGErro::ERRO_ELIMINAR_SCHEDULE
+                                    );
+
+
+                                    //$this->record->scheduleNew?->update(['status' => 'Eliminado']);
+                                }
+
+
+                                if (UserHelper::currentUser()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
+
+                                    DBHelper::updateScheduleData(
+                                        $this->record->scheduleConflict->id,
+                                        ['status' => 'Aprovado'],
+                                        MSGErro::ERRO_APROVAR_SCHEDULE
+                                    );
+
+                                    //   $this->record->scheduleConflict?->update(['status' => 'Aprovado']);
+
+                                    DBHelper::updateScheduleData(
+                                        $this->record->scheduleNew?->id,
+                                        ['status' => 'Eliminado'],
+                                        MSGErro::ERRO_ELIMINAR_SCHEDULE
+                                    );
+
+                                    //  $this->record->scheduleNew?->update(['status' => 'Eliminado']);
+                                } else {
+
+
+                                    DBHelper::updateScheduleData(
+                                        $this->record->scheduleConflict->id,
+                                        ['status' => 'Eliminado'],
+                                        MSGErro::ERRO_ELIMINAR_SCHEDULE
+                                    );
+                                    DBHelper::updateScheduleData(
+                                        $this->record->scheduleNew->id,
+                                        ['status' => 'Aprovado'],
+                                        MSGErro::ERRO_APROVAR_SCHEDULE
+                                    );
+
+
+                                    // $this->record->scheduleConflict?->update(['status' => 'Eliminado']);
+
+                                    // $this->record->scheduleNew?->update(['status' => 'Aprovado']);
+                                }
+                                break;
+
+                            default:
+                                Notification::make()
+                                    ->title('Estado não tratado')
+                                    ->body('O estado do horário não foi tratado para eliminação.')
+                                    ->danger()
+                                    ->send();
+                                throw new \Exception('Estado não tratado');
                         }
 
-
-                        if ($this->record->status === 'Escalado') {
-
-                            //$this->record->delete();
-                            $this->record->update([
-                                'status' => 'Eliminado',
-                            ]);
-
-                            if (UserHelper::currentUser()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
-                                // $this->record->scheduleConflict?->delete();
-                                $this->record->scheduleConflict?->update([
-                                    'status' => 'Eliminado',
-                                ]);
-                                //ScheduleResource::hoursCounterUpdate($this->record->scheduleConflict, true);
-                                $this->hoursCounterUpdate($this->record->scheduleConflict, true);
-                                //ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
-                                $this->hoursCounterUpdate($this->record->scheduleNew, false);
-                            } else {
-                                // $this->record->scheduleNew?->delete();
-                                $this->record->scheduleNew?->update([
-                                    'status' => 'Eliminado',
-                                ]);
-                            }
-
-                            if (UserHelper::currentUser()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
-
-                                $this->record->scheduleConflict?->update([
-                                    'status' => 'Aprovado',
-                                ]);
-                                $this->record->scheduleNew?->update([
-                                    'status' => 'Eliminado',
-                                ]);
-                            } else {
-
-                                $this->record->scheduleConflict?->update([
-                                    'status' => 'Eliminado',
-                                ]);
-                                $this->record->scheduleNew?->update([
-                                    'status' => 'Aprovado',
-                                ]);
-                            }
-                        }
 
                         Notification::make()
                             ->title("Horário Eliminado")
@@ -311,10 +423,10 @@ class EditScheduleConflict extends EditRecord
         return Room::where('id_building', $edificioId)
             ->whereDoesntHave('schedules', function ($query) use ($idTimePeriod, $idWeekday) {
                 $query->where('id_timeperiod', $idTimePeriod)
-                    ->where('id_weekday', $idWeekday);
+                    ->where('id_weekday', $idWeekday)
+                    ->where('status', '!=', 'Eliminado');
             })
             ->get()
-            //->unique('name')
             ->pluck('name', 'id')
             ->toArray();
     }

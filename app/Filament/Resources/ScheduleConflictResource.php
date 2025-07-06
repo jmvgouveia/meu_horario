@@ -99,7 +99,7 @@ class ScheduleConflictResource extends Resource
 
         return $form->schema([
 
-            Section::make('🟢 Passo 1: Marcação original')
+            Section::make('🟢 Marcação original')
                 ->collapsible()
                 ->description('O professor que fez a marcação inicial no horário.')
                 ->schema([
@@ -121,7 +121,7 @@ class ScheduleConflictResource extends Resource
                 ])
                 ->columns(2),
 
-            Section::make('🟡 Passo 2: Pedido de alteração')
+            Section::make('🟡 Pedido de alteração')
                 ->collapsible()
 
                 ->description('Solicitação feita por outro professor.')
@@ -141,7 +141,7 @@ class ScheduleConflictResource extends Resource
                 ])
                 ->columns(2),
 
-            Section::make('🔵 Passo 3: Resposta do professor original')
+            Section::make('🔵 Resposta do professor original')
                 ->collapsible()
 
                 ->description('Resposta ao pedido.')
@@ -166,7 +166,7 @@ class ScheduleConflictResource extends Resource
                 ->columns(2),
 
 
-            Section::make('🔴 Passo 4: Situação Escalada para Direção Pedagógica')
+            Section::make('🔴 Situação Escalada para Direção Pedagógica')
                 ->collapsible()
 
                 ->description('Situação escalada para análise superior.')

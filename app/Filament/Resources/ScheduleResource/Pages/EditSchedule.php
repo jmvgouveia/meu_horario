@@ -37,10 +37,9 @@ class EditSchedule extends EditRecord
         try {
             DB::transaction(function () {
                 $this->validateScheduleWindow();
+
                 $this->checkScheduleConflictsAndAvailability($this->data, $this->record?->id);
-                // $this->form->fill([
-                //     'status' => 'Aprovado',
-                // ]);
+
                 $this->data['status'] = 'Aprovado';
             });
         } catch (\Exception $e) {
@@ -104,6 +103,7 @@ class EditSchedule extends EditRecord
                                 $scheduleNovo = $pendingRequest->scheduleNew;
 
                                 if ($scheduleNovo) {
+
                                     DBHelper::updateScheduleStatus($scheduleNovo->id, 'Aprovado', MSGErro::ERRO_APROVAR_SCHEDULE);
 
                                     $this->hoursCounterUpdate($scheduleNovo, false);
@@ -122,9 +122,12 @@ class EditSchedule extends EditRecord
                                             ->sendToDatabase($requerente);
                                     }
                                 }
-                                $pendingRequest->update([
-                                    'status' => 'Eliminado',
-                                ]);
+
+                                DBHelper::updateScheduleRequestData(
+                                    $pendingRequest->id,
+                                    ['status' => 'Eliminado'],
+                                    MSGErro::ERRO_ELIMINAR_SCHEDULE
+                                );
                             }
 
                             if ($record->status !== 'Pendente') {
@@ -133,6 +136,7 @@ class EditSchedule extends EditRecord
 
                             // Alterar estado de pedido para eliminado
                             DBHelper::updateScheduleRequestStatus($this->record->id, true, 'Eliminado', MSGErro::ERRO_ELIMINAR_SCHEDULE);
+
                             DBHelper::updateScheduleStatus($this->record->id, 'Eliminado', MSGErro::ERRO_ELIMINAR_SCHEDULE);
 
                             Notification::make()
@@ -177,6 +181,7 @@ class EditSchedule extends EditRecord
                     ])
                     ->action(function (array $data, $livewire) {
                         $livewire->submitJustification($data);
+                        return filament()->getUrl();
                     })
             ]),
         ];

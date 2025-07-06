@@ -12,9 +12,11 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -54,6 +56,7 @@ class ScheduleRequestResource extends Resource
                 ->schema([
 
                     Grid::make(3)->schema([
+
                         Placeholder::make('solicitante')
                             ->label('Pedido feito por')
                             ->content(fn($record) => $record->requester->name ?? '—'),
@@ -65,12 +68,24 @@ class ScheduleRequestResource extends Resource
 
                         Placeholder::make('status')
                             ->label('Estado Atual')
-                            ->content(fn($record) => $record->status ?? '—'),
+                            // ->content(fn($record) => $record->status ?? '—'),
+                            ->content(function ($record) {
+                                return match ($record->status) {
+                                    'Recusado'   => '❌ Recusado',
+                                    'Eliminado'  => '🛑 Eliminado',
+                                    default => $record->status ?? '—',
+                                };
+                            }),
 
                     ]),
+                    Placeholder::make('Pedido Eliminado')
+                        ->content('Este pedido foi eliminado e já não é possível editar.')
+                        ->visible(fn($get) => $get('status') === 'Eliminado')
+                        ->columns(1),
 
                     Section::make('Justificação do Pedido')
                         ->description('Motivo indicado pelo docente para solicitar a troca de horário.')
+                        ->visible(fn($get) => $get('status') !== 'Eliminado')
                         ->schema([
                             Placeholder::make('justification')
                                 ->label('')
