@@ -40,8 +40,8 @@ class RegistrationImporter extends Importer
             ImportColumn::make('id_subjects')
                 ->label('IDs das Disciplinas (separados por vírgulas)')
                 ->rules(['required', 'string'])
-                ->example('1,2,3')
-                ->fillRecordUsing(null),
+                ->example('1,2,3')->fillRecordUsing(null)
+                ->dehydrateStateUsing(fn() => null),
         ];
     }
 
