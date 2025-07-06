@@ -29,7 +29,7 @@ class RegistrationImporter extends Importer
 
             ImportColumn::make('id_schoolyear')
                 ->label('ID do Ano Letivo')
-                ->rules(['required', 'integer', 'exists:school_years,id'])
+                ->rules(['required', 'integer', 'exists:schoolyears,id'])
                 ->example('2024'),
 
             ImportColumn::make('id_class')
