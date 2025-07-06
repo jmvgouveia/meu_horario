@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DatabaseHelper as DBHelper;
 use App\Helpers\MensagensErro as MSGErro;
-
+use App\Models\Schedule;
+use App\Models\ScheduleRequest;
 
 class EditScheduleConflict extends EditRecord
 {
@@ -248,8 +249,23 @@ class EditScheduleConflict extends EditRecord
         $actions[] = DeleteAction::make()
             ->label('Eliminar Horário')
             ->color('danger')
-            ->visible(fn() => !UserHelper::currentUser()->isgestorConflitos())
-            ->visible(fn() => $this->record->status !== 'Eliminado')
+            ->visible(function () {
+                $user = Filament::auth()->user();
+                $teacherId = $user?->teacher?->id;
+
+                if (!$teacherId || $this->record->status === 'Eliminado') {
+                    return false;
+                }
+
+                $idTeacherRequester = $this->record->id_teacher;
+                $idTeacherOwner = Schedule::where('id', $this->record->id_schedule)->value('id_teacher');
+
+                if ($user->hasRole('Gestor Conflitos')) {
+                    return $teacherId === $idTeacherRequester;
+                }
+
+                return $teacherId === $idTeacherRequester || $teacherId === $idTeacherOwner;
+            })
             ->mountUsing(function () {
                 if ($this->record->status === 'Eliminado') {
                     Notification::make()
