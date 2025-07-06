@@ -32,13 +32,13 @@ class TeacherSubjectResource extends Resource
 
     public static function getPluralLabel(): string
     {
-        return auth()->user()?->isSuperAdmin()
+        return auth()->user()?->isTeacher()
             ? 'Disciplinas do Professor'
             : 'As minhas disciplinas';
     }
     public static function getNavigationLabel(): string
     {
-        return auth()->user()?->isSuperAdmin()
+        return auth()->user()?->isTeacher()
             ? 'Professores - Disciplinas'
             : 'As minhas disciplinas';
     }
