@@ -8,7 +8,6 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 
 class RegistrationImporter extends Importer
 {
@@ -40,13 +39,16 @@ class RegistrationImporter extends Importer
             ImportColumn::make('id_subjects')
                 ->label('IDs das Disciplinas (separados por vírgulas)')
                 ->rules(['required', 'string'])
-                ->example('1,2,3')->fillRecordUsing(null)
-                ->dehydrateStateUsing(fn() => null),
+                ->example('1,2,3')
+                ->fillRecordUsing(null),
         ];
     }
 
     protected function beforeFill(): void
     {
+
+        unset($this->data['id_subjects']);
+
         $this->data['id_student'] = intval($this->data['id_student'] ?? 0);
         $this->data['id_course'] = intval($this->data['id_course'] ?? 0);
         $this->data['id_schoolyear'] = intval($this->data['id_schoolyear'] ?? 0);
@@ -56,7 +58,6 @@ class RegistrationImporter extends Importer
     public function resolveRecord(): ?Registration
     {
         return DB::transaction(function () {
-
             try {
                 Log::debug('Importando matrícula:', $this->data);
 
@@ -67,8 +68,8 @@ class RegistrationImporter extends Importer
                     'id_class' => $this->data['id_class'],
                 ]);
 
-                if (!empty($this->data['id_subjects'])) {
-                    $this->attachSubjectsToRegistration($registration, $this->data['id_subjects']);
+                if (!empty($this->originalData['id_subjects'])) {
+                    $this->attachSubjectsToRegistration($registration, $this->originalData['id_subjects']);
                 }
 
                 return $registration;
