@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\DatabaseHelper as DBHelper;
 use App\Helpers\MensagensErro as MSGErro;
+use App\Helpers\ScheduleRequestQueueHelper;
 use App\Models\Schedule;
 use App\Models\ScheduleRequest;
 
@@ -211,6 +212,7 @@ class EditScheduleConflict extends EditRecord
                             MSGErro::ERRO_ATUALIZAR_SCHEDULE
                         );
 
+                        ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleNew->id);
 
                         // $this->record->scheduleConflict?->update([
                         //     'status' => 'Aprovado',
@@ -307,6 +309,7 @@ class EditScheduleConflict extends EditRecord
                                     'Erro ao reaprovar horário original'
                                 );
                                 //$this->record->scheduleConflict?->update(['status' => 'Aprovado']);
+                                ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleNew->id);
 
 
                                 break;
@@ -329,6 +332,8 @@ class EditScheduleConflict extends EditRecord
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
 
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleConflict->id);
+
                                     //$this->record->scheduleConflict?->update(['status' => 'Eliminado',]);
 
                                     $this->hoursCounterUpdate($this->record->scheduleConflict, true);
@@ -343,6 +348,7 @@ class EditScheduleConflict extends EditRecord
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
 
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleNew->id);
 
                                     //$this->record->scheduleNew?->update(['status' => 'Eliminado']);
                                 }
@@ -363,6 +369,7 @@ class EditScheduleConflict extends EditRecord
                                         ['status' => 'Eliminado'],
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleNew->id);
 
                                     //  $this->record->scheduleNew?->update(['status' => 'Eliminado']);
                                 } else {
@@ -373,6 +380,9 @@ class EditScheduleConflict extends EditRecord
                                         ['status' => 'Eliminado'],
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
+
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleConflict->id);
+
                                     DBHelper::updateScheduleData(
                                         $this->record->scheduleNew->id,
                                         ['status' => 'Aprovado'],

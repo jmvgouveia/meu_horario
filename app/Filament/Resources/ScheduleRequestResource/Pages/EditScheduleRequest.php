@@ -17,6 +17,8 @@ use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\DatabaseHelper as DBHelper;
 use App\Helpers\MensagensErro as MSGErro;
+use App\Helpers\ScheduleRequestQueueHelper;
+
 
 
 class EditScheduleRequest extends EditRecord
@@ -153,6 +155,8 @@ class EditScheduleRequest extends EditRecord
                                     ]))
                             ])
                             ->sendToDatabase($requester);
+                        //-----------NEW
+                        ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleNew->id);
                     });
 
                     // return redirect($this->getResource()::getUrl('index'));
@@ -412,6 +416,9 @@ class EditScheduleRequest extends EditRecord
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
 
+                                    //--------NEW
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($deletedSchedule->id);
+
                                     // $deletedSchedule->update(['status' => 'Eliminado']);
 
 
@@ -509,6 +516,8 @@ class EditScheduleRequest extends EditRecord
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
                                     // $deletedSchedule->update(['status' => 'Eliminado']);
+                                    //---new
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($deletedSchedule->id);
 
                                     Notification::make()
                                         ->title('Marcação eliminada')
@@ -575,6 +584,8 @@ class EditScheduleRequest extends EditRecord
                                         'Erro ao eliminar horário (Aprovado DP - conflito)'
                                     );
 
+                                    //--------NEW
+                                    ScheduleRequestQueueHelper::promoverProximoNaFila($deletedSchedule->id);
 
 
                                     //  $deletedSchedule->update(['status' => 'Eliminado']);
