@@ -71,20 +71,123 @@ class WeeklyScheduleWidget extends Widget
 
         $weekdays = Weekday::orderBy('id')->pluck('weekday')->toArray();
 
-        $timePeriods = Timeperiod::orderBy('description')->get();
+        $timePeriods = Timeperiod::orderBy('start_time')->get()->values(); // 👈 importante: ->values() reinicia os índices para 0,1,2...
 
         $calendar = [];
 
-        foreach ($timePeriods as $tp) {
-            foreach (array_keys($weekdays) as $dayId) {
-                $calendar[$tp->id][$dayId] = [];
-            }
+
+
+        foreach ($timePeriods as $period) {
+
+            $start = \Carbon\Carbon::createFromFormat('H:i:s', $period->start_time);
+            $label = $start->format('H:00'); // agrupamento por hora cheia
+
+            $timePeriodsGrouped[$label][] = $period;
         }
+
+
+
+
+        // foreach ($timePeriods as $tp) {
+        //     foreach (array_keys($weekdays) as $dayId) {
+        //         $calendar[$tp->id][$dayId] = [];
+        //     }
+        // }
+
+
+        // foreach ($schedules as $schedule) {
+        //     $dayId = $schedule->id_weekday;
+        //     $timeId = $schedule->id_timeperiod;
+        //     $calendar[$timeId][$dayId][] = $schedule;
+        // }
+
+        // foreach ($schedules as $schedule) {
+        //     $dayId = $schedule->id_weekday;
+        //     $timeId = $schedule->id_timeperiod;
+
+        //     // Marcar o slot da própria meia hora
+        //     $calendar[$timeId][$dayId][] = $schedule;
+
+        //     // Garantir que timeperiod está carregado
+        //     if (!$schedule->relationLoaded('timeperiod') || !$schedule->timeperiod?->start_time) {
+        //         continue;
+        //     }
+
+        //     $startMin = \Carbon\Carbon::parse($schedule->timeperiod->start_time)->minute;
+
+        //     // Se começa às 30, ocupar a slot seguinte (formando 1h visual)
+        //     if ($startMin === 30) {
+        //         $currentIndex = $timePeriods->search(fn($tp) => $tp->id === $timeId);
+
+        //         if ($currentIndex !== false && isset($timePeriods[$currentIndex + 1])) {
+        //             $nextSlot = $timePeriods[$currentIndex + 1];
+        //             $calendar[$nextSlot->id][$dayId][] = $schedule;
+        //         }
+        //     }
+        // }
+        // foreach ($timePeriods as $i => $tp) {
+        //     dump("Slot $i → ID: {$tp->id}, Início: {$tp->start_time}");
+        // }
         foreach ($schedules as $schedule) {
             $dayId = $schedule->id_weekday;
             $timeId = $schedule->id_timeperiod;
-            $calendar[$timeId][$dayId][] = $schedule;
+
+            $startMin = \Carbon\Carbon::createFromFormat('H:i:s', $schedule->timeperiod->start_time)->minute;
+            $currentIndex = $timePeriods->search(fn($tp) => $tp->id === $timeId);
+
+            // Começa às :00 → ocupar slot atual + slot seguinte
+            if ($startMin === 0) {
+                $calendar[$timeId][$dayId][] = $schedule;
+
+                $nextSlot = $timePeriods[$currentIndex + 1] ?? null;
+                if ($nextSlot) {
+                    $calendar[$nextSlot->id][$dayId][] = $schedule;
+                }
+            }
+
+            // Começa às :30 → ocupar slot atual + slot1 da hora seguinte
+            if ($startMin === 30) {
+                $calendar[$timeId][$dayId][] = $schedule;
+
+                $nextSlot = $timePeriods[$currentIndex + 1] ?? null;
+                if ($nextSlot) {
+                    $calendar[$nextSlot->id][$dayId][] = $schedule;
+                }
+            }
         }
+
+
+        // foreach ($calendar as $timeId => $slots) {
+        //     foreach ($slots as $dayId => $items) {
+        //         foreach ($items as $sched) {
+        //             dump("{$sched->timeperiod->start_time} | dia: $dayId | slot: $timeId | id: {$sched->id}");
+        //         }
+        //     }
+        // }
+        // dd('Fim do debug');
+        // foreach ($schedules as $schedule) {
+        //     $dayId = $schedule->id_weekday;
+        //     $timeId = $schedule->id_timeperiod;
+
+        //     // Slot atual
+        //     $calendar[$timeId][$dayId][] = $schedule;
+
+        //     // Verifica se começa numa meia hora (ex: 08:30)
+        //     $startMin = \Carbon\Carbon::createFromFormat('H:i:s', $schedule->timeperiod->start_time)->minute;
+
+        //     if ($startMin === 30) {
+        //         // Localiza o ID do slot seguinte
+        //         $currentIndex = $timePeriods->search(fn($tp) => $tp->id === $timeId);
+        //         $nextSlot = $timePeriods[$currentIndex + 1] ?? null;
+
+        //         if ($nextSlot) {
+        //             $calendar[$nextSlot->id][$dayId][] = $schedule;
+        //         }
+        //     }
+        // }
+
+
+        //    $timePeriodsGrouped = array_filter($timePeriodsGrouped, fn($group) => count($group) === 2);
 
         $recusados = ScheduleRequest::where('status', 'Recusado')
             ->where('id_teacher', $teacher->id)
@@ -111,8 +214,19 @@ class WeeklyScheduleWidget extends Widget
             ->get()
             ->keyBy('id');
 
-        return view(static::$view, compact('calendar', 'weekdays', 'timePeriods', 'recusados', 'escalados', 'PedidosAprovadosDP', 'AprovadosDP'))
-            ->with('teacher', $teacher);
+        // return view(static::$view, compact('calendar', 'weekdays', 'timePeriods', 'recusados', 'escalados', 'PedidosAprovadosDP', 'AprovadosDP'))
+        //     ->with('teacher', $teacher);
+        // dd($calendar);
+        return view(static::$view, [
+            'calendar' => $calendar,
+            'weekdays' => $weekdays,
+            'timePeriods' => $timePeriods->values(), // 👈 reinicia índices para [0, 1, 2...]
+            'recusados' => $recusados,
+            'escalados' => $escalados,
+            'PedidosAprovadosDP' => $PedidosAprovadosDP,
+            'AprovadosDP' => $AprovadosDP,
+            'teacher' => $teacher,
+        ]);
     }
 
 
