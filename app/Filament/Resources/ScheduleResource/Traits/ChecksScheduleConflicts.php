@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ScheduleResource\Traits;
 
+use App\Models\RoomBlockedHours;
 use App\Models\Schedule;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
@@ -21,6 +22,30 @@ trait ChecksScheduleConflicts
     {
         return strtotime($startA) < strtotime($endB) && strtotime($startB) < strtotime($endA);
     }
+
+
+
+    private function checkRoomBlocked(int $idRoom, int $idWeekday, int $idTimePeriod): void
+    {
+        $bloqueio = RoomBlockedHours::where('id_room', $idRoom)
+            ->where('id_weekday', $idWeekday)
+            ->where('id_timeperiod', $idTimePeriod)
+            ->first();
+
+        if ($bloqueio) {
+            Notification::make()
+                ->title('Sala bloqueada')
+                ->body("Não é possível marcar ou trocar nesta sala. Motivo: {$bloqueio->description}")
+                ->danger()
+                ->persistent()
+                ->send();
+
+            throw new Halt("Sala bloqueada: {$bloqueio->description}");
+        }
+    }
+
+
+
 
     protected function checkScheduleConflictsAndAvailability(array $data, ?int $ignoreId = null): void
     {
@@ -57,6 +82,7 @@ trait ChecksScheduleConflicts
                 $ignoreId
             );
         }
+        $this->checkRoomBlocked($data['id_room'], $data['id_weekday'], $data['id_timeperiod']);
         $this->checkHoursDaily($teacher->id, $data['id_weekday']);
         $this->checkWorkload($teacher->id, $tipo);
     }

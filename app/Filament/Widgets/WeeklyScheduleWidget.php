@@ -71,7 +71,12 @@ class WeeklyScheduleWidget extends Widget
 
         $weekdays = Weekday::orderBy('id')->pluck('weekday')->toArray();
 
-        $timePeriods = Timeperiod::orderBy('start_time')->get()->values(); // 👈 importante: ->values() reinicia os índices para 0,1,2...
+        $timePeriods = Timeperiod::orderBy('start_time')->get()->values(); //
+
+        //    $timePeriods = TimePeriod::where('active', true)
+        // ->orderBy('start_time')
+        // ->get()
+        // ->values();
 
         $calendar = [];
 

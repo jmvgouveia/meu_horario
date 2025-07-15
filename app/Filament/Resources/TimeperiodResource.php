@@ -5,10 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TimeperiodResource\Pages;
 use App\Models\Timeperiod;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class TimeperiodResource extends Resource
@@ -52,6 +54,17 @@ class TimeperiodResource extends Resource
                 TextColumn::make('description')
                     ->label("Descrição")
                     ->searchable(),
+                TextColumn::make('start_time')
+                    ->label("Hora de Início")
+                    ->dateTime('H:i')
+                    ->sortable(),
+                TextColumn::make('end_time')
+                    ->label("Hora de Fim"),
+                ToggleColumn::make('active')
+                    ->label('Ativo')
+                    ->default(true)
+                    ->inline(false)
+                    ->columnSpanFull(),
             ])
             ->filters([
                 //

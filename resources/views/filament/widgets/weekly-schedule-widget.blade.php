@@ -122,6 +122,14 @@
         background-color: #dc2626;
     }
 
+    .bg-inactive-slot {
+        background-color: #f3f4f6;
+        /* gray-100 */
+        color: #9ca3af;
+        /* gray-400 */
+        font-style: italic;
+    }
+
     @keyframes pulse {
         0% {
             transform: scale(1);
@@ -141,10 +149,7 @@
 </style>
 <div id="calendar-container">
     <div class="flex items-center justify-end text-xs text-gray-500 mt-2 space-x-1" id="last-updated">
-
     </div>
-
-
     <div class="w-full overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
         <table class="min-w-[800px] w-full table-fixed border-collapse text-center text-sm">
             <thead>
@@ -155,10 +160,6 @@
                     @endforeach
                 </tr>
             </thead>
-
-
-
-
             <tbody>
                 @php $ocupado = []; @endphp
 
@@ -173,10 +174,19 @@
                     @if ($isSlot1)
                     {{-- Linha 1: Slot1 --}}
                     <tr>
-                        <td class="sticky left-0 z-10 bg-gray-50 border-b border-gray-300 text-gray-900 px-2 py-4 text-center align-middle leading-tight" rowspan="2">
-                            {{ $startHour }}
+                        <td class="sticky left-0 z-10 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 text-gray-900 px-2 align-middle leading-tight" rowspan="2" style="vertical-align: middle;">
+                            <div class="flex items-center justify-center h-full font-bold text-sm min-h-[100%]">
+                                {{ $startHour }}
+
+                                <!-- <br> -->
+                                <!-- {{ $slot->id . ' - ' . $nextSlot->id }} -->
+                            </div>
                         </td>
 
+                        @php
+                        $isSlot1Active = $slot->active;
+                        $isSlot2Active = $nextSlot->active;
+                        @endphp
                         @foreach ($weekdays as $dayId=> $dayName)
 
                         {{-- Se já foi marcado por um rowspan anterior --}}
@@ -209,11 +219,17 @@
                         @endif
 
                         {{-- Nenhuma marcação agora; "+" na linha 1 --}}
+                        @if (! $isSlot1Active)
+                        <td class="border-b px-2 py-3 text-center align-top bg-inactive-slot italic text-gray-400">
+                            +
+                        </td>
+                        @else
                         <td class="border-b px-2 py-3 text-center align-top">
                             <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId, 'timeperiod' => $slot->id]) }}" class="text-blue-500 text-lg">
                                 +
                             </a>
                         </td>
+                        @endif
                         @endforeach
                     </tr>
 
@@ -247,12 +263,17 @@
                         @endif
                         @endif
 
-                        {{-- Nenhuma marcação; "+" na linha 2 --}}
+                        @if (! $isSlot2Active)
+                        <td class="border-b px-2 py-3 text-center align-top bg-inactive-slot italic text-gray-400">
+                            +
+                        </td>
+                        @else
                         <td class="border-b px-2 py-3 text-center align-top">
                             <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId, 'timeperiod' => $nextSlot->id]) }}" class="text-blue-500 text-lg">
                                 +
                             </a>
                         </td>
+                        @endif
                         @endforeach
                     </tr>
                     @endif
