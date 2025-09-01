@@ -89,13 +89,6 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.06);
     }
 
-
-    td[rowspan="2"] {
-        vertical-align: top;
-        /* ou middle */
-    }
-
-
     .status-title {
         font-weight: 700;
         font-size: 0.875rem;
@@ -122,14 +115,6 @@
         background-color: #dc2626;
     }
 
-    .bg-inactive-slot {
-        background-color: #f3f4f6;
-        /* gray-100 */
-        color: #9ca3af;
-        /* gray-400 */
-        font-style: italic;
-    }
-
     @keyframes pulse {
         0% {
             transform: scale(1);
@@ -149,7 +134,10 @@
 </style>
 <div id="calendar-container">
     <div class="flex items-center justify-end text-xs text-gray-500 mt-2 space-x-1" id="last-updated">
+
     </div>
+
+
     <div class="w-full overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
         <table class="min-w-[800px] w-full table-fixed border-collapse text-center text-sm">
             <thead>
@@ -161,131 +149,124 @@
                 </tr>
             </thead>
             <tbody>
-                @php $ocupado = []; @endphp
 
-                @for ($i = 0; $i < count($timePeriods) - 1; $i++)
-                    @php
-                    $slot=$timePeriods[$i];
-                    $nextSlot=$timePeriods[$i + 1];
-                    $isSlot1=\Carbon\Carbon::parse($slot->start_time)->minute === 0;
-                    $startHour = \Carbon\Carbon::parse($slot->start_time)->format('H:i');
-                    @endphp
+                @foreach ($timePeriods as $timePeriod)
+                <tr>
+                    <td class="px-4 py-3 font-semibold bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 sticky left-0 z-10 whitespace-nowrap">
+                        {{ $timePeriod->description }}
+                    </td>
 
-                    @if ($isSlot1)
-                    {{-- Linha 1: Slot1 --}}
-                    <tr>
-                        <td class="sticky left-0 z-10 bg-gray-200 dark:bg-gray-700 border-b border-gray-300 text-gray-900 px-2 align-middle leading-tight" rowspan="2" style="vertical-align: middle;">
-                            <div class="flex items-center justify-center h-full font-bold text-sm min-h-[100%]">
-                                {{ $startHour }}
+                    @foreach ($weekdays as $dayId => $dayName)
+                    @php $schedulesInSlot = $calendar[$timePeriod->id][$dayId] ?? []; @endphp
 
-                                <!-- <br> -->
-                                <!-- {{ $slot->id . ' - ' . $nextSlot->id }} -->
+                    <td class="px-4 py-3 align-top text-gray-900 dark:text-gray-100 border-t border-gray-200 dark:border-gray-700">
+                        @forelse ($schedulesInSlot as $schedule)
+                        @php
+                        $badgeClass = match($schedule->status) {
+                        'Aprovado', 'Aprovado DP' => 'badge-aprovado',
+                        'Pendente' => 'badge-pendente',
+                        'Rejeitado' => 'badge-rejeitado',
+                        default => '',
+                        };
+
+                        $info = ['Sala: ' . ($schedule->room->name ?? '—')];
+
+                        if (!empty($schedule->classes)) {
+                        $info[] = collect($schedule->classes)->pluck('name')->join(', ');
+                        }
+
+                        if (!empty($schedule->shift)) {
+                        $info[] = 'Turno: ' . $schedule->shift;
+                        }
+
+                        $info[] = 'ID: ' . $schedule->id;
+
+                        $hasNotification = false;
+                        $notifLetter = '';
+                        $notifClass = '';
+                        $tooltip = '';
+                        $link = route('filament.admin.resources.schedules.edit', $schedule->id);
+
+                        $authId = auth()->user()?->teacher?->id;
+
+                        // Recusado
+                        if ($recusados->has($schedule->id)) {
+                        $hasNotification = true;
+                        $notifLetter = 'R';
+                        $tooltip = 'Pedido de troca recusado';
+                        $link = route('filament.admin.resources.schedule-requests.edit', $recusados[$schedule->id]->id);
+                        }
+
+                        // Aprovado pelo DP
+                        if ($schedule->status === 'Aprovado DP' && $PedidosAprovadosDP->has($schedule->id)) {
+                        $req = $PedidosAprovadosDP[$schedule->id];
+                        $hasNotification = true;
+                        $notifLetter = 'DP';
+                        $notifClass = 'dp';
+                        $tooltip = 'Troca aprovada';
+                        $link = route('filament.admin.resources.schedule-requests.edit', $req->id);
+                        }
+
+                        // Escalado
+                        if ($escalados->has($schedule->id)) {
+                        $hasNotification = true;
+                        $notifLetter = 'E';
+                        $tooltip = 'Troca escalada';
+                        $link = route('filament.admin.resources.schedule-conflicts.edit', $escalados[$schedule->id]->id);
+                        }
+
+                        // Novo: só considera pedidos com status relevante (Pendente, Escalado, Aprovado DP)
+                        $firstRequest = $schedule->requests()
+                        ->with('scheduleConflict.teacher.user')
+                        ->whereIn('status', ['Pendente', 'Escalado', 'Aprovado DP'])
+                        ->orderBy('created_at')
+                        ->first();
+
+
+                        if ($firstRequest && $firstRequest->status === 'Pendente') {
+                        if ($authId === $firstRequest->scheduleConflict?->teacher?->id) {
+                        $hasNotification = true;
+                        $notifLetter = 'T';
+                        $tooltip = 'Pedido pendente';
+                        $link = route('filament.admin.resources.schedule-requests.edit', $firstRequest->id);
+                        }
+                        }
+                        @endphp
+
+                        @unless($schedule->status === 'Eliminado' || $schedule->status === 'Recusado DP')
+                        <a href="{{ $link }}">
+                            <div class="relative mb-2">
+
+                                <div class="status-badge {{ in_array(strtolower($schedule->subject->name ?? ''), ['reunião', 'tee']) ? 'badge-reuniao-tee' : $badgeClass }}">
+                                    <div class="status-title">{{ $schedule->subject->name ?? 'Sem Matéria' }}</div>
+                                    @foreach ($info as $i)
+                                    <div class="status-info">{{ $i }}</div>
+                                    @endforeach
+                                </div>
+
+
+
+
+                                @if ($hasNotification)
+                                <span class="notificacao {{ $notifLetter }} {{ $notifClass ?: 'pulsar' }}" title="{{ $tooltip }}">{{ $notifLetter }}</span>
+
+                                @endif
+
+
                             </div>
-                        </td>
-
-                        @php
-                        $isSlot1Active = $slot->active;
-                        $isSlot2Active = $nextSlot->active;
-                        @endphp
-                        @foreach ($weekdays as $dayId=> $dayName)
-
-                        {{-- Se já foi marcado por um rowspan anterior --}}
-                        @if (!empty($ocupado[$i][$dayId]) || !empty($ocupado[$i + 1][$dayId]))
-                        @continue
-                        @endif
-
-                        @php
-                        $s1 = $calendar[$slot->id][$dayId] ?? [];
-                        $s2 = $calendar[$nextSlot->id][$dayId] ?? [];
-                        @endphp
-
-                        {{-- Caso 1: Começa às :00 na slot atual --}}
-                        @if (!empty($s1))
-                        @php
-                        $schedule = $s1[0];
-                        $startMin = \Carbon\Carbon::parse($schedule->timeperiod->start_time)->minute;
-                        @endphp
-
-                        @if ($startMin === 0)
-                        @php
-                        $ocupado[$i][$dayId] = true;
-                        $ocupado[$i + 1][$dayId] = true;
-                        @endphp
-                        <td class="border-b px-2 py-3 text-center align-top" rowspan="2">
-                            @include('components.schedule-badge', compact('schedule', 'recusados', 'PedidosAprovadosDP', 'escalados'))
-                        </td>
-                        @continue
-                        @endif
-                        @endif
-
-                        {{-- Nenhuma marcação agora; "+" na linha 1 --}}
-                        @if (! $isSlot1Active)
-                        <td class="border-b px-2 py-3 text-center align-top bg-inactive-slot italic text-gray-400">
+                        </a>
+                        @endunless
+                        @empty
+                        <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId, 'timeperiod' => $timePeriod->id]) }}" class="block p-2 text-gray-400 dark:text-gray-600 hover:text-blue-600 dark:hover:text-blue-400 transition">
                             +
-                        </td>
-                        @else
-                        <td class="border-b px-2 py-3 text-center align-top">
-                            <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId, 'timeperiod' => $slot->id]) }}" class="text-blue-500 text-lg">
-                                +
-                            </a>
-                        </td>
-                        @endif
-                        @endforeach
-                    </tr>
+                        </a>
+                        @endforelse
+                    </td>
+                    @endforeach
+                </tr>
+                @endforeach
 
-                    {{-- Linha 2: Slot2 --}}
-                    <tr>
-                        @foreach ($weekdays as $dayId => $dayName)
-                        @if (!empty($ocupado[$i + 1][$dayId]))
-                        @continue
-                        @endif
-
-                        @php
-                        $s2 = $calendar[$nextSlot->id][$dayId] ?? [];
-                        @endphp
-
-                        {{-- Caso 2: Começa às :30 na slot seguinte --}}
-                        @if (!empty($s2))
-                        @php
-                        $schedule = $s2[0];
-                        $startMin = \Carbon\Carbon::parse($schedule->timeperiod->start_time)->minute;
-                        @endphp
-
-                        @if ($startMin === 30)
-                        @php
-                        $ocupado[$i + 1][$dayId] = true;
-                        $ocupado[$i + 2][$dayId] = true;
-                        @endphp
-                        <td class="border-b px-2 py-3 text-center align-top" rowspan="2">
-                            @include('components.schedule-badge', compact('schedule', 'recusados', 'PedidosAprovadosDP', 'escalados'))
-                        </td>
-                        @continue
-                        @endif
-                        @endif
-
-                        @if (! $isSlot2Active)
-                        <td class="border-b px-2 py-3 text-center align-top bg-inactive-slot italic text-gray-400">
-                            +
-                        </td>
-                        @else
-                        <td class="border-b px-2 py-3 text-center align-top">
-                            <a href="{{ route('filament.admin.resources.schedules.create', ['weekday' => $dayId, 'timeperiod' => $nextSlot->id]) }}" class="text-blue-500 text-lg">
-                                +
-                            </a>
-                        </td>
-                        @endif
-                        @endforeach
-                    </tr>
-                    @endif
-                    @endfor
             </tbody>
-
-
-
-
-
-
-
         </table>
         <br>
         <div class="flex flex-wrap justify-center gap-2 mb-4 px-4 text-xs font-medium max-w-4xl mx-auto">

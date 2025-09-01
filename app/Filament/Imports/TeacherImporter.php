@@ -17,39 +17,44 @@ class TeacherImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('number')->required(),
-            ImportColumn::make('name')->required(),
-            ImportColumn::make('acronym')->required(),
+            ImportColumn::make('number')
+                ->rules(['required']),
+
+            ImportColumn::make('name')
+                ->rules(['required']),
+
+            ImportColumn::make('acronym')
+                ->rules(['required']),
+
             ImportColumn::make('birthdate')
-                ->required()
-                ->rule('date'),
+                ->rules(['required', 'date']),
+
             ImportColumn::make('startingdate')
-                ->required()
-                ->rule('date'),
+                ->rules(['required', 'date']),
+
             ImportColumn::make('id_nationality')
-                ->required()
-                ->rule('exists:nationalities,id'),
+                ->rules(['required', 'exists:nationalities,id']),
+
             ImportColumn::make('id_gender')
-                ->required()
-                ->rule(Rule::in([1, 2])), // 1 = Masculino, 2 = Feminino
+                ->rules(['required', Rule::in([1, 2])]), // 1 = Masculino, 2 = Feminino
+
             ImportColumn::make('id_qualification')
-                ->required()
-                ->rule('exists:qualifications,id'),
+                ->rules(['required', 'exists:qualifications,id']),
+
             ImportColumn::make('id_department')
-                ->required()
-                ->rule('exists:departments,id'),
+                ->rules(['required', 'exists:departments,id']),
+
             ImportColumn::make('id_professionalrelationship')
-                ->required()
-                ->rule('exists:professional_relationships,id'),
+                ->rules(['required', 'exists:professional_relationships,id']),
+
             ImportColumn::make('id_contractualrelationship')
-                ->required()
-                ->rule('exists:contractual_relationships,id'),
+                ->rules(['required', 'exists:contractual_relationships,id']),
+
             ImportColumn::make('id_salaryscale')
-                ->required()
-                ->rule('exists:salary_scales,id'),
+                ->rules(['required', 'exists:salary_scales,id']),
+
             ImportColumn::make('id_user')
-                ->nullable()
-                ->rule('exists:users,id'),
+                ->rules(['nullable', 'exists:users,id']),
         ];
     }
 
@@ -78,8 +83,11 @@ class TeacherImporter extends Importer
                 'number' => $this->data['number'],
                 'name' => $this->data['name'],
                 'acronym' => $this->data['acronym'],
-                'birthdate' => Carbon::createFromFormat('Y-m-d', $this->data['birthdate']),
-                'startingdate' =>  Carbon::createFromFormat('Y-m-d', $this->data['startingdate']),
+                //'birthdate' => Carbon::createFromFormat('Y-m-d', $this->data['birthdate']),
+                //'startingdate' =>  Carbon::createFromFormat('Y-m-d', $this->data['startingdate']),
+
+                'birthdate'    => Carbon::parse($this->data['birthdate']),
+                'startingdate' => Carbon::parse($this->data['startingdate']),
                 'id_nationality' => $this->data['id_nationality'],
                 'id_gender' => $this->data['id_gender'],
                 'id_qualification' => $this->data['id_qualification'],
