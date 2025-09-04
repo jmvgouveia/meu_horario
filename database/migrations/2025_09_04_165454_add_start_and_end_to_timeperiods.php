@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('timeperiods', function (Blueprint $table) {
-            $table->time('start_time')->nullable()->change();
-            $table->time('end_time')->nullable()->change();
-            $table->boolean('active')->default(true)->change();
+            $table->time('start_time')->nullable();
+            $table->time('end_time')->nullable();
+            $table->boolean('active')->default(true);
         });
     }
 
