@@ -46,12 +46,12 @@ class TimeperiodResource extends Resource
                     ->maxLength(255),
                 TextInput::make('start_time')
                     ->label('Hora de Início')
-                    ->required()
-                    ->time(),
+                    ->required(),
+                //->time(),
                 TextInput::make('end_time')
                     ->label('Hora de Fim')
-                    ->required()
-                    ->time(),
+                    ->required(),
+                //->time(),
                 Toggle::make('active')
                     ->label('Ativo')
                     ->default(true)
