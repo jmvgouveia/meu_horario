@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\TimePeriodImporter;
 use App\Filament\Resources\TimeperiodResource\Pages;
 use App\Models\Timeperiod;
 use Filament\Forms\Components\TextInput;
@@ -89,6 +90,13 @@ class TimeperiodResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->importer(TimePeriodImporter::class)
+                    ->label('Importar Períodos de Tempo')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('forest_green'),
             ]);
     }
 

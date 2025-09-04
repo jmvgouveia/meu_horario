@@ -19,6 +19,15 @@ class TimePeriodImporter extends Importer
             ImportColumn::make('description')
                 ->label('Descrição')
                 ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('start_time')
+                ->label('Hora de Início')
+                ->rules(['required', 'date_format:H:i']),
+            ImportColumn::make('end_time')
+                ->label('Hora de Fim')
+                ->rules(['required', 'date_format:H:i']),
+            ImportColumn::make('active')
+                ->label('Ativo')
+                ->rules(['boolean']),
 
         ];
     }
@@ -33,6 +42,9 @@ class TimePeriodImporter extends Importer
     protected function beforeFill(): void
     {
         $this->data['description'] = trim($this->data['description'] ?? '');
+        $this->data['start_time'] = trim($this->data['start_time'] ?? '');
+        $this->data['end_time'] = trim($this->data['end_time'] ?? '');
+        $this->data['active'] = filter_var($this->data['active'] ?? false, FILTER_VALIDATE_BOOLEAN);
     }
 
     public static function getCompletedNotificationBody(Import $import): string
