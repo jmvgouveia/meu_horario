@@ -44,6 +44,19 @@ class TimeperiodResource extends Resource
                     ->label('Descrição')
                     ->required()
                     ->maxLength(255),
+                TextInput::make('start_time')
+                    ->label('Hora de Início')
+                    ->required()
+                    ->time(),
+                TextInput::make('end_time')
+                    ->label('Hora de Fim')
+                    ->required()
+                    ->time(),
+                Toggle::make('active')
+                    ->label('Ativo')
+                    ->default(true)
+                    ->inline(false)
+                    ->required(),
             ]);
     }
 
