@@ -234,8 +234,6 @@ class WeeklyScheduleWidget extends Widget
         ]);
     }
 
-
-
     public static function canView(): bool
     {
         $user = Filament::auth()->user();

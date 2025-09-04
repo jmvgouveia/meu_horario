@@ -11,6 +11,10 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Observers\StudentObserver;
+use App\Models\Student;
+
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,5 +50,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability) {
             return $user->isSuperAdmin() ? true : null;
         });
+
+        Student::observe(StudentObserver::class);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\StudentImporter;
 use App\Filament\Resources\StudentResource\Pages;
 use App\Models\Student;
+use Dom\Text;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -47,6 +48,7 @@ class StudentResource extends Resource
                             ->maxLength(255)
                             ->placeholder('Introduza nome')
                             ->columnSpan(3),
+
                         DatePicker::make('birthdate')
                             ->label('Data de nascimento')
                             ->required(),
@@ -63,6 +65,12 @@ class StudentResource extends Resource
                             ->required()
                             ->numeric()
                             ->placeholder('Introduza número de aluno'),
+                        TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Introduza e-mail'),
                     ]),
             ]);
     }
@@ -79,6 +87,15 @@ class StudentResource extends Resource
                 TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->label('E-mail')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('user.id')
+                    ->label('ID User')
+                    ->searchable()
+                    ->toggleable()
                     ->sortable(),
             ])
             ->filters([

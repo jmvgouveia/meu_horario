@@ -11,6 +11,8 @@ class Subject extends Model
         'name',
         'acronym',
         'type',
+        'status',
+        'student_can_enroll'
     ];
 
     public function courses()
@@ -28,4 +30,9 @@ class Subject extends Model
     {
         return $this->hasMany(Schedule::class, 'id_subject');
     }
+
+    // public function user()
+    // {
+    //     return $this->belongsTo(User::class);
+    // }
 }

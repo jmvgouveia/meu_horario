@@ -12,6 +12,8 @@ class SchoolYear extends Model
         'schoolyear',
         'start_date',
         'end_date',
+        'start_date_registration',
+        'end_date_registration',
         'active'
     ];
 
