@@ -9,8 +9,10 @@ class Student extends Model
     protected $fillable = [
         'number',
         'name',
+        'email',
         'id_gender',
         'birthdate',
+        'user_id',
     ];
 
     public function gender()
@@ -21,5 +23,10 @@ class Student extends Model
     public function registrations()
     {
         return $this->hasMany(Registration::class, 'id_student', 'id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

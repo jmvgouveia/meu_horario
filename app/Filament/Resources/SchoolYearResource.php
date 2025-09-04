@@ -56,8 +56,8 @@ class SchoolYearResource extends Resource
 
                     ])->columns(2),
 
-                Section::make('Marcação de Horários')
-                    ->description('Defina as datas de início e fim para a marcação de horários')
+                Section::make('Marcação de Horários Docentes')
+                    ->description('Defina as datas de início e fim para a marcação de horários pelos Docentes')
                     ->schema([
                         DatePicker::make('start_date')
                             ->label('Data de Início')
@@ -103,6 +103,55 @@ class SchoolYearResource extends Resource
                             ),
 
                     ])->columns(2),
+
+                Section::make('Marcação de Horários Alunos')
+                    ->description('Defina as datas de início e fim para a marcação de horários pelos Alunos')
+                    ->schema([
+                        DatePicker::make('start_date_registration')
+                            ->label('Data de Início')
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(
+                                function ($state, callable $set, callable $get) {
+                                    $startYear = Carbon::parse($state)->year;
+                                    $end = $get('end_date');
+
+                                    if ($end) {
+                                        $endYear = Carbon::parse($end)->year;
+
+                                        if ($startYear === $endYear) {
+
+                                            throw ValidationException::withMessages([
+                                                'end_date' => 'As datas devem estar em anos diferentes.',
+                                            ]);
+                                        }
+                                    }
+                                }
+                            ),
+                        DatePicker::make('end_date_registration')
+                            ->label('Data de Fim')
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(
+                                function ($state, callable $set, callable $get) {
+                                    $endYear = Carbon::parse($state)->year;
+                                    $start = $get('start_date');
+
+                                    if ($start) {
+                                        $startYear = Carbon::parse($start)->year;
+
+                                        if ($startYear === $endYear) {
+
+                                            throw ValidationException::withMessages([
+                                                'end_date' => 'As datas devem estar em anos diferentes.',
+                                            ]);
+                                        }
+                                    }
+                                }
+                            ),
+
+                    ])->columns(2),
+
             ])->columns(3);
     }
 

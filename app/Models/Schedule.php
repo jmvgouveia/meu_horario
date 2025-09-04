@@ -14,6 +14,7 @@ class Schedule extends Model
         'id_weekday',
         'id_subject',
         'shift',
+        'shift_limit',
         'status'
     ];
 
@@ -66,5 +67,16 @@ class Schedule extends Model
     public function requests()
     {
         return $this->hasMany(ScheduleRequest::class, 'id_schedule');
+    }
+
+    public function registrations()
+    {
+        return $this->hasMany(RegistrationSubject::class, 'id_schedule', 'id');
+    }
+    public function registrationSubjects()
+    {
+        // Relaciona todos os registros de estudantes para este schedule
+        return $this->hasMany(\App\Models\RegistrationSubject::class, 'id_subject', 'id_subject')
+            ->whereHas('registration', fn($q) => $q->where('id_class', $this->classes->pluck('id')));
     }
 }

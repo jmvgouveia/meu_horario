@@ -41,7 +41,10 @@ class RoomBlockedHoursResource extends Resource
     {
         return 'Bloqueios de Salas';
     }
-
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->check() && auth()->user()->hasRole('Super Admin');
+    }
     public static function form(Form $form): Form
     {
         return $form

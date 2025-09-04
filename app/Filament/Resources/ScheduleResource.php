@@ -44,7 +44,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Illuminate\Database\Eloquent\Model;
 use App\Helpers\UserHelper;
-use App\Helpers\DatabaseHelper AS DBHelper;
+use App\Helpers\DatabaseHelper as DBHelper;
+use Illuminate\Support\Str;
 
 class ScheduleResource extends Resource
 {
@@ -184,7 +185,7 @@ class ScheduleResource extends Resource
             // Se não houver ano letivo ativo, retorna vazio para segurança
             $query->whereRaw('0 = 1');
         }
-    
+
         return $query;
     }
 
@@ -454,16 +455,63 @@ class ScheduleResource extends Resource
                                 });
                             }),
 
+
+                        //     Section::make('Turno')
+                        //         ->collapsible()
+                        //         ->description('Indique o turno da aula')
+                        //         ->schema([
+                        //             Select::make('shift')
+                        //                 ->label('Turno')
+                        //                 ->visible(function (callable $get) {
+                        //                     $students = $get('students');
+                        //                     return is_array($students) ? count($students) === 0 : true;
+                        //                 })
+                        //                 ->options(function () {
+                        //                     $acronym = Auth::user()?->teacher?->acronym ?? '';
+                        //                     return [
+                        //                         "Turno A - $acronym" => "Turno A - $acronym",
+                        //                         "Turno B - $acronym" => "Turno B - $acronym",
+                        //                         "Turno C - $acronym" => "Turno C - $acronym",
+                        //                         "Turno D - $acronym" => "Turno D - $acronym",
+                        //                     ];
+                        //                 })
+                        //                 ->placeholder('Em caso de ser a turma toda, selecione o turno'),
+
+                        //             TextInput::make('shift1')
+                        //                 ->label('Turno Gerado (automático)')
+                        //                 ->visible(function (callable $get) {
+                        //                     $students = $get('students');
+                        //                     return is_array($students) && count($students) > 0;
+                        //                 })
+                        //                 ->extraAttributes(['readonly' => true])
+                        //                 ->default(fn(callable $get, ?Schedule $record) => $get('shift') ?? $record?->shift)
+                        //                 ->placeholder('Será preenchido automaticamente com os números dos alunos'),
+                        //         ]),
+
+                        //     TextInput::make('shift_limit')
+                        //         ->label('Número limite de alunos')
+                        //         ->numeric()
+                        //         ->minValue(1)
+                        //         ->visible(function (callable $get) {
+                        //             $shift = $get('shift');
+                        //             return in_array($shift, [
+                        //                 "Turno A - " . (Auth::user()?->teacher?->acronym ?? ''),
+                        //                 "Turno B - " . (Auth::user()?->teacher?->acronym ?? ''),
+                        //                 "Turno C - " . (Auth::user()?->teacher?->acronym ?? ''),
+                        //                 "Turno D - " . (Auth::user()?->teacher?->acronym ?? ''),
+                        //             ]);
+                        //         }),
+
+                        // ]),
+
                         Section::make('Turno')
                             ->collapsible()
                             ->description('Indique o turno da aula')
                             ->schema([
                                 Select::make('shift')
                                     ->label('Turno')
-                                    ->visible(function (callable $get) {
-                                        $students = $get('students');
-                                        return is_array($students) ? count($students) === 0 : true;
-                                    })
+                                    ->reactive() // <--- garante que mudanças disparam actualizações
+                                    ->visible(fn(callable $get) => is_array($get('students')) ? count($get('students')) === 0 : true)
                                     ->options(function () {
                                         $acronym = Auth::user()?->teacher?->acronym ?? '';
                                         return [
@@ -473,20 +521,27 @@ class ScheduleResource extends Resource
                                             "Turno D - $acronym" => "Turno D - $acronym",
                                         ];
                                     })
-                                    ->placeholder('Em caso de ser a turma toda, selecione o turno'),
+                                    ->placeholder('Em caso de ser a turma toda, não selecione o turno'),
 
                                 TextInput::make('shift')
                                     ->label('Turno Gerado (automático)')
-                                    ->visible(function (callable $get) {
-                                        $students = $get('students');
-                                        return is_array($students) && count($students) > 0;
-                                    })
+                                    ->visible(fn(callable $get) => is_array($get('students')) && count($get('students')) > 0)
                                     ->extraAttributes(['readonly' => true])
-                                    ->default(fn(callable $get, ?Schedule $record) => $get('shift') ?? $record?->shift)
+                                    ->default(fn(callable $get, ?Schedule $record) => $get('shift') ? "Turno {$get('shift')} - " . (Auth::user()?->teacher?->acronym ?? '') : $record?->shift)
                                     ->placeholder('Será preenchido automaticamente com os números dos alunos'),
+
+                                TextInput::make('shift_limit')
+                                    ->label('Número limite de alunos')
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->visible(
+                                        fn(callable $get) =>
+                                        Str::startsWith($get('shift'), ['Turno A', 'Turno B', 'Turno C', 'Turno D'])
+                                    )
                             ]),
 
                     ]),
+
 
                 ActionGroup::make([
                     Action::make('justificarConflito')
@@ -649,7 +704,6 @@ class ScheduleResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
                     ->visible(fn() => UserHelper::isUserSuperAdmin()),
-
             ]);
     }
 

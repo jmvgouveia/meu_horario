@@ -7,10 +7,13 @@ use App\Filament\Resources\SubjectResource\Pages;
 use App\Models\Subject;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class SubjectResource extends Resource
@@ -56,6 +59,23 @@ class SubjectResource extends Resource
                     ->default('Letiva')
                     ->required()
                     ->helperText('Selecione o tipo de disciplina'),
+
+                Toggle::make('student_can_enroll')
+                    ->label('Permite Inscrição de Alunos')
+                    ->default(false)
+                    ->inline(false)
+                    //   ->onColor('success')
+                    ->offColor('secondary'),
+                //  ->helperText('Indica se a disciplina está ativa ou inativa no sistema'),
+
+                Toggle::make('status')
+                    ->label('Ativo')
+                    ->default(true)
+                    ->inline(false)
+                    // ->onColor('success')
+                    ->offColor('secondary')
+                    ->helperText('Indica se a disciplina está ativa ou inativa no sistema'),
+
             ])->columns(3);
     }
 
@@ -83,6 +103,14 @@ class SubjectResource extends Resource
                     ->sortable()
                     ->toggleable()
                     ->searchable(),
+                ToggleColumn::make('student_can_enroll')
+                    ->label('Permite Inscrição de Alunos')
+                    ->sortable()
+                    ->toggleable(),
+                ToggleColumn::make('status')
+                    ->label('Ativo')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 //
