@@ -29,4 +29,15 @@ class Student extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function schedules()
+    {
+        // Confirma o nome da pivot: 'schedule_students' (plural) é o mais comum.
+        // Se na tua BD for 'schedule_student', troca o segundo argumento.
+        return $this->belongsToMany(
+            Schedule::class,
+            'schedules',   // <- pivot table
+            'id_student',          // <- FK para Student na pivot
+            'id_schedule'          // <- FK para Schedule na pivot
+        )->withTimestamps();
+    }
 }

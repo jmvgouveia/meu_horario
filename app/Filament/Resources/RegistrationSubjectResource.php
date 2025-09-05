@@ -288,12 +288,13 @@ class RegistrationSubjectResource extends Resource
 
                             // Se for Individual: não mostrar "Turno …"
                             if ($isIndividual) {
-                                return "{$dia} : {$hora} : {$sala}{$suffix}";
+                                return "{$dia} ● {$hora} ● {$sala}{$suffix}";
                             }
 
                             // Caso normal (ou partilhada): inclui Turno
-                            $turnoShow = $turno !== '' ? "Turno {$turno} : " : '';
-                            return "{$dia} : {$hora} : {$sala}{$suffix}";
+                            $turnoShow = (stripos($turno, 'Turno') === 0) ? $turno . '  ● ' : '';
+
+                            return "{$turnoShow} {$dia}  ●  {$hora}  ● {$sala}{$suffix}";
                         };
 
                         // 1) selectedSchedule → 1 linha

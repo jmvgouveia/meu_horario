@@ -55,6 +55,15 @@ class TeacherStudentsResource extends Resource
             ->where('id_schoolyear', $activeYear->id)
             ->pluck('id_subject');
 
+        // Se não houver disciplinas, retorna query vazia
+        if ($teacherSubjectIds->isEmpty()) {
+            return parent::getEloquentQuery()->whereRaw('1=0');
+        }
+
+
+
+
+
         return parent::getEloquentQuery()
             ->whereIn('id_subject', $teacherSubjectIds)
             ->whereHas('registration', fn($q) => $q->where('id_schoolyear', $activeYear->id))
@@ -64,6 +73,8 @@ class TeacherStudentsResource extends Resource
                 'registration.class',    // ->name
             ]);
     }
+
+
 
 
     public static function exportTeacherStudents(?Collection $records = null): StreamedResponse
