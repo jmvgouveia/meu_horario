@@ -69,6 +69,7 @@ class RegistrationSubjectResource extends Resource
                         ->where('id_subject', $record->id_subject)
                         ->whereHas('classes', fn($q) => $q->where('classes.id', $record->registration->id_class))
                         ->where('status', 'Aprovado')
+                        ->where('id_schoolyear', $record->registration->id_schoolyear) //
                         ->where('shift', 'like', 'Turno%') // começa com "Turno"
                         // Exemplo de filtro adicional
                         ->get();
