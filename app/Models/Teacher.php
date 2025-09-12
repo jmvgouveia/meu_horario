@@ -121,4 +121,8 @@ class Teacher extends Model
                 ]);
         }
     }
+    protected $casts = [
+        'birthdate' => 'date:Y-m-d',
+        'startingdate' => 'date:Y-m-d',
+    ];
 }

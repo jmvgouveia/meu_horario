@@ -13,6 +13,8 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Observers\StudentObserver;
 use App\Models\Student;
+use App\Models\Teacher;
+use App\Observers\TeacherObserver;
 
 
 
@@ -52,5 +54,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Student::observe(StudentObserver::class);
+        //  Teacher::observe(TeacherObserver::class);
     }
 }
