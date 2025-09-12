@@ -2,14 +2,20 @@
 
 namespace App\Filament\Imports;
 
+use App\Helpers\DatabaseHelper;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\TeacherHourCounter;
 use Carbon\Carbon;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+
+
+use updateWorkload;
 
 class TeacherImporter extends Importer
 {
@@ -67,6 +73,31 @@ class TeacherImporter extends Importer
         }
     }
 
+    // public static function updateWorkload(Teacher $teacher, array $data): bool
+    // {
+    //     // já não fazemos $teacher->save() aqui
+
+    //     $schoolYearId = $data['id_schoolyear'] ?? null;
+    //     if (!$schoolYearId) {
+    //         return true;
+    //     }
+
+    //     TeacherHourCounter::firstOrCreate(
+    //         [
+    //             'id_teacher'    => $teacher->id,
+    //             'id_schoolyear' => $schoolYearId,
+    //         ],
+    //         [
+    //             'workload'            => 26,
+    //             'teaching_load'       => 22,
+    //             'non_teaching_load'   => 4,
+    //             'authorized_overtime' => 0,
+    //         ]
+    //     );
+
+    //     return true;
+    // }
+
     public function resolveRecord(): ?Teacher
     {
         return DB::transaction(function () {
@@ -104,8 +135,36 @@ class TeacherImporter extends Importer
                 'id_user'      => $user->id,
             ]);
 
+
+            // 3) cria/sincroniza contador (salva o teacher se ainda não existir)
+            // self::updateWorkload($teacher, $this->data);
+
+
             return $teacher;
         });
+    }
+
+    public function afterSave(): void
+    {
+        if ($this->record instanceof Teacher) {
+            //   $schoolYearId = $this->data['id_schoolyear'] ?? null;
+            $schoolYearId = DatabaseHelper::getIDActiveSchoolyear();
+
+            if ($schoolYearId) {
+                TeacherHourCounter::firstOrCreate(
+                    [
+                        'id_teacher'    => $this->record->id,
+                        'id_schoolyear' => $schoolYearId,
+                    ],
+                    [
+                        'workload'            => 26,
+                        'teaching_load'       => 22,
+                        'non_teaching_load'   => 4,
+                        'authorized_overtime' => 0,
+                    ]
+                );
+            }
+        }
     }
 
     public static function getCompletedNotificationBody(Import $import): string

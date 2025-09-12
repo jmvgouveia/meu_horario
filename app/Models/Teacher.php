@@ -125,4 +125,26 @@ class Teacher extends Model
         'birthdate' => 'date:Y-m-d',
         'startingdate' => 'date:Y-m-d',
     ];
+
+    // protected static function booted()
+    // {
+    //     static::created(function (Teacher $teacher) {
+    //         $schoolYearId = request('id_schoolyear') ?? null;
+
+    //         if ($schoolYearId) {
+    //             \App\Models\TeacherHourCounter::firstOrCreate(
+    //                 [
+    //                     'id_teacher'    => $teacher->id,
+    //                     'id_schoolyear' => $schoolYearId,
+    //                 ],
+    //                 [
+    //                     'workload'            => 26,
+    //                     'teaching_load'       => 22,
+    //                     'non_teaching_load'   => 4,
+    //                     'authorized_overtime' => 0,
+    //                 ]
+    //             );
+    //         }
+    //     });
+    // }
 }
