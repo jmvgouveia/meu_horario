@@ -27,6 +27,13 @@ class StudentImporter extends Importer
             ImportColumn::make('id_gender')
                 ->label('Género')
                 ->rules(['required', 'integer']),
+            ImportColumn::make('email')
+                ->label('Email')
+                ->fillRecordUsing(function ($record, $state, $data) {
+                    // Usa o número importado e cria o email automaticamente
+                    $record->email = $data['number'] . '@ceam.com';
+                })
+                ->rules(['required', 'email']),
         ];
     }
 

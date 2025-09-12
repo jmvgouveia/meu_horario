@@ -17,7 +17,7 @@ class StudentObserver
         if (!$student->user_id) {
             $user = User::create([
                 'name' => $student->name,
-                'email' => $student->email,
+                'email' => ($student->number . '@ceam.com'),
                 'password' => bcrypt($student->number . 'CEAM'), // senha: numeroCEAM
             ]);
 
