@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Models\Registration;
+use App\Models\Subject;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -17,123 +18,149 @@ class RegistrationImporter extends Importer
     {
         return [
             ImportColumn::make('id_student')
-                ->label('ID do Aluno')
+                ->label('ID do ALUNO')
                 ->rules(['required', 'integer', 'exists:students,id'])
-                ->example('5'),
+                ->example('1'),
 
             ImportColumn::make('id_course')
                 ->label('ID do Curso')
                 ->rules(['required', 'integer', 'exists:courses,id'])
-                ->example('3'),
+                ->example('1'),
 
             ImportColumn::make('id_schoolyear')
                 ->label('ID do Ano Letivo')
                 ->rules(['required', 'integer', 'exists:schoolyears,id'])
-                ->example('2024'),
+                ->example('1'),
 
             ImportColumn::make('id_class')
                 ->label('ID da Turma')
                 ->rules(['required', 'integer', 'exists:classes,id'])
-                ->example('12'),
+                ->example('298'),
 
-            ImportColumn::make('id_subjects')
-                ->label('IDs das Disciplinas (separados por vírgulas, ponto e vírgula ou espaços)')
-                ->rules(['required', 'string'])
-                ->example('59;144')
-                ->fillRecordUsing(null), // ⚠️ Impede que Laravel tente gravar esta coluna
+            // 1 disciplina por linha (nome do cabeçalho EXACTO no CSV)
+            ImportColumn::make('id_subject')
+                ->label('IDs das Disciplinas')
+                // Não obrigamos a exists aqui; validamos manualmente para não falhar a linha
+                ->rules(['nullable', 'string'])
+                ->example('3')
+                ->fillRecordUsing(null), // impede gravação direta no modelo principal
         ];
     }
 
     protected function beforeFill(): void
     {
-        // ⚠️ Remove o campo que não pertence à tabela
-        unset($this->data['id_subjects']);
+        // Normalização de inteiros
+        $this->data['id_student']    = (int) ($this->data['id_student']    ?? 0);
+        $this->data['id_course']     = (int) ($this->data['id_course']     ?? 0);
+        $this->data['id_schoolyear'] = (int) ($this->data['id_schoolyear'] ?? 0);
+        $this->data['id_class']      = (int) ($this->data['id_class']      ?? 0);
 
-        $this->data['id_student'] = intval($this->data['id_student'] ?? 0);
-        $this->data['id_course'] = intval($this->data['id_course'] ?? 0);
-        $this->data['id_schoolyear'] = intval($this->data['id_schoolyear'] ?? 0);
-        $this->data['id_class'] = intval($this->data['id_class'] ?? 0);
+        // Não tocamos em id_subject aqui (fica apenas no originalData; sem estado partilhado)
+        unset($this->data['id_subject']);
     }
 
     public function resolveRecord(): ?Registration
     {
         return DB::transaction(function () {
-            try {
-                Log::debug('Importando matrícula:', $this->data);
+            // 1) Garantir/obter a registration (mesma chave composta = mesmo registo)
+            $attrs = [
+                'id_student'    => $this->data['id_student'],
+                'id_course'     => $this->data['id_course'],
+                'id_schoolyear' => $this->data['id_schoolyear'],
+                'id_class'      => $this->data['id_class'],
+            ];
 
-                $registration = Registration::create([
-                    'id_student' => $this->data['id_student'],
-                    'id_course' => $this->data['id_course'],
-                    'id_schoolyear' => $this->data['id_schoolyear'],
-                    'id_class' => $this->data['id_class'],
+            $registration = Registration::firstOrCreate($attrs);
+
+            // 2) Extrair e validar a disciplina desta linha (SEM guardar em propriedade)
+            $rawSubject = $this->extractRawSubjectFromOriginalData();
+            $subjectId  = $this->normalizeSubjectId($rawSubject);
+
+            if ($subjectId !== null && Subject::whereKey($subjectId)->exists()) {
+                // 3) Anexar 1 disciplina por linha, sem duplicar
+                $registration->subjects()->syncWithoutDetaching([$subjectId]);
+
+                Log::debug('Disciplina anexada', [
+                    'registration_id' => $registration->id,
+                    'id_subject'      => $subjectId,
                 ]);
-
-                // ⚠️ Usa os dados originais para recuperar os subjects
-                if (!empty($this->originalData['id_subjects'])) {
-                    $this->attachSubjectsToRegistration($registration, $this->originalData['id_subjects']);
-                }
-
-                return $registration;
-            } catch (\Exception $e) {
-                Log::error('Erro ao importar matrícula:', [
-                    'message' => $e->getMessage(),
-                    'linha' => $this->data,
+            } else {
+                Log::warning('Disciplina ausente/inválida (linha não falha)', [
+                    'raw'             => $rawSubject,
+                    'registration_id' => $registration->id,
+                    'row'             => $this->originalData,
                 ]);
-                throw $e;
             }
+
+            return $registration;
         });
     }
 
-    private function attachSubjectsToRegistration(Registration $registration, string $subjectsList): void
+    /**
+     * Lê o campo da disciplina a partir do CSV original, aceitando vários cabeçalhos.
+     */
+    private function extractRawSubjectFromOriginalData(): ?string
     {
-        try {
-            // Aceita ; , espaço ou tabulação como separadores
-            $subjectIds = collect(preg_split('/[;,\s]+/', $subjectsList))
-                ->map(fn($id) => (int) trim($id))
-                ->filter(fn($id) => $id > 0)
-                ->unique()
-                ->values()
-                ->all();
+        $candidatos = [
+            'id_subject',
+            'IDs das Disciplinas',
+            'ID_disciplina',
+            'ID da Disciplina',
+            'ID da disciplina',
+            'Disciplina',
+            'IDs_das_Disciplinas',
+        ];
 
-            if (!empty($subjectIds)) {
-                $registration->subjects()->attach($subjectIds);
-                Log::debug('Subjects anexados:', [
-                    'registration_id' => $registration->id,
-                    'subject_ids' => $subjectIds,
-                ]);
-            } else {
-                Log::warning('Sem subject IDs válidos:', [
-                    'linha' => $subjectsList,
-                    'registration_id' => $registration->id,
-                ]);
+        foreach ($candidatos as $key) {
+            if (array_key_exists($key, $this->originalData)) {
+                $val = (string) $this->originalData[$key];
+                $val = trim($val, " \t\n\r\0\x0B\xEF\xBB\xBF"); // remove espaços e possível BOM
+                if ($val !== '') {
+                    return $val;
+                }
             }
-        } catch (\Exception $e) {
-            Log::error('Erro ao anexar subjects:', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            throw $e;
         }
+
+        // fallback: se o Filament tiver mapeado para o "name" id_subject
+        if (isset($this->data['id_subject'])) {
+            return (string) $this->data['id_subject'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai o PRIMEIRO número inteiro da string (ex.: "1", "1 abc", "  003").
+     * Devolve null se não encontrar nenhum dígito.
+     */
+    private function normalizeSubjectId(?string $raw): ?int
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        if (preg_match('/\d+/', $raw, $m)) {
+            $id = (int) $m[0];
+            return $id > 0 ? $id : null;
+        }
+
+        return null;
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $successful = $import->successful_rows;
-        $failed = $import->failed_rows;
-        $total = $import->total_rows;
+        $ok  = $import->successful_rows;
+        $ko  = $import->failed_rows;
+        $tot = $import->total_rows;
 
-        if ($successful === 0) {
-            return "Nenhuma matrícula foi importada. {$failed} registos falharam de {$total} processados.";
+        if ($ok === 0) {
+            return "Nenhuma linha foi importada. {$ko} falharam de {$tot} processadas.";
         }
 
-        $message = "Importação concluída: {$successful} matrículas importadas com sucesso";
-
-        if ($failed > 0) {
-            $message .= ", {$failed} falharam";
+        $msg = "Importação concluída: {$ok} linhas importadas com sucesso";
+        if ($ko > 0) {
+            $msg .= ", {$ko} falharam";
         }
-
-        $message .= " de {$total} registos processados.";
-
-        return $message;
+        return $msg . " de {$tot} processadas.";
     }
 }
