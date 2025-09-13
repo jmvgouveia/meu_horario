@@ -9,11 +9,15 @@ use Dom\Text;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Tables\Columns\ToggleColumn;
 
 class TeacherHourCounterResource extends Resource
 {
@@ -44,12 +48,41 @@ class TeacherHourCounterResource extends Resource
                     ->required()
                     ->reactive()
                     ->placeholder('Selecione um professor'),
-                Checkbox::make('authorized_overtime')
+                // Toggle::make('authorized_overtime')
+                //     ->label('Horas Extras Autorizadas')
+                //     ->default(false)
+                //     ->columnSpanFull(),
+
+                Toggle::make('authorized_overtime')
                     ->label('Horas Extras Autorizadas')
                     ->default(false)
-                    ->columnSpanFull(),
+                    ->live() // necessário para atualizar a UI no toggle
+                    ->columnSpanFull()
+                    ->afterStateUpdated(function (bool $state, Set $set) {
+                        if (! $state) {
+                            // se desligar, força o valor para 0
+                            $set('numOvertime', 0);
+                        }
+                    }),
+
+                TextInput::make('numovertime')
+                    ->label('Horas Extras (h)')
+                    ->numeric()
+                    ->inputMode('decimal')
+                    ->minValue(0)
+                    ->step('0.25')              // ajusta se quiseres 0.5 ou 0.01
+                    ->suffix('h')
+                    ->default(0)
+                    ->visible(fn(Get $get) => (bool) $get('authorized_overtime'))         // só mostra quando autorizado
+                    ->required(fn(Get $get) => (bool) $get('authorized_overtime'))        // obriga quando visível
+                    ->dehydrateStateUsing(
+                        fn($state, Get $get) =>                        // ao gravar:
+                        $get('authorized_overtime') ? (float) ($state ?? 0) : 0           //   se off, guarda 0
+                    ),
+
+
                 TextInput::make('teaching_load')
-                    ->label('Carga Horária Letiva')
+                    ->label('Carga Letiva')
                     ->required()
                     ->numeric()
                     ->minValue(0)
@@ -62,7 +95,7 @@ class TeacherHourCounterResource extends Resource
                     })
                     ->placeholder('Introduza carga horária letiva'),
                 TextInput::make('non_teaching_load')
-                    ->label('Carga Horária Não Letiva')
+                    ->label('Carga Não Letiva')
                     ->required()
                     ->numeric()
                     ->minValue(0)
@@ -73,15 +106,15 @@ class TeacherHourCounterResource extends Resource
                         $set('workload', ($get('teaching_load') ?? 0) + ($state ?? 0));
                     })
                     ->placeholder('Introduza carga horária não letiva'),
+
                 TextInput::make('workload')
                     ->label('Carga Horária Total')
                     ->numeric()
-                    ->disabled()
                     ->reactive()
                     ->dehydrated(true)
                     ->afterStateHydrated(function (TextInput $component, $state, $record) {
                         $component->state(
-                            ($record->teaching_load ?? 0) + ($record->non_teaching_load ?? 0)
+                            ($record->teaching_load ?? 0) + ($record->non_teaching_load ?? 0) + ($record->numovertime ?? 0)
                         );
                     }),
 
@@ -112,26 +145,26 @@ class TeacherHourCounterResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('teaching_load')
-                    ->label('Carga Horária Letiva')
+                    ->label('Carga Letiva')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('non_teaching_load')
-                    ->label('Carga Horária Não Letiva')
+                    ->label('Carga Não Letiva')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('authorized_overtime')
-                    ->label('Horas Extras Autorizadas')
-                    ->badge()
-                    ->formatStateUsing(function (?string $state): string {
-                        return match ($state) {
-                            '1' => 'Autorizado',
-                            '0' => 'Não Autorizado',
-                            default => ucfirst($state ?? '-'),
-                        };
-                    })
-                    ->color(fn(?string $state): string => in_array($state, ['1', '1']) ? 'success' : 'danger')
+
+                ToggleColumn::make('authorized_overtime')
+                    ->label('Extras Autorizadas')
+                    ->onColor('primary')
+                    ->searchable()
+                    ->disabled()
+                    ->sortable(),
+
+
+                TextColumn::make('numovertime')
+                    ->label('Nº de Horas Extras')
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(),
             ])
             ->filters([
                 //

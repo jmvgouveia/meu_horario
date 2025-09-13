@@ -10,6 +10,12 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
         <div class="p-4 bg-gray dark:bg-gray-800 rounded shadow">
             <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Resumo de Carga Horária</h3>
             <br>
+
+
+
+
+            <br>
+
             <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Horas por Marcar</h3>
 
             <div class="flex flex-wrap gap-4">
@@ -21,6 +27,10 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
                         <x-heroicon-o-clock class="w-7 h-7 !text-blue-600 dark:!text-blue-400" />
                         <p class="text-2xl font-bold !text-blue-600 dark:!text-blue-400">
                             &nbsp {{ $resumo['disponivel_letiva'] ?? 0 }} h
+                        </p>
+
+                        <p class="text-sm font-bold !text-blue-600 dark:!text-blue-400">
+                            &nbsp ({{$resumo['disponivel_letiva'] - $resumo['horas_extras'] ?? 0 }} h +&nbsp{{$resumo['horas_extras']}} h extra )
                         </p>
                     </div>
                 </div>
@@ -38,6 +48,7 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
 
             </div>
             <br>
+
             <h3 class="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">Horas Marcadas</h3>
 
             <div class="flex flex-wrap gap-4">
@@ -80,6 +91,9 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
                         </p>
                     </div>
                 </div>
+
+
+
             </div>
 
             <br>

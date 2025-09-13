@@ -13,6 +13,7 @@ class TeacherHourCounter extends Model
         'non_teaching_load',
         'authorized_overtime',
         'id_schoolyear',
+        'numovertime',
     ];
 
     public function teacher()
@@ -24,4 +25,9 @@ class TeacherHourCounter extends Model
     {
         return $this->belongsTo(SchoolYear::class, 'id_schoolyear');
     }
+
+    protected $casts = [
+        'authorized_overtime' => 'bool',
+        'numovertime' => 'float',
+    ];
 }

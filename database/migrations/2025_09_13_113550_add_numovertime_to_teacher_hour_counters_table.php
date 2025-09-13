@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('timeperiods', function (Blueprint $table) {
-            $table->time('start_time')->nullable();
-            $table->time('end_time')->nullable();
-            $table->boolean('active')->default(true)->change();
+        Schema::table('teacher_hour_counters', function (Blueprint $table) {
+            $table->integer('numovertime')->default(0)->after('authorized_overtime');
         });
     }
 
@@ -23,7 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('timeperiods', function (Blueprint $table) {
+        Schema::table('teacher_hour_counters', function (Blueprint $table) {
+            $table->dropColumn('numovertime');
+
             //
         });
     }

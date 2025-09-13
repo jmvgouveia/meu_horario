@@ -85,6 +85,10 @@ class OverviewWidget extends Widget
                 ];
             })->toArray();
 
+        $horasExtras = $counter?->numovertime ?? 0;
+
+        // $totalHoraLetiva = ($counter?->teaching_load ?? 0) - array_sum(array_column($cargos, 'redução_letiva')) - array_sum(array_column($tempoReducoes, 'redução_letiva'));
+
         $resumo = [
             'letiva' => $aulasLetivas,
             'nao_letiva' => $aulasNaoLetivas,
@@ -92,6 +96,7 @@ class OverviewWidget extends Widget
             'disponivel_naoletiva' => max(0, $counter?->non_teaching_load ?? 0),
             'cargos' => $cargos,
             'tempo_reducoes' => $tempoReducoes,
+            'horas_extras' => $horasExtras,
         ];
 
         return view(static::$view, compact('resumo'));
