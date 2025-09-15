@@ -13,6 +13,10 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use STS\FilamentImpersonate\Tables\Actions\Impersonate;
+
+
+
 
 class UserResource extends Resource
 {
@@ -21,6 +25,8 @@ class UserResource extends Resource
     protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Utilizadores';
     protected static ?string $navigationIcon = 'heroicon-s-user-group';
+
+
 
     public static function getLabel(): string
     {
@@ -85,6 +91,7 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Impersonate::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
