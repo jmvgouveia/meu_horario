@@ -401,7 +401,7 @@ trait ChecksScheduleConflicts
             $anteriorFim = $end;
         }
 
-        if ($maxConsecutivas >= 6) {
+        if ($maxConsecutivas > 6) {
             Notification::make()
                 ->title('Limite diário excedido')
                 ->body('Este professor já tem 6 marcações seguidas neste dia. Deve haver um intervalo.')
