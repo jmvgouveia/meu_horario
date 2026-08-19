@@ -2,11 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Teacher;
+use App\Models\User;
+use App\Models\SchoolYear;
+use App\Services\MergedScheduleCalendarService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Facades\Filament;
 use Filament\Pages\Page;
-use App\Models\Teacher;
-use App\Services\MergedScheduleCalendarService;
 
 class HorarioSobreposto extends Page
 {
@@ -22,14 +25,18 @@ class HorarioSobreposto extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        $user = auth()->user();
+        return static::canAccess();
+    }
 
-        // Oculta da navegação apenas se for professor
-        if ($user && $user->hasRole('Super Admin')) {
-            return true;
-        }
+    public static function canAccess(): bool
+    {
+        $user = Filament::auth()->user();
 
-        return false; // visível para admins, superadmins, etc.
+        return $user instanceof User
+            && (
+                $user->hasRole('Super Admin')
+                || static::userHasCoordinatorPosition($user)
+            );
     }
 
     public function form(Form $form): Form
@@ -39,7 +46,7 @@ class HorarioSobreposto extends Page
                 ->schema([
                     Forms\Components\MultiSelect::make('teacher_ids')
                         ->label('Docentes')
-                        ->options(fn() => Teacher::query()->orderBy('name')->pluck('name', 'id')->toArray())
+                        ->options(fn() => $this->teacherOptions())
                         ->searchable()
                         ->preload()
                         ->reactive(),
@@ -51,10 +58,81 @@ class HorarioSobreposto extends Page
     public function getMergedProperty(): ?array
     {
         $ids = $this->data['teacher_ids'] ?? [];
+        $ids = array_values(array_intersect(
+            array_map('intval', $ids),
+            $this->allowedTeacherIds(),
+        ));
+
         if (empty($ids)) {
             return null;
         }
 
         return MergedScheduleCalendarService::buildForTeachers($ids);
+    }
+
+    protected function teacherOptions(): array
+    {
+        return $this->allowedTeacherQuery()
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+    }
+
+    protected function allowedTeacherIds(): array
+    {
+        return $this->allowedTeacherQuery()
+            ->pluck('id')
+            ->map(fn($id) => (int) $id)
+            ->toArray();
+    }
+
+    protected function allowedTeacherQuery()
+    {
+        $user = Filament::auth()->user();
+        $activeSchoolYearId = SchoolYear::query()->where('active', true)->value('id');
+        $query = Teacher::query()
+            ->when(
+                $activeSchoolYearId,
+                fn($query) => $query->whereHas(
+                    'schedules',
+                    fn($scheduleQuery) => $scheduleQuery
+                        ->where('id_schoolyear', $activeSchoolYearId)
+                        ->whereIn('status', ['Aprovado', 'Aprovado DP'])
+                ),
+                fn($query) => $query->whereRaw('0 = 1')
+            );
+
+        if ($user instanceof User && $user->hasRole('Super Admin')) {
+            return $query;
+        }
+
+        return $query->where('id_department', $user?->teacher?->id_department);
+    }
+
+    protected static function userHasCoordinatorPosition(User $user): bool
+    {
+        $activeSchoolYearId = SchoolYear::query()->where('active', true)->value('id');
+        $teacher = $user->teacher;
+
+        if (! $activeSchoolYearId || ! $teacher?->id_department) {
+            return false;
+        }
+
+        return $teacher->positions()
+            ->wherePivot('id_schoolyear', $activeSchoolYearId)
+            ->whereIn('positions.name', static::coordinatorPositionNames())
+            ->exists();
+    }
+
+    protected static function coordinatorPositionNames(): array
+    {
+        return [
+            'Coordenador',
+            'Coordenador Departamento',
+            'Coordenador de Departamento',
+            'Coordenador de departamento',
+            'Coordenador Departamento Curricular',
+            'Coordenador de Departamento Curricular',
+        ];
     }
 }

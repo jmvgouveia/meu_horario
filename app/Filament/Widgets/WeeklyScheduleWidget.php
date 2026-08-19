@@ -22,11 +22,7 @@ class WeeklyScheduleWidget extends Widget
     protected int|string|array $pollingInterval = '5s';
 
 
-    protected int | string | array $columnSpan = [
-        'sm' => 12,
-        'md' => 12,
-        'lg' => 'full',
-    ];
+    protected int | string | array $columnSpan = 'full';
 
 
     public function render(): View
@@ -196,10 +192,13 @@ class WeeklyScheduleWidget extends Widget
 
         $recusados = ScheduleRequest::where('status', 'Recusado')
             ->where('id_teacher', $teacher->id)
+            ->whereHas('scheduleConflict', fn($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->keyBy('id_new_schedule');
 
         $escalados = ScheduleRequest::where('status', 'Escalado')
+            ->where('id_teacher', $teacher->id)
+            ->whereHas('scheduleConflict', fn($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->reduce(function ($carry, $req) {
                 $carry[$req->id_schedule] = $req;
@@ -208,6 +207,8 @@ class WeeklyScheduleWidget extends Widget
             }, collect());
 
         $PedidosAprovadosDP = ScheduleRequest::where('status', 'Aprovado DP')
+            ->where('id_teacher', $teacher->id)
+            ->whereHas('scheduleConflict', fn($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->reduce(function ($carry, $req) {
                 $carry[$req->id_schedule] = $req;
@@ -216,6 +217,8 @@ class WeeklyScheduleWidget extends Widget
             }, collect());
 
         $AprovadosDP = Schedule::where('status', 'Aprovado DP')
+            ->where('id_teacher', $teacher->id)
+            ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->get()
             ->keyBy('id');
 

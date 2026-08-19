@@ -64,6 +64,9 @@ class RegistrationSubjectResource extends Resource
             Section::make('Escolha o Turno')
                 ->columns(1)
                 ->schema(function ($record) {
+                    if (! $record) {
+                        return [];
+                    }
 
                     $availableShifts = \App\Models\Schedule::query()
                         ->where('id_subject', $record->id_subject)
@@ -74,13 +77,14 @@ class RegistrationSubjectResource extends Resource
                         // Exemplo de filtro adicional
                         ->get();
 
-                    $shiftCards = collect($availableShifts)->map(function ($s) {
+                    $shiftCards = collect($availableShifts)->map(function ($s) use ($record) {
                         $day = $s->weekday?->weekday ?? '';
                         $start = $s->timeperiod?->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $s->timeperiod->start_time)->format('H:i') : '';
                         $end   = $s->timeperiod?->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $s->timeperiod->end_time)->format('H:i') : '';
                         $room = $s->room?->name ?? '';
-                        $inscritos = \App\Models\RegistrationSubject::where('shift', $s->id)
-                            ->whereHas('registration', fn($q) => $q->where('id_class', $s->classes->pluck('id')))
+                        $inscritos = \App\Models\RegistrationSubject::where('id_schedule', $s->id)
+                            ->whereHas('registration', fn($q) => $q->whereIn('id_class', $s->classes->pluck('id')))
+                            ->whereKeyNot($record->getKey())
                             ->count();
                         $vagas = max(0, $s->shift_limit - $inscritos);
 
@@ -106,7 +110,7 @@ class RegistrationSubjectResource extends Resource
                                     ->label('👥 Vagas')
                                     ->content($vagas),
 
-                                ToggleButtons::make('shift')
+                                ToggleButtons::make('id_schedule')
                                     ->label('Escolher')
                                     ->options([$s->id => 'Selecionar'])
                                     ->reactive()
@@ -114,7 +118,7 @@ class RegistrationSubjectResource extends Resource
                                     ->dehydrated(fn() => $vagas > 0) // não envia o valor no submit quando não há vagas
                                     ->afterStateHydrated(function ($state, callable $set) use ($vagas) {
                                         if ($vagas <= 0) {
-                                            $set('shift', null); // limpa seleção antiga
+                                            $set('id_schedule', null); // limpa seleção antiga
                                         }
                                     }),
 
@@ -143,10 +147,15 @@ class RegistrationSubjectResource extends Resource
                             'class' => 'bg-gray-50 border rounded-lg p-4 shadow mb-4 cursor-pointer hover:bg-red-50 transition-colors'
                         ])
                         ->schema([
-                            ToggleButtons::make('shift')
+                            ToggleButtons::make('id_schedule')
                                 ->label('Escolher')
                                 ->options(['none' => 'Selecionar nenhum turno'])
                                 ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    if ($state === 'none') {
+                                        $set('id_schedule', null);
+                                    }
+                                })
                         ]);
 
                     return array_merge($shiftCards, [$noneCard]);
@@ -200,17 +209,15 @@ class RegistrationSubjectResource extends Resource
                         $candidates = Schedule::query()
                             ->where('id_subject', $record->id_subject)
                             ->where('status', 'Aprovado')
-                            ->where('shift', 'like', '%' . $studentNo . '%')
+                            ->where('id_schoolyear', $record->registration?->id_schoolyear)
+                            ->whereHas('students', fn($q) => $q->where('students.id', $record->registration?->id_student))
                             ->when(
                                 $record->registration?->id_class,
                                 fn($q, $id) =>
                                 $q->whereHas('classes', fn($qq) => $qq->where('classes.id', $id))
                             )
-                            ->with(['weekday', 'timeperiod', 'room', 'teacher'])
-                            ->get()
-                            // evitar falso match (ex.: 444 em 4444)
-                            ->filter(fn($sch) => preg_match('/(^|\D)' . preg_quote($studentNo, '/') . '(\D|$)/', (string) $sch->shift))
-                            ->values();
+                            ->with(['weekday', 'timeperiod', 'room', 'teacher', 'students'])
+                            ->get();
 
                         if ($candidates->isEmpty()) {
                             return 'Sem Turno';
@@ -259,12 +266,9 @@ class RegistrationSubjectResource extends Resource
                         $lineFor = function ($s) use ($fmt, $studentNo) {
                             $turno = (string) ($s->shift ?? '');
 
-                            // Extrair todos os números do shift (na ordem, únicos)
-                            $nums = collect();
-                            if ($turno !== '') {
-                                preg_match_all('/\d+/', $turno, $m);
-                                $nums = collect($m[0])->map(fn($n) => (string) $n)->unique()->values();
-                            }
+                            $nums = $s->students
+                                ? $s->students->pluck('number')->map(fn($n) => (string) $n)->unique()->values()
+                                : collect();
 
                             $isIndividual = $studentNo && $nums->count() === 1 && $nums->first() === (string) $studentNo;
 
