@@ -55,3 +55,12 @@
 
 - `./vendor/bin/pint --test` acusa muitos problemas de estilo pre-existentes em varias partes do projeto.
 - Nao foi aplicado `pint` global para evitar alterar ficheiros nao relacionados.
+
+### Validacao de Dependencias
+
+- Foi tentado atualizar `althinect/filament-spatie-roles-permissions` de `2.3.2` para `2.3.3`.
+- A versao `2.3.3` foi rejeitada por incompatibilidade com o Filament atual: assinatura de `getNavigationGroup()` diferente da esperada por `Filament\Resources\Resource`.
+- O pacote ficou fixado em `2.3.2`, que passa `composer audit` e permite `artisan package:discover`.
+- Dependencias npm foram atualizadas dentro das constraints atuais do projeto.
+- Assets publicados do Filament foram atualizados por `php artisan filament:upgrade` durante o fluxo Composer.
+- Validacoes apos refresh: `composer audit`, `npm audit`, `npm run build` e `php artisan test` passaram.
