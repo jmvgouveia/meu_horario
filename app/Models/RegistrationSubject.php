@@ -92,6 +92,7 @@ class RegistrationSubject extends Model
 
     protected $fillable = [
         'shift',
+        'id_schedule',
     ];
 
     public function subject()
@@ -104,16 +105,9 @@ class RegistrationSubject extends Model
         return $this->belongsTo(Registration::class, 'id_registration');
     }
 
-    public function student()
+    public function getStudentAttribute(): ?Student
     {
-        return $this->hasOneThrough(
-            Student::class,
-            Registration::class,
-            'id',              // PK em registrations
-            'id',              // PK em students
-            'id_registration', // FK em registrations_subjects
-            'id_student'       // FK em registrations
-        );
+        return $this->registration?->student;
     }
 
     public function schoolyear()
@@ -147,6 +141,6 @@ class RegistrationSubject extends Model
 
     public function selectedSchedule()
     {
-        return $this->belongsTo(\App\Models\Schedule::class, 'shift'); // 'shift' guarda o ID do schedule
+        return $this->belongsTo(\App\Models\Schedule::class, 'id_schedule');
     }
 }

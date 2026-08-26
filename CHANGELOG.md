@@ -64,3 +64,11 @@
 - Dependencias npm foram atualizadas dentro das constraints atuais do projeto.
 - Assets publicados do Filament foram atualizados por `php artisan filament:upgrade` durante o fluxo Composer.
 - Validacoes apos refresh: `composer audit`, `npm audit`, `npm run build` e `php artisan test` passaram.
+
+### Coerencia de Horarios de Alunos
+
+- Adicionadas migrations para `registrations_subjects.id_schedule` e `students.number` como string.
+- `RegistrationSubject::selectedSchedule()` passou a usar `id_schedule` de forma explicita.
+- `Student::schedules()` passou a usar a pivot correta `schedules_students`.
+- Exportacao/listagem de alunos por professor passou a resolver horarios por pivot de alunos em vez de procurar numeros dentro de texto livre.
+- Adicionado teste de regressao para garantir associacao exata entre aluno, horario e turno selecionado.
