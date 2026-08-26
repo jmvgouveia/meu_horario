@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Actions as ActionGroup;
+use Filament\Forms\Components\Placeholder;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Toggle;
@@ -525,12 +526,10 @@ class ScheduleResource extends Resource
                                     })
                                     ->placeholder('Em caso de ser a turma toda, não selecione o turno'),
 
-                                TextInput::make('shift')
+                                Placeholder::make('generated_shift')
                                     ->label('Turno Gerado (automático)')
                                     ->visible(fn(callable $get) => is_array($get('students')) && count($get('students')) > 0)
-                                    ->extraAttributes(['readonly' => true])
-                                    ->default(fn(callable $get, ?Schedule $record) => $get('shift') ? "Turno {$get('shift')} - " . (Auth::user()?->teacher?->acronym ?? '') : $record?->shift)
-                                    ->placeholder('Será preenchido automaticamente com os números dos alunos'),
+                                    ->content(fn(callable $get, ?Schedule $record) => $get('shift') ?: $record?->shift ?: 'Será preenchido automaticamente com os números dos alunos'),
 
                                 TextInput::make('shift_limit')
                                     ->label('Número limite de alunos')

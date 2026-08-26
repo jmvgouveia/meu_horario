@@ -154,6 +154,10 @@ class RegistrationSubjectResource extends Resource
             //         }),
             // ]);
             ->schema(function ($record) {
+                if (! $record) {
+                    return [];
+                }
+
                 $availableShifts = \App\Models\Schedule::query()
                     ->where('id_subject', $record->id_subject)
                     ->whereHas('classes', fn($q) => $q->where('classes.id', $record->registration->id_class))
@@ -166,7 +170,7 @@ class RegistrationSubjectResource extends Resource
                     return $s->teacher_id . '|' . ($s->shift ?? '');
                 });
 
-                $shiftCards = $grouped->map(function ($group) {
+                $shiftCards = $grouped->map(function ($group) use ($record) {
                     /** @var \App\Models\Schedule $first */
                     $first = $group->first();
 
@@ -183,6 +187,7 @@ class RegistrationSubjectResource extends Resource
                         // vagas por slot (sem somar)
                         $inscritos = \App\Models\RegistrationSubject::where('shift', $s->id)
                             ->whereHas('registration', fn($q) => $q->whereIn('id_class', $s->classes->pluck('id')))
+                            ->whereKeyNot($record->getKey())
                             ->count();
                         $vagas = max(0, (int) $s->shift_limit - $inscritos);
 
@@ -584,7 +589,7 @@ class RegistrationSubjectResource extends Resource
                                     fn($q) =>
                                     $q->where('id_schoolyear', $schoolYearId)
                                 )
-                                ->with(['weekday', 'timeperiod', 'room', 'teacher'])
+                                ->with(['weekday', 'timeperiod', 'room', 'teacher', 'students'])
                                 ->get();
 
                             $record->foundSchedulesForTurno = $siblings;
@@ -610,7 +615,8 @@ class RegistrationSubjectResource extends Resource
                         $candidates = \App\Models\Schedule::query()
                             ->where('id_subject', $record->id_subject)
                             ->where('status', 'Aprovado')
-                            ->where('shift', 'like', '%' . $studentNo . '%')
+                            ->where('id_schoolyear', $record->registration?->id_schoolyear)
+                            ->whereHas('students', fn($q) => $q->where('students.id', $record->registration?->id_student))
                             ->when(
                                 $record->registration?->id_class,
                                 fn($q, $id) => $q->whereHas('classes', fn($qq) => $qq->where('classes.id', $id))
@@ -619,10 +625,8 @@ class RegistrationSubjectResource extends Resource
                                 $record->registration?->id_schoolyear,
                                 fn($q, $sy) => $q->where('id_schoolyear', $sy)
                             )
-                            ->with(['weekday', 'timeperiod', 'room', 'teacher'])
-                            ->get()
-                            ->filter(fn($sch) => preg_match('/(^|\D)' . preg_quote($studentNo, '/') . '(\D|$)/', (string) $sch->shift))
-                            ->values();
+                            ->with(['weekday', 'timeperiod', 'room', 'teacher', 'students'])
+                            ->get();
 
                         if ($candidates->isEmpty()) {
                             return 'Sem Turno';
@@ -647,7 +651,7 @@ class RegistrationSubjectResource extends Resource
                                 fn($q) =>
                                 $q->where('id_schoolyear', $schoolYearId)
                             )
-                            ->with(['weekday', 'timeperiod', 'room', 'teacher'])
+                            ->with(['weekday', 'timeperiod', 'room', 'teacher', 'students'])
                             ->get();
 
                         $record->foundSchedulesForTurno = $siblings;
@@ -688,12 +692,9 @@ class RegistrationSubjectResource extends Resource
                         $lineFor = function ($s) use ($fmt, $studentNo) {
                             $turno = (string) ($s->shift ?? '');
 
-                            // marcação Individual vs Partilhada (opcional)
-                            $nums = collect();
-                            if ($turno !== '') {
-                                preg_match_all('/\d+/', $turno, $m);
-                                $nums = collect($m[0])->map(fn($n) => (string) $n)->unique()->values();
-                            }
+                            $nums = $s->students
+                                ? $s->students->pluck('number')->map(fn($n) => (string) $n)->unique()->values()
+                                : collect();
                             $isIndividual = $studentNo && $nums->count() === 1 && $nums->first() === (string) $studentNo;
 
                             $dia  = $s->weekday?->weekday ?: '—';

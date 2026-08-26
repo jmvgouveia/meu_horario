@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Models\Weekday;
 use App\Models\Timeperiod;
 use App\Models\Schedule;
+use App\Models\SchoolYear;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Schema;
 
@@ -24,6 +25,7 @@ class MergedScheduleCalendarService
         // Dados base
         $weekdays    = Weekday::query()->orderBy('id')->pluck('weekday', 'id')->toArray();
         $timePeriods = Timeperiod::query()->orderBy('start_time')->get();
+        $activeSchoolYearId = SchoolYear::query()->where('active', true)->value('id');
 
         // Eager load mínimo e seguro (usa nomes de relações já criadas no modelo)
         $with = array_values(array_intersect(
@@ -32,11 +34,14 @@ class MergedScheduleCalendarService
             collect(get_class_methods(Schedule::class))->filter()->all()
         ));
 
-        $schedules = Schedule::query()
-            ->with($with)
-            ->whereIn($colTeacher, $teacherIds)
-            ->where('status', 'Aprovado')
-            ->get();
+        $schedules = $activeSchoolYearId
+            ? Schedule::query()
+                ->with($with)
+                ->whereIn($colTeacher, $teacherIds)
+                ->where('id_schoolyear', $activeSchoolYearId)
+                ->whereIn('status', ['Aprovado', 'Aprovado DP'])
+                ->get()
+            : collect();
 
         // Montar calendar[timeperiod_id][weekday_id] = [schedules...]
         $calendar = [];
@@ -48,7 +53,7 @@ class MergedScheduleCalendarService
         }
 
         // Paleta de cores por docente
-        $teachers = Teacher::whereIn('id', $teacherIds)->get(['id', 'name']);
+        $teachers = Teacher::whereIn('id', $teacherIds)->orderBy('name')->get(['id', 'name', 'number', 'acronym']);
         $teacherPalette = [];
         foreach ($teachers as $t) {
             $teacherPalette[$t->id] = self::hslFromId($t->id);

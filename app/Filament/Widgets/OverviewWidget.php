@@ -20,11 +20,7 @@ class OverviewWidget extends Widget
 
     protected int|string|array $pollingInterval = '5s';
 
-    protected int | string | array $columnSpan = [
-        'sm' => 12,
-        'md' => 12,
-        'lg' => 'full',
-    ];
+    protected int | string | array $columnSpan = 'full';
 
     public function render(): View
     {
