@@ -107,23 +107,20 @@ class TeacherStudentsResource extends Resource
         $resolveShift = function (RegistrationSubject $record) use ($teacherId): ?string {
             $classId   = $record->registration?->id_class;
             $subjectId = $record->id_subject;
-            $studentNo = (string) ($record->registration?->student?->number ?? '');
+            $studentId = $record->registration?->id_student;
 
-            if ($teacherId && $classId && $subjectId && $studentNo !== '') {
+            if ($teacherId && $classId && $subjectId && $studentId) {
                 $schedule = Schedule::query()
                     ->where('id_teacher', $teacherId)
                     ->where('id_subject', $subjectId)
                     ->where('status', 'Aprovado')
                     ->whereHas('classes', fn($q) => $q->where('classes.id', $classId))
-                    ->where('shift', 'like', '%' . $studentNo . '%')
+                    ->whereHas('students', fn($q) => $q->where('students.id', $studentId))
                     ->orderBy('id')
                     ->first();
 
-                if ($schedule) {
-                    $shift = (string) ($schedule->shift ?? '');
-                    if ($shift !== '' && preg_match('/(^|\D)' . preg_quote($studentNo, '/') . '(\D|$)/', $shift)) {
-                        return $shift;
-                    }
+                if ($schedule && ! blank($schedule->shift)) {
+                    return (string) $schedule->shift;
                 }
             }
 
@@ -134,17 +131,7 @@ class TeacherStudentsResource extends Resource
                 ->first();
 
             if ($regSub) {
-                $scheduleId = $regSub->id_schedule ?? $regSub->schedule_id ?? null;
-
-                if (! $scheduleId) {
-                    foreach (['shift', 'turno', 'turn'] as $cand) {
-                        $val = $regSub->{$cand} ?? null;
-                        if ($val !== null && ctype_digit((string) $val)) {
-                            $scheduleId = (int) $val;
-                            break;
-                        }
-                    }
-                }
+                $scheduleId = $regSub->id_schedule ?? null;
 
                 if ($scheduleId) {
                     $sch = Schedule::find($scheduleId);
@@ -271,25 +258,21 @@ class TeacherStudentsResource extends Resource
         $teacherId = auth()->user()?->teacher?->id ?? 0;
         $classId   = $record->registration?->id_class;
         $subjectId = $record->id_subject;
-        $studentNo = (string) ($record->registration?->student?->number ?? '');
+        $studentId = $record->registration?->id_student;
 
         // 1) Schedule do professor (preferencial)
-        if ($teacherId && $classId && $subjectId && $studentNo !== '') {
+        if ($teacherId && $classId && $subjectId && $studentId) {
             $schedule = Schedule::query()
                 ->where('id_teacher', $teacherId)
                 ->where('id_subject', $subjectId)
                 ->where('status', 'Aprovado')
                 ->whereHas('classes', fn($q) => $q->where('classes.id', $classId))
-                ->where('shift', 'like', '%' . $studentNo . '%')
+                ->whereHas('students', fn($q) => $q->where('students.id', $studentId))
                 ->orderBy('id')
                 ->first();
 
-            if ($schedule) {
-                $shift = (string) ($schedule->shift ?? '');
-                // Evita falso match 444 vs 4444
-                if ($shift !== '' && preg_match('/(^|\D)' . preg_quote($studentNo, '/') . '(\D|$)/', $shift)) {
-                    return $shift;
-                }
+            if ($schedule && ! blank($schedule->shift)) {
+                return (string) $schedule->shift;
             }
         }
 
@@ -300,19 +283,8 @@ class TeacherStudentsResource extends Resource
             ->first();
 
         if ($regSub) {
-            // (a) id_schedule explícito (ou schedule_id)
-            $scheduleId = $regSub->id_schedule ?? $regSub->schedule_id ?? null;
-
-            // (b) se algum campo textual tiver só dígitos, trata como id_schedule
-            if (! $scheduleId) {
-                foreach (['shift', 'turno', 'turn'] as $cand) {
-                    $val = $regSub->{$cand} ?? null;
-                    if ($val !== null && ctype_digit((string) $val)) {
-                        $scheduleId = (int) $val;
-                        break;
-                    }
-                }
-            }
+            // (a) id_schedule explícito
+            $scheduleId = $regSub->id_schedule ?? null;
 
             if ($scheduleId) {
                 $sch = Schedule::find($scheduleId);
