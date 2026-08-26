@@ -72,3 +72,11 @@
 - `Student::schedules()` passou a usar a pivot correta `schedules_students`.
 - Exportacao/listagem de alunos por professor passou a resolver horarios por pivot de alunos em vez de procurar numeros dentro de texto livre.
 - Adicionado teste de regressao para garantir associacao exata entre aluno, horario e turno selecionado.
+
+### Organizacao Git
+
+- A branch `verHorariosAdmin` foi integrada em `main`.
+- A branch `verHorariosAdmin` foi removida localmente e no remoto.
+- `main` ficou sincronizada com `origin/main`.
+- Estado validado com 29 testes, `composer audit` e `npm audit` sem vulnerabilidades conhecidas.
+- Permanecem ficheiros locais nao versionados para revisao futura; nao foram apagados para evitar perda de trabalho.

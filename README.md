@@ -97,3 +97,15 @@ Nota: `php artisan optimize:clear` pode falhar fora do ambiente Docker se a cach
 ## Documentacao de Alteracoes
 
 As alteracoes funcionais relevantes devem ser registadas em `CHANGELOG.md`.
+
+## Contexto Para Proximas Sessoes
+
+- A branch principal de trabalho e `main`.
+- A antiga branch `verHorariosAdmin` foi integrada em `main` e removida localmente e no GitHub.
+- Antes de iniciar novo trabalho, executar `git fetch origin` e confirmar `git status -sb`.
+- Ler este ficheiro e `CHANGELOG.md` para recuperar regras funcionais e decisoes recentes.
+- Existem ficheiros locais nao versionados que nao devem ser apagados sem revisao:
+  - `app/Filament/Resources/AboutSystemResource/`
+  - `resources/views/filament/resources/`
+  - `resources/js/`
+  - `report.json`
