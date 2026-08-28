@@ -16,7 +16,7 @@ class ProfessionalRelationshipResource extends Resource
 {
     protected static ?string $model = ProfessionalRelationship::class;
 
-    protected static ?string $navigationGroup = 'Área do Professor';
+    protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Relações Profissionais';
     protected static ?string $navigationIcon = 'heroicon-s-bookmark-square';
     protected static ?int $navigationSort = 10;

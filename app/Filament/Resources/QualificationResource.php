@@ -16,7 +16,7 @@ class QualificationResource extends Resource
 {
     protected static ?string $model = Qualification::class;
 
-    protected static ?string $navigationGroup = 'Campos - Área do Professor';
+    protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Qualificações';
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
     protected static ?int $navigationSort = 5;

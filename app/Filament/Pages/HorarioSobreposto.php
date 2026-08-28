@@ -14,7 +14,7 @@ use Filament\Pages\Page;
 class HorarioSobreposto extends Page
 {
     protected static ?string $navigationIcon  = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Área de Coordenação Curricular';
+    protected static ?string $navigationGroup = 'Horários';
     protected static ?string $navigationLabel = 'Horário Departamento';
     protected static ?string $title           = 'Horário sobreposto de docentes';
     protected static string $view             = 'filament.pages.horario-sobreposto';

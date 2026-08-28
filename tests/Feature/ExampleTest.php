@@ -2,17 +2,88 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Widgets\WeeklyScheduleWidget;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_redirects_to_login(): void
+    public function test_home_redirects_to_maestro_panel(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('/meuhorario/login');
+        $response->assertRedirect('/maestro');
+    }
+
+    public function test_maestro_login_loads_the_brand_assets(): void
+    {
+        $this->get('/maestro/login')
+            ->assertOk()
+            ->assertSee('maestro-logo-light.svg')
+            ->assertSee('maestro-logo-dark.svg')
+            ->assertSee('/css/maestro.css', escape: false);
+
+        $this->assertFileExists(public_path('images/maestro-symbol.svg'));
+    }
+
+    public function test_user_without_a_role_cannot_access_maestro_panel(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/maestro')
+            ->assertForbidden();
+    }
+
+    public function test_application_resources_use_the_maestro_navigation_groups(): void
+    {
+        $groups = collect(Filament::getPanel('admin')->getResources())
+            ->filter(fn (string $resource): bool => str_starts_with($resource, 'App\\Filament\\Resources\\'))
+            ->map(fn (string $resource): ?string => $resource::getNavigationGroup())
+            ->unique()
+            ->values()
+            ->all();
+
+        $this->assertEqualsCanonicalizing([
+            'Académico',
+            'Horários',
+            'Recursos',
+            'Administração',
+        ], $groups);
+    }
+
+    public function test_teacher_schedule_shortcut_requires_authentication(): void
+    {
+        $this->get('/meuhorario')->assertRedirect('/maestro/login');
+    }
+
+    public function test_teacher_schedule_shortcut_is_limited_to_professors(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findOrCreate('Aluno'));
+
+        $this->actingAs($user)->get('/meuhorario')->assertForbidden();
+        $this->get('/maestro/o-meu-horario')->assertForbidden();
+    }
+
+    public function test_professor_can_open_their_schedule_page_from_the_shortcut(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findOrCreate('Professor'));
+
+        $this->actingAs($user)->get('/meuhorario')->assertRedirect('/maestro/o-meu-horario');
+        $this->get('/maestro/o-meu-horario')
+            ->assertOk()
+            ->assertSee('O Meu Horário')
+            ->assertSee('id="calendar-container"', escape: false)
+            ->assertSee('/css/maestro.css', escape: false);
+
+        $this->assertNotContains(
+            WeeklyScheduleWidget::class,
+            Filament::getPanel('admin')->getWidgets(),
+        );
     }
 }

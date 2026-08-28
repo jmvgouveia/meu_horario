@@ -20,18 +20,18 @@ class StatsOverviewAP extends BaseWidget
 
             Stat::make('Número de Cursos', Course::count())
                 ->description('Número total de Cursos')
-                ->descriptionIcon('heroicon-m-academic-cap')
-                ->color('success'),
+                ->icon('heroicon-m-academic-cap')
+                ->extraAttributes(['class' => 'maestro-stat-card']),
 
             Stat::make('Número de Turmas', Classes::count())
                 ->description('Número total de Turmas')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('success'),
+                ->icon('heroicon-m-user-group')
+                ->extraAttributes(['class' => 'maestro-stat-card']),
 
             Stat::make('Número de Alunos', Student::count())
                 ->description('Número total de Alunos')
-                ->descriptionIcon('heroicon-m-user-group')
-                ->color('warning'),
+                ->icon('heroicon-m-user-group')
+                ->extraAttributes(['class' => 'maestro-stat-card']),
 
         ];
     }

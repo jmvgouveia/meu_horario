@@ -12,16 +12,25 @@ use Filament\Pages\Page;
 class AboutSystem extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-information-circle';
-    protected static ?string $navigationLabel = 'About';
+
+    protected static ?string $navigationLabel = 'Sobre o sistema';
+
     protected static ?string $navigationGroup = 'Administração';
+
     protected static ?int $navigationSort = 2;
+
     protected static string $view = 'filament.pages.about-system';
 
     public array $system = [];
+
     public array $directPackages = [];
+
     public array $devPackages = [];
+
     public array $outdatedPackages = [];
+
     public array $stats = [];
+
     public ?string $lastChecked = null;
 
     public static function shouldRegisterNavigation(): bool

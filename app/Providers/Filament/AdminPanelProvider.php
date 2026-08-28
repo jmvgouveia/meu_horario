@@ -2,20 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Panel;
-use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
-use Filament\Widgets;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Resources\TeacherResource;
@@ -25,22 +11,26 @@ use App\Filament\Widgets\OverviewWidget;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\StatsOverviewAP;
 use App\Filament\Widgets\StatsOverviewRH;
-use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Filament\Widgets\StudentsOverview;
 use App\Filament\Widgets\TeachersOverview;
-use App\Models\Schedule;
-use App\Models\Student;
-use App\Models\Teacher;
 use App\Models\User;
-use Filament\Facades\Filament as FacadesFilament;
-use Filament\Navigation\NavigationGroup;
-use Filament\Support\Facades\FilamentAsset;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
-use Filament\Navigation\NavigationItem;
-//use Filament\Support\Facades\Filament;
-
-use Filament\Notifications\NotificationsPlugin;
-
+use Filament\Navigation\NavigationGroup;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Assets\Css;
+use Filament\Support\Colors\Color;
+use Filament\Support\Enums\MaxWidth;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -49,11 +39,11 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('meuhorario')
+            ->path('maestro')
             ->login()
             ->userMenuItems([
                 MenuItem::make()
-                    ->label('Minha Conta')
+                    ->label('A Minha Conta')
                     ->url(function () {
                         $user = \Filament\Facades\Filament::auth()->user();
 
@@ -65,14 +55,20 @@ class AdminPanelProvider extends PanelProvider
                         // Caso contrário, redireciona para edição do próprio user
                         return UserResource::getUrl('edit', ['record' => $user->id]);
                     })
-                    ->icon('heroicon-o-user')
+                    ->icon('heroicon-o-user'),
             ])
-
 
             ->colors([
-                'primary' => '#0094ee', // Cor do Texto
+                'primary' => Color::hex('#063B82'),
             ])
-            ->favicon('images/favoicon.ico')
+            ->font('Inter')
+            ->darkMode()
+            ->maxContentWidth(MaxWidth::Full)
+            ->sidebarWidth('18rem')
+            ->favicon(asset('images/maestro-symbol.svg'))
+            ->assets([
+                Css::make('maestro')->html(asset('css/maestro.css')),
+            ])
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
@@ -81,7 +77,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             //   ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                WeeklyScheduleWidget::class,
                 OverviewWidget::class,
                 StatsOverview::class,
                 StatsOverviewRH::class,
@@ -89,7 +84,6 @@ class AdminPanelProvider extends PanelProvider
                 TeachersOverview::class,
                 StudentsOverview::class,
                 BuildingsOverview::class,
-
 
                 /* Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class, */
@@ -110,30 +104,22 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->sidebarFullyCollapsibleOnDesktop()
-            ->brandName('Meu Horário')
-            ->brandLogo(function () {
-                if (request()->is('meuhorario/login')) {
-                    return '<img src="' . asset('images/logo-login.png') . '" style="height:64px;">';
-                }
-
-                return '<img src="' . asset('images/logo-painel.png') . '" style="height:32px;">';
-            })
+            ->brandName('MAESTRO')
+            ->brandLogo(asset('images/maestro-logo-light.svg'))
+            ->darkModeBrandLogo(asset('images/maestro-logo-dark.svg'))
+            ->brandLogoHeight(fn (): string => request()->is('maestro/login') ? '7rem' : '2.625rem')
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Calendarização'),
+                    ->label('Académico'),
                 NavigationGroup::make()
-                    ->label('Área do Professor'),
+                    ->label('Horários'),
                 NavigationGroup::make()
-                    ->label('Área do Aluno'),
-                NavigationGroup::make()
-                    ->label('Gestão'),
-                NavigationGroup::make()
-                    ->label('Pólos e Núcleos'),
+                    ->label('Recursos'),
                 NavigationGroup::make()
                     ->label('Administração')
                     ->collapsible(false),
             ])
             ->databaseNotifications()
-            ->databaseNotificationsPolling('5s');;
+            ->databaseNotificationsPolling('5s');
     }
 }

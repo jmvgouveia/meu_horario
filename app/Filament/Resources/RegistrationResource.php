@@ -23,7 +23,7 @@ class RegistrationResource extends Resource
 {
     protected static ?string $model = Registration::class;
 
-    protected static ?string $navigationGroup = 'Área do Aluno';
+    protected static ?string $navigationGroup = 'Académico';
     protected static ?string $navigationLabel = 'Matrículas';
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?int $navigationSort = 2;

@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\Response;
 use App\Models\Student;
 use App\Models\User;
 
@@ -13,7 +12,7 @@ class StudentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->checkPermissionTo('view-any Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('view-any Student');
     }
 
     /**
@@ -21,7 +20,11 @@ class StudentPolicy
      */
     public function view(User $user, Student $student): bool
     {
-        return $user->checkPermissionTo('view Student');
+        if ($user->hasRole('Aluno')) {
+            return $this->belongsToUser($user, $student);
+        }
+
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('view Student');
     }
 
     /**
@@ -29,7 +32,7 @@ class StudentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->checkPermissionTo('create Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('create Student');
     }
 
     /**
@@ -37,7 +40,11 @@ class StudentPolicy
      */
     public function update(User $user, Student $student): bool
     {
-        return $user->checkPermissionTo('update Student');
+        if ($user->hasRole('Aluno')) {
+            return $this->belongsToUser($user, $student);
+        }
+
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('update Student');
     }
 
     /**
@@ -45,7 +52,7 @@ class StudentPolicy
      */
     public function delete(User $user, Student $student): bool
     {
-        return $user->checkPermissionTo('delete Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('delete Student');
     }
 
     /**
@@ -53,7 +60,7 @@ class StudentPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->checkPermissionTo('delete-any Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('delete-any Student');
     }
 
     /**
@@ -61,7 +68,7 @@ class StudentPolicy
      */
     public function restore(User $user, Student $student): bool
     {
-        return $user->checkPermissionTo('restore Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('restore Student');
     }
 
     /**
@@ -69,7 +76,7 @@ class StudentPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->checkPermissionTo('restore-any Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('restore-any Student');
     }
 
     /**
@@ -77,7 +84,7 @@ class StudentPolicy
      */
     public function replicate(User $user, Student $student): bool
     {
-        return $user->checkPermissionTo('replicate Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('replicate Student');
     }
 
     /**
@@ -85,7 +92,7 @@ class StudentPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->checkPermissionTo('reorder Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('reorder Student');
     }
 
     /**
@@ -93,7 +100,7 @@ class StudentPolicy
      */
     public function forceDelete(User $user, Student $student): bool
     {
-        return $user->checkPermissionTo('force-delete Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('force-delete Student');
     }
 
     /**
@@ -101,6 +108,16 @@ class StudentPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->checkPermissionTo('force-delete-any Student');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('force-delete-any Student');
+    }
+
+    private function belongsToUser(User $user, Student $student): bool
+    {
+        return $student->user_id !== null && (int) $student->user_id === (int) $user->getKey();
+    }
+
+    private function canManageGlobally(User $user): bool
+    {
+        return ! $user->isTeacher() && ! $user->hasRole('Aluno');
     }
 }

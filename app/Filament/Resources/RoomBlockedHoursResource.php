@@ -27,7 +27,7 @@ class RoomBlockedHoursResource extends Resource
     protected static ?string $model = RoomBlockedHours::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Calendarização';
+    protected static ?string $navigationGroup = 'Horários';
     protected static ?string $navigationLabel = 'Bloqueio de Salas';
 
     protected static ?int $navigationSort = 6;

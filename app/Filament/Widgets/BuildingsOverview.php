@@ -10,8 +10,10 @@ use Filament\Widgets\ChartWidget;
 class BuildingsOverview extends ChartWidget
 {
     protected static ?string $heading = 'Edifícios e Salas';
+
     protected static ?int $sort = 2;
-    protected static ?string $maxHeight = '300px';
+
+    protected static ?string $maxHeight = '280px';
 
     protected function getData(): array
     {
@@ -23,15 +25,17 @@ class BuildingsOverview extends ChartWidget
                     'label' => 'Número de Salas',
                     'data' => $buildings->pluck('rooms_count')->toArray(),
                     'backgroundColor' => [
-                        '#2563EB',
-                        '#16A34A',
-                        '#DC2626',
-                        '#CA8A04',
-                        '#9333EA',
-                        '#DB2777',
-                        '#2563EB',
-                        '#16A34A',
+                        '#063B82',
+                        '#1558A6',
+                        '#2E6BB5',
+                        '#5C8FC8',
+                        '#90B4DA',
+                        '#C1D7EA',
+                        '#FFBF00',
+                        '#D9A300',
                     ],
+                    'borderWidth' => 0,
+                    'hoverOffset' => 4,
                 ],
             ],
             'labels' => $buildings->pluck('name')->toArray(),
@@ -40,7 +44,7 @@ class BuildingsOverview extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'doughnut';
     }
 
     protected function getOptions(): array
@@ -50,8 +54,14 @@ class BuildingsOverview extends ChartWidget
                 'legend' => [
                     'display' => true,
                     'position' => 'bottom',
+                    'labels' => [
+                        'usePointStyle' => true,
+                        'padding' => 16,
+                    ],
                 ],
             ],
+            'cutout' => '68%',
+            'responsive' => true,
             'maintainAspectRatio' => false,
         ];
     }

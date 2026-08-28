@@ -17,7 +17,7 @@ use Filament\Tables\Table;
 class BuildingResource extends Resource
 {
     protected static ?string $model = Building::class;
-    protected static ?string $navigationGroup = 'Pólos e Núcleos';
+    protected static ?string $navigationGroup = 'Recursos';
     protected static ?string $navigationLabel = 'Edifícios';
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
 

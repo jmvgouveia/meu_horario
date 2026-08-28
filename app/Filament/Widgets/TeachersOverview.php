@@ -10,8 +10,10 @@ use Filament\Widgets\ChartWidget;
 class TeachersOverview extends ChartWidget
 {
     protected static ?string $heading = 'Distribuição de Professores por Sexo';
+
     protected static ?int $sort = 2;
-    protected static ?string $maxHeight = '300px';
+
+    protected static ?string $maxHeight = '280px';
 
     protected function getData(): array
     {
@@ -25,7 +27,9 @@ class TeachersOverview extends ChartWidget
                 [
                     'label' => 'Número de Professores',
                     'data' => $docentes->pluck('total')->toArray(),
-                    'backgroundColor' => ['#2563EB', '#DC2626'],
+                    'backgroundColor' => ['#063B82', '#FFBF00'],
+                    'borderWidth' => 0,
+                    'hoverOffset' => 4,
                 ],
             ],
             'labels' => $docentes->pluck('gender')->toArray(),
@@ -34,7 +38,7 @@ class TeachersOverview extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'doughnut';
     }
 
     protected function getOptions(): array
@@ -44,8 +48,14 @@ class TeachersOverview extends ChartWidget
                 'legend' => [
                     'display' => true,
                     'position' => 'bottom',
+                    'labels' => [
+                        'usePointStyle' => true,
+                        'padding' => 16,
+                    ],
                 ],
             ],
+            'cutout' => '68%',
+            'responsive' => true,
             'maintainAspectRatio' => false,
         ];
     }

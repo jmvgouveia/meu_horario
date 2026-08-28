@@ -16,7 +16,7 @@ class ContratualRelationshipResource extends Resource
 {
     protected static ?string $model = ContratualRelationship::class;
 
-    protected static ?string $navigationGroup = 'Área do Professor';
+    protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Relações Contratuais';
     protected static ?string $navigationIcon = 'heroicon-o-bookmark-square';
     protected static ?int $navigationSort = 9;

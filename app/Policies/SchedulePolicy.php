@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\Response;
 use App\Models\Schedule;
 use App\Models\User;
 
@@ -13,7 +12,7 @@ class SchedulePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->checkPermissionTo('view-any Schedule');
+        return ! $user->hasRole('Aluno') && $user->checkPermissionTo('view-any Schedule');
     }
 
     /**
@@ -21,7 +20,9 @@ class SchedulePolicy
      */
     public function view(User $user, Schedule $schedule): bool
     {
-        return $user->checkPermissionTo('view Schedule');
+        return ! $user->hasRole('Aluno')
+            && $user->checkPermissionTo('view Schedule')
+            && (! $user->isTeacher() || $this->belongsToTeacher($user, $schedule));
     }
 
     /**
@@ -29,7 +30,7 @@ class SchedulePolicy
      */
     public function create(User $user): bool
     {
-        return $user->checkPermissionTo('create Schedule');
+        return ! $user->hasRole('Aluno') && $user->checkPermissionTo('create Schedule');
     }
 
     /**
@@ -37,7 +38,9 @@ class SchedulePolicy
      */
     public function update(User $user, Schedule $schedule): bool
     {
-        return $user->checkPermissionTo('update Schedule');
+        return ! $user->hasRole('Aluno')
+            && $user->checkPermissionTo('update Schedule')
+            && (! $user->isTeacher() || $this->belongsToTeacher($user, $schedule));
     }
 
     /**
@@ -45,7 +48,7 @@ class SchedulePolicy
      */
     public function delete(User $user, Schedule $schedule): bool
     {
-        return $user->checkPermissionTo('delete Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('delete Schedule');
     }
 
     /**
@@ -53,7 +56,7 @@ class SchedulePolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->checkPermissionTo('delete-any Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('delete-any Schedule');
     }
 
     /**
@@ -61,7 +64,7 @@ class SchedulePolicy
      */
     public function restore(User $user, Schedule $schedule): bool
     {
-        return $user->checkPermissionTo('restore Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('restore Schedule');
     }
 
     /**
@@ -69,7 +72,7 @@ class SchedulePolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->checkPermissionTo('restore-any Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('restore-any Schedule');
     }
 
     /**
@@ -77,7 +80,7 @@ class SchedulePolicy
      */
     public function replicate(User $user, Schedule $schedule): bool
     {
-        return $user->checkPermissionTo('replicate Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('replicate Schedule');
     }
 
     /**
@@ -85,7 +88,7 @@ class SchedulePolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->checkPermissionTo('reorder Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('reorder Schedule');
     }
 
     /**
@@ -93,7 +96,7 @@ class SchedulePolicy
      */
     public function forceDelete(User $user, Schedule $schedule): bool
     {
-        return $user->checkPermissionTo('force-delete Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('force-delete Schedule');
     }
 
     /**
@@ -101,6 +104,23 @@ class SchedulePolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->checkPermissionTo('force-delete-any Schedule');
+        return $this->canManageGlobally($user) && $user->checkPermissionTo('force-delete-any Schedule');
+    }
+
+    public function export(User $user): bool
+    {
+        return false;
+    }
+
+    private function belongsToTeacher(User $user, Schedule $schedule): bool
+    {
+        $teacherId = $user->teacher?->getKey();
+
+        return $teacherId !== null && (int) $schedule->id_teacher === (int) $teacherId;
+    }
+
+    private function canManageGlobally(User $user): bool
+    {
+        return ! $user->isTeacher() && ! $user->hasRole('Aluno');
     }
 }

@@ -47,11 +47,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Helpers\UserHelper;
 use App\Helpers\DatabaseHelper as DBHelper;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 class ScheduleResource extends Resource
 {
     protected static ?string $model = Schedule::class;
-    protected static ?string $navigationGroup = 'Calendarização';
+    protected static ?string $navigationGroup = 'Horários';
     protected static ?string $navigationLabel = 'Marcação de Horários';
     protected static ?int $navigationSort = 3;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -70,31 +71,22 @@ class ScheduleResource extends Resource
     }
     public static function exportSchedules(?Collection $records = null): StreamedResponse
     {
+        Gate::authorize('export', Schedule::class);
+
         //$anoLetivoAtivoId = \App\Models\SchoolYear::where('active', true)->value('id');
         $anoLetivoAtivoId = DBHelper::getIDActiveSchoolyear();
 
-        if ($records) {
-            // Aplica filtro de status e ano letivo diretamente no collection
-            $schedules = $records->load([
-                'teacher',
-                'room',
-                'subject',
-                'weekday',
-                'timePeriod',
-                'classes',
-                'students'
-            ])->filter(function ($item) use ($anoLetivoAtivoId) {
-                return in_array($item->status, ['Aprovado', 'Aprovado DP'])
-                    && $item->id_schoolyear === $anoLetivoAtivoId;
-            });
-        } else {
-            // Filtro direto via query
-            $schedules = Schedule::query()
-                ->whereIn('status', ['Aprovado', 'Aprovado DP'])
-                ->where('id_schoolyear', $anoLetivoAtivoId)
-                ->with(['teacher', 'room', 'subject', 'weekday', 'timePeriod', 'classes', 'students'])
-                ->get();
+        $query = static::getEloquentQuery()
+            ->whereIn('status', ['Aprovado', 'Aprovado DP'])
+            ->where('id_schoolyear', $anoLetivoAtivoId);
+
+        if ($records !== null) {
+            $query->whereKey($records->modelKeys());
         }
+
+        $schedules = $query
+            ->with(['teacher', 'room', 'subject', 'weekday', 'timePeriod', 'classes', 'students'])
+            ->get();
 
         $now = now()->format('Y-m-d_H-i');
         $filename = "horarios-{$now}.txt";
@@ -171,12 +163,18 @@ class ScheduleResource extends Resource
     {
         $query = parent::getEloquentQuery();
 
-        // Verifica se está autenticado e tem professor associado
-        if (Auth::check() && Auth::user()->teacher) {
-            $teacherId = Auth::user()->teacher->id;
+        $user = Auth::user();
 
-            // Filtra pelo professor
-            $query->where('id_teacher', $teacherId);
+        if ($user?->hasRole('Aluno') && ! $user->isSuperAdmin()) {
+            $query->whereRaw('0 = 1');
+        } elseif ($user?->isTeacher() && ! $user->isSuperAdmin()) {
+            $teacherId = $user->teacher?->getKey();
+
+            if ($teacherId === null) {
+                $query->whereRaw('0 = 1');
+            } else {
+                $query->where('id_teacher', $teacherId);
+            }
         }
 
         // Obtém o ano letivo ativo (ajusta conforme o teu modelo)
@@ -695,7 +693,7 @@ class ScheduleResource extends Resource
                     ->action(fn() => self::exportSchedules())
                     ->color('primary')
                     ->requiresConfirmation()
-                    ->visible(fn() => UserHelper::isUserSuperAdmin()),
+                    ->visible(fn() => Gate::allows('export', Schedule::class)),
 
             ])
             ->bulkActions([
@@ -704,7 +702,7 @@ class ScheduleResource extends Resource
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn(Collection $records) => self::exportSchedules($records))
-                    ->visible(fn() => UserHelper::isUserSuperAdmin()),
+                    ->visible(fn() => Gate::allows('export', Schedule::class)),
             ]);
     }
 

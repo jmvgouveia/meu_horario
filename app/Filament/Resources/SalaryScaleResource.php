@@ -16,7 +16,7 @@ class SalaryScaleResource extends Resource
 {
     protected static ?string $model = SalaryScale::class;
 
-    protected static ?string $navigationGroup = 'Área do Professor';
+    protected static ?string $navigationGroup = 'Administração';
     protected static ?string $navigationLabel = 'Escalões Salariais';
     protected static ?string $navigationIcon = 'heroicon-o-currency-euro';
     protected static ?int $navigationSort = 6;

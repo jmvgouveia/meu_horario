@@ -28,8 +28,8 @@ class ScheduleRequestResource extends Resource
 {
     protected static ?string $model = ScheduleRequest::class;
 
-    protected static ?string $navigationGroup = 'Calendarização';
-    protected static ?string $navigationLabel = 'Pedidos de Troca';
+    protected static ?string $navigationGroup = 'Horários';
+    protected static ?string $navigationLabel = 'Pedidos de Alteração/Troca';
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-circle';
     protected static ?string $navigationBadgeTooltip = 'Pedidos recebidos';
     protected static ?int $navigationSort = 2;

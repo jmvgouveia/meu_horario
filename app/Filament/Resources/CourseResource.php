@@ -16,7 +16,7 @@ class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
-    protected static ?string $navigationGroup = 'Gestão';
+    protected static ?string $navigationGroup = 'Académico';
     protected static ?string $navigationLabel = 'Cursos';
     protected static ?string $navigationIcon = 'heroicon-s-academic-cap';
     protected static ?int $navigationSort = 2;

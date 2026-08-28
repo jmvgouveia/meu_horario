@@ -25,7 +25,7 @@ class ScheduleConflictResource extends Resource
     protected static ?string $model = ScheduleRequest::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationGroup = 'Calendarização';
+    protected static ?string $navigationGroup = 'Horários';
     protected static ?string $navigationLabel = 'Gestão de Conflitos';
 
     public static function getLabel(): string

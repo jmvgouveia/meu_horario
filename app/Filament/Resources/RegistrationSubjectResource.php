@@ -42,17 +42,17 @@ class RegistrationSubjectResource extends Resource
     protected static ?string $model = RegistrationSubject::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
-    protected static ?string $navigationGroup = 'Aluno';
-    protected static ?string $navigationLabel = 'O meu Horário';
+    protected static ?string $navigationGroup = 'Académico';
+    protected static ?string $navigationLabel = 'Horário do Aluno';
 
     public static function getLabel(): string
     {
-        return 'O meu Horário';
+        return 'Horário do Aluno';
     }
 
     public static function getPluralLabel(): string
     {
-        return 'O meu Horário';
+        return 'Horário do Aluno';
     }
     public static function shouldRegisterNavigation(): bool
     {

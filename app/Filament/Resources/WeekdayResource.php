@@ -15,7 +15,7 @@ class WeekdayResource extends Resource
 {
     protected static ?string $model = Weekday::class;
 
-    protected static ?string $navigationGroup = 'Calendarização';
+    protected static ?string $navigationGroup = 'Horários';
     protected static ?string $navigationLabel = 'Dias da semana';
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?int $navigationSort = 5;

@@ -23,8 +23,8 @@ class SchoolYearResource extends Resource
 {
     protected static ?string $model = SchoolYear::class;
 
-    protected static ?string $navigationGroup = 'Calendarização';
-    protected static ?string $navigationLabel = 'Anos Lectivos';
+    protected static ?string $navigationGroup = 'Administração';
+    protected static ?string $navigationLabel = 'Anos Letivos';
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
     protected static ?int $navigationSort = 3;
 

@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\TeacherStudentsResource;
 use App\Models\RegistrationSubject;
 use App\Models\Schedule;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -47,6 +49,63 @@ class ScheduleStudentAssignmentTest extends TestCase
 
         $this->assertSame($data['selected_schedule_id'], $registrationSubject->selectedSchedule->id);
         $this->assertSame('P1234', $registrationSubject->student->number);
+    }
+
+    public function test_teacher_students_only_contains_students_assigned_to_the_teacher_schedule(): void
+    {
+        $data = $this->createScheduleFixture();
+        $now = now();
+        $user = User::factory()->create();
+
+        DB::table('teachers')->where('id', $data['teacher_id'])->update(['id_user' => $user->id]);
+        DB::table('teacher_subjects')->insert([
+            'id_teacher' => $data['teacher_id'],
+            'id_subject' => $data['subject_id'],
+            'id_schoolyear' => $data['school_year_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $assignedRegistrationSubjectId = DB::table('registrations_subjects')->insertGetId([
+            'id_registration' => $data['registration_id'],
+            'id_subject' => $data['subject_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $otherStudentId = Student::withoutEvents(fn() => Student::create([
+            'number' => 'P5678',
+            'name' => 'Student Two',
+            'birthdate' => '2010-02-01',
+        ]))->id;
+        $otherRegistrationId = DB::table('registrations')->insertGetId([
+            'id_student' => $otherStudentId,
+            'id_course' => $data['course_id'],
+            'id_schoolyear' => $data['school_year_id'],
+            'id_class' => $data['class_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $otherRegistrationSubjectId = DB::table('registrations_subjects')->insertGetId([
+            'id_registration' => $otherRegistrationId,
+            'id_subject' => $data['subject_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        DB::table('schedules_students')->insert([
+            'id_schedule' => $data['selected_schedule_id'],
+            'id_student' => $data['student_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $this->actingAs($user);
+
+        $registrationSubjectIds = TeacherStudentsResource::getEloquentQuery()->pluck('id');
+
+        $this->assertTrue($registrationSubjectIds->contains($assignedRegistrationSubjectId));
+        $this->assertFalse($registrationSubjectIds->contains($otherRegistrationSubjectId));
     }
 
     private function createScheduleFixture(): array
@@ -174,6 +233,9 @@ class ScheduleStudentAssignmentTest extends TestCase
 
         return [
             'school_year_id' => $schoolYearId,
+            'teacher_id' => $teacherId,
+            'course_id' => $courseId,
+            'class_id' => $classId,
             'subject_id' => $subjectId,
             'student_id' => $studentId,
             'registration_id' => $registrationId,

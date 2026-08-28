@@ -20,7 +20,7 @@ class TeacherSubjectResource extends Resource
 {
     protected static ?string $model = TeacherSubject::class;
 
-    protected static ?string $navigationGroup = 'Área do Professor';
+    protected static ?string $navigationGroup = 'Académico';
     protected static ?string $navigationLabel = 'Professores - Disciplinas';
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 

@@ -1,6 +1,6 @@
-# Meu Horario
+# MAESTRO
 
-Aplicacao Laravel/Filament para gestao de horarios escolares.
+Plataforma Integrada de Gestão do Conservatório, desenvolvida em Laravel/Filament para gestão de horários escolares.
 
 ## Stack
 
@@ -12,21 +12,22 @@ Aplicacao Laravel/Filament para gestao de horarios escolares.
 - Vite `^6.4`
 - Tailwind CSS `^4.3`
 
-## Modulos Principais
+## Módulos Principais
 
-- Docentes, alunos, utilizadores e permissoes.
-- Cursos, turmas, disciplinas, salas, polos/nucleos e departamentos.
-- Marcacao de horarios por docente, disciplina, turma, aluno, sala, dia e hora.
-- Pedidos de troca, conflitos e estados de aprovacao.
+- Docentes, alunos, utilizadores e permissões.
+- Cursos, turmas, disciplinas, salas, polos/núcleos e departamentos.
+- Marcação de horários por docente, disciplina, turma, aluno, sala, dia e hora.
+- Pedidos de troca, conflitos e estados de aprovação.
 - Vista semanal do professor.
 - Vista de horario sobreposto para administracao e coordenacao de departamento.
-- Pagina `About` com informacao tecnica do sistema.
+- Página `Sobre o sistema` com informação técnica da plataforma.
 
 ## Regras Funcionais Importantes
 
-- O painel Filament esta em `/meuhorario`.
+- O painel Filament está em `/maestro`; `/` redireciona para esse endereço.
+- `/meuhorario` é um atalho autenticado exclusivo para docentes e redireciona para `O Meu Horário`.
 - A home do professor usa dashboard em uma coluna, com widgets empilhados.
-- A pagina `About` deve estar disponivel apenas para `Super Admin`.
+- A página `Sobre o sistema` deve estar disponível apenas para `Super Admin`.
 - O cargo de coordenador nao e uma role Spatie; vem da relacao `teacher_positions` com `positions`.
 - O `Horario (sobreposto)` deve estar disponivel para:
   - `Super Admin`.

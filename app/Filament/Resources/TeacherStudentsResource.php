@@ -25,7 +25,7 @@ class TeacherStudentsResource extends Resource
     // ✅ 1 linha = 1 Aluno/Disciplina (pivot)
     protected static ?string $model = RegistrationSubject::class;
 
-    protected static ?string $navigationGroup = 'Área do Professor';
+    protected static ?string $navigationGroup = 'Académico';
     protected static ?string $navigationLabel = 'Os meus Alunos';
     protected static ?string $navigationIcon  = 'heroicon-o-academic-cap';
     protected static ?int    $navigationSort  = 3;
@@ -61,13 +61,20 @@ class TeacherStudentsResource extends Resource
             return parent::getEloquentQuery()->whereRaw('1=0');
         }
 
-
-
-
-
         return parent::getEloquentQuery()
             ->whereIn('id_subject', $teacherSubjectIds)
             ->whereHas('registration', fn($q) => $q->where('id_schoolyear', $activeYear->id))
+            ->whereExists(function ($query) use ($teacherId, $activeYear) {
+                $query->selectRaw('1')
+                    ->from('schedules_students')
+                    ->join('schedules', 'schedules.id', '=', 'schedules_students.id_schedule')
+                    ->join('registrations', 'registrations.id_student', '=', 'schedules_students.id_student')
+                    ->whereColumn('registrations.id', 'registrations_subjects.id_registration')
+                    ->whereColumn('schedules.id_subject', 'registrations_subjects.id_subject')
+                    ->where('schedules.id_teacher', $teacherId)
+                    ->where('schedules.id_schoolyear', $activeYear->id)
+                    ->where('schedules.status', 'Aprovado');
+            })
             ->with([
                 'subject',
                 'registration.student',  // ->number (ou process_number)
@@ -80,27 +87,13 @@ class TeacherStudentsResource extends Resource
 
     public static function exportTeacherStudents(?Collection $records = null): StreamedResponse
     {
-        // 1) Ano letivo ativo
-        $anoLetivoAtivoId = class_exists(\App\Helpers\DBHelper::class)
-            ? \App\Helpers\DBHelper::getIDActiveSchoolyear()
-            : \App\Models\SchoolYear::where('active', true)->value('id');
-
         $teacherId = auth()->user()?->teacher?->id ?? 0;
 
-        // 2) Obter registos (selecionados vs todos no escopo)
+        // Obter registos (selecionados vs todos no escopo)
         if ($records) {
             $regSubs = $records->load(['registration.student', 'registration.class', 'subject']);
         } else {
-            $teacherSubjectIds = \App\Models\TeacherSubject::query()
-                ->where('id_teacher', $teacherId)
-                ->where('id_schoolyear', $anoLetivoAtivoId)
-                ->pluck('id_subject');
-
-            $regSubs = RegistrationSubject::query()
-                ->whereIn('id_subject', $teacherSubjectIds)
-                ->whereHas('registration', fn($q) => $q->where('id_schoolyear', $anoLetivoAtivoId))
-                ->with(['registration.student', 'registration.class', 'subject'])
-                ->get();
+            $regSubs = static::getEloquentQuery()->get();
         }
 
         // 3) Helper para resolver o turno (mesma lógica usada na tabela)

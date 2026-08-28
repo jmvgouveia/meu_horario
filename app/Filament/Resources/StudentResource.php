@@ -20,7 +20,7 @@ class StudentResource extends Resource
 {
     protected static ?string $model = Student::class;
 
-    protected static ?string $navigationGroup = 'Área do Aluno';
+    protected static ?string $navigationGroup = 'Académico';
     protected static ?string $navigationLabel = 'Alunos';
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?int $navigationSort = 1;

@@ -18,8 +18,8 @@ class TimeperiodResource extends Resource
 {
     protected static ?string $model = Timeperiod::class;
 
-    protected static ?string $navigationGroup = 'Calendarização';
-    protected static ?string $navigationLabel = 'Períodos de tempo';
+    protected static ?string $navigationGroup = 'Horários';
+    protected static ?string $navigationLabel = 'Períodos/Horas';
     protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?int $navigationSort = 4;
 
