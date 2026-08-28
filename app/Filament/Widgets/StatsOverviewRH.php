@@ -18,13 +18,13 @@ class StatsOverviewRH extends BaseWidget
         return [
 
             Stat::make('Número de Docentes', Teacher::count())
-                ->description('Número total de docentes')
+                ->description('Total de docentes registados')
                 ->icon('heroicon-m-user-group')
                 ->extraAttributes(['class' => 'maestro-stat-card']),
 
-            Stat::make('Número de Deparmentos', Department::count())
-                ->description('Número total de Departamentos')
-                ->icon('heroicon-m-user-group')
+            Stat::make('Número de Departamentos', Department::count())
+                ->description('Total de departamentos')
+                ->icon('heroicon-m-building-library')
                 ->extraAttributes(['class' => 'maestro-stat-card']),
         ];
     }

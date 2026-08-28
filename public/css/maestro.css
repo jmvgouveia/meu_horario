@@ -1,7 +1,18 @@
 :root {
-    --maestro-selected: #eff6ff;
     --maestro-blue: #063b82;
     --maestro-accent: #ffbf00;
+    --maestro-background: #f8fafc;
+    --maestro-card: #ffffff;
+    --maestro-text: #172033;
+    --maestro-secondary: #64748b;
+    --maestro-border: #e5e7eb;
+    --maestro-selected: #eff6ff;
+    --maestro-chart-secondary: #64748b;
+}
+
+.fi-body,
+.fi-main-ctn {
+    background: var(--maestro-background);
 }
 
 .fi-main {
@@ -9,71 +20,217 @@
     margin-inline: auto;
 }
 
+.fi-dashboard-page .fi-header {
+    margin-bottom: 0.25rem;
+}
+
 .fi-dashboard-page .fi-header-heading {
-    font-size: clamp(1.875rem, 2vw, 2rem);
+    color: var(--maestro-text);
+    font-size: clamp(1.75rem, 2vw, 2rem);
     font-weight: 700;
     line-height: 1.2;
+    letter-spacing: -0.025em;
 }
 
 .fi-dashboard-page .fi-header-subheading {
     max-width: 48rem;
-    font-size: 1rem;
-    line-height: 1.6;
+    color: var(--maestro-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.5;
 }
 
-.fi-dashboard-page .fi-header {
-    margin-bottom: 0.5rem;
+.maestro-school-year.fi-btn {
+    color: var(--maestro-blue);
+    background: var(--maestro-selected);
+    border-color: #dbeafe;
+    box-shadow: none;
+    opacity: 1;
+    cursor: default;
 }
 
-.fi-wi-chart canvas {
-    max-height: 280px;
-}
-
-.fi-wi-stats-overview-stats-ctn {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-    align-items: stretch;
-    gap: 1.25rem;
+/* The three permission-aware stat widgets form one uninterrupted KPI grid. */
+.fi-dashboard-page .fi-wi-stats-overview,
+.fi-dashboard-page .fi-wi-stats-overview-stats-ctn {
+    display: contents;
 }
 
 .maestro-stat-card.fi-wi-stats-overview-stat {
-    height: 100%;
-    min-height: 10rem;
-    padding: 1.5rem;
+    min-height: 8rem;
+    padding: 1.125rem 1.25rem;
+    border: 1px solid var(--maestro-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 3%);
     transition: border-color 175ms ease, box-shadow 175ms ease, transform 175ms ease;
 }
 
+.maestro-stat-card.fi-wi-stats-overview-stat::after {
+    position: absolute;
+    bottom: 0;
+    left: 1.25rem;
+    width: 2rem;
+    height: 2px;
+    background: var(--maestro-accent);
+    border-radius: 999px 999px 0 0;
+    content: '';
+}
+
 .maestro-stat-card.fi-wi-stats-overview-stat:hover {
-    box-shadow: 0 8px 20px rgb(23 32 51 / 8%);
-    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgb(23 32 51 / 5%);
+    transform: translateY(-1px);
 }
 
 .maestro-stat-card .fi-wi-stats-overview-stat-icon {
     position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0.625rem;
+    top: 1rem;
+    right: 1rem;
+    width: 2.125rem;
+    height: 2.125rem;
+    padding: 0.5rem;
     color: var(--maestro-blue);
     background: var(--maestro-selected);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
 }
 
 .maestro-stat-card .fi-wi-stats-overview-stat-label {
-    padding-right: 3rem;
+    padding-right: 2.75rem;
+    color: var(--maestro-secondary);
     font-size: 0.8125rem;
     font-weight: 500;
-    letter-spacing: 0.01em;
+    line-height: 1.3;
+    letter-spacing: 0.005em;
 }
 
 .maestro-stat-card .fi-wi-stats-overview-stat-value {
+    color: var(--maestro-text);
     font-size: clamp(1.75rem, 2vw, 2rem);
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .maestro-stat-card .fi-wi-stats-overview-stat-description {
-    font-size: 0.875rem;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.fi-dashboard-page .fi-section {
+    border: 1px solid var(--maestro-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 3%);
+}
+
+.fi-dashboard-page .fi-section-header {
+    padding: 1.125rem 1.25rem 0.5rem;
+}
+
+.fi-dashboard-page .fi-section-content {
+    padding: 0.75rem 1.25rem 1.125rem;
+}
+
+.fi-dashboard-page .fi-wi-chart canvas {
+    max-height: 210px;
+    color: var(--maestro-text);
+}
+
+.fi-sidebar,
+.fi-sidebar-header,
+.fi-sidebar-nav {
+    background: var(--maestro-background);
+}
+
+.fi-sidebar-header {
+    border-right: 1px solid var(--maestro-border);
+    box-shadow: none;
+}
+
+.fi-sidebar-nav {
+    gap: 1.75rem;
+    padding-top: 1.75rem;
+    padding-bottom: 1.75rem;
+    border-right: 1px solid var(--maestro-border);
+}
+
+.fi-sidebar-group {
+    gap: 0.375rem;
+}
+
+.fi-sidebar-group-label {
+    color: var(--maestro-secondary);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fi-sidebar-group-collapse-button,
+.fi-sidebar-item:not(.fi-active) .fi-sidebar-item-icon {
+    color: #94a3b8;
+}
+
+.fi-sidebar-item-button {
+    min-height: 2.5rem;
+    border-radius: 0.5rem;
+}
+
+.fi-sidebar-item:not(.fi-active) .fi-sidebar-item-button:hover {
+    background: #f1f5f9;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    color: var(--maestro-blue);
+    background: var(--maestro-selected);
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-button::before {
+    position: absolute;
+    inset-block: 0.375rem;
+    inset-inline-start: -0.5rem;
+    width: 3px;
+    background: var(--maestro-accent);
+    border-radius: 999px;
+    content: '';
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item.fi-active .fi-sidebar-item-label {
+    color: var(--maestro-blue);
+    font-weight: 600;
+}
+
+.fi-topbar > nav {
+    border-bottom: 1px solid var(--maestro-border);
+    box-shadow: none;
+}
+
+.maestro-user-summary {
+    display: none;
+    min-width: 0;
+    text-align: right;
+}
+
+.maestro-user-name,
+.maestro-user-role {
+    display: block;
+    max-width: 13rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.maestro-user-name {
+    color: var(--maestro-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.maestro-user-role {
+    margin-top: 0.125rem;
+    color: var(--maestro-secondary);
+    font-size: 0.6875rem;
+    line-height: 1.2;
 }
 
 .fi-input:focus,
@@ -85,8 +242,40 @@
     outline-offset: 2px;
 }
 
-.dark .maestro-stat-card.fi-wi-stats-overview-stat:hover {
-    box-shadow: 0 8px 20px rgb(0 0 0 / 20%);
+.fi-simple-main {
+    border-top: 3px solid var(--maestro-accent);
+}
+
+@media (min-width: 1280px) {
+    .maestro-user-summary {
+        display: block;
+    }
+}
+
+.dark .fi-body,
+.dark .fi-main-ctn,
+.dark .fi-sidebar,
+.dark .fi-sidebar-header,
+.dark .fi-sidebar-nav {
+    background: #0f172a;
+}
+
+.dark .fi-dashboard-page .fi-header-heading,
+.dark .maestro-stat-card .fi-wi-stats-overview-stat-value,
+.dark .maestro-user-name {
+    color: #f8fafc;
+}
+
+.dark .fi-dashboard-page .fi-wi-chart canvas {
+    --maestro-chart-secondary: #94a3b8;
+    color: #f8fafc;
+}
+
+.dark .maestro-stat-card.fi-wi-stats-overview-stat,
+.dark .fi-dashboard-page .fi-section {
+    border-color: #334155;
+    background: #111827;
+    box-shadow: none;
 }
 
 .dark .maestro-stat-card .fi-wi-stats-overview-stat-icon {
@@ -94,8 +283,18 @@
     background: rgb(21 88 166 / 25%);
 }
 
-.fi-simple-main {
-    border-top: 3px solid var(--maestro-accent);
+.dark .fi-sidebar-item:not(.fi-active) .fi-sidebar-item-button:hover {
+    background: #1e293b;
+}
+
+.dark .fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background: rgb(6 59 130 / 35%);
+}
+
+.dark .fi-sidebar-header,
+.dark .fi-sidebar-nav,
+.dark .fi-topbar > nav {
+    border-color: #334155;
 }
 
 @media (prefers-reduced-motion: reduce) {

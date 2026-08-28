@@ -30,7 +30,7 @@ $totalReducaoReducoes = collect($resumo['tempo_reducoes'] ?? [])->sum('redução
                         </p>
 
                         <p class="text-sm font-bold !text-blue-600 dark:!text-blue-400">
-                            &nbsp ({{$resumo['disponivel_letiva'] - $resumo['horas_extras'] ?? 0 }} h +&nbsp{{$resumo['horas_extras']}} h extra )
+                            &nbsp ({{ ($resumo['disponivel_letiva'] ?? 0) - ($resumo['horas_extras'] ?? 0) }} h +&nbsp;{{ $resumo['horas_extras'] ?? 0 }} h extra)
                         </p>
                     </div>
                 </div>

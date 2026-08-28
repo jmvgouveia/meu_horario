@@ -13,7 +13,13 @@ class BuildingsOverview extends ChartWidget
 
     protected static ?int $sort = 2;
 
-    protected static ?string $maxHeight = '280px';
+    protected static ?string $maxHeight = '210px';
+
+    protected int|string|array $columnSpan = [
+        'default' => 1,
+        'md' => 2,
+        'xl' => 2,
+    ];
 
     protected function getData(): array
     {
@@ -58,6 +64,18 @@ class BuildingsOverview extends ChartWidget
                         'usePointStyle' => true,
                         'padding' => 16,
                     ],
+                ],
+            ],
+            'scales' => [
+                'x' => [
+                    'display' => false,
+                    'grid' => ['display' => false],
+                    'ticks' => ['display' => false],
+                ],
+                'y' => [
+                    'display' => false,
+                    'grid' => ['display' => false],
+                    'ticks' => ['display' => false],
                 ],
             ],
             'cutout' => '68%',

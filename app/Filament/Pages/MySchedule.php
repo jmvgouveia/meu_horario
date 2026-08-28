@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\OverviewWidget;
 use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -39,6 +40,12 @@ class MySchedule extends Page
     {
         return [
             WeeklyScheduleWidget::class,
+            OverviewWidget::class,
         ];
+    }
+
+    public function getHeaderWidgetsColumns(): int
+    {
+        return 1;
     }
 }

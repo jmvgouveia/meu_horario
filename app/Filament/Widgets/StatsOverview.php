@@ -17,16 +17,16 @@ class StatsOverview extends BaseWidget
     {
         return [
             Stat::make('Total de Edifícios', Building::count())
-                ->description('Número total de edifícios')
+                ->description('Edifícios disponíveis')
                 ->icon('heroicon-m-building-office')
                 ->extraAttributes(['class' => 'maestro-stat-card']),
 
             Stat::make('Total de Salas', Room::count())
-                ->description('Número total de salas')
-                ->icon('heroicon-m-building-office')
+                ->description('Salas disponíveis')
+                ->icon('heroicon-m-building-office-2')
                 ->extraAttributes(['class' => 'maestro-stat-card']),
 
-            Stat::make('Média de Salas', number_format(Room::count() / max(Building::count(), 1), 1))
+            Stat::make('Média de Salas por Edifício', number_format(Room::count() / max(Building::count(), 1), 1))
                 ->description('Média de salas por edifício')
                 ->icon('heroicon-m-calculator')
                 ->extraAttributes(['class' => 'maestro-stat-card']),

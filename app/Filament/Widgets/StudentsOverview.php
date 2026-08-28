@@ -13,7 +13,13 @@ class StudentsOverview extends ChartWidget
 
     protected static ?int $sort = 2;
 
-    protected static ?string $maxHeight = '280px';
+    protected static ?string $maxHeight = '210px';
+
+    protected int|string|array $columnSpan = [
+        'default' => 1,
+        'md' => 2,
+        'xl' => 2,
+    ];
 
     protected function getData(): array
     {
@@ -28,7 +34,7 @@ class StudentsOverview extends ChartWidget
                 [
                     'label' => 'Número de Alunos',
                     'data' => $students->pluck('total')->toArray(),
-                    'backgroundColor' => ['#1558A6', '#FFBF00'],
+                    'backgroundColor' => ['#063B82', '#FFBF00', '#5C8FC8', '#90B4DA'],
                     'borderWidth' => 0,
                     'hoverOffset' => 4,
                 ],
@@ -46,6 +52,10 @@ class StudentsOverview extends ChartWidget
     {
         return [
             'plugins' => [
+                'maestroCenterText' => [
+                    'display' => true,
+                    'label' => 'Alunos',
+                ],
                 'legend' => [
                     'display' => true,
                     'position' => 'bottom',
@@ -53,6 +63,18 @@ class StudentsOverview extends ChartWidget
                         'usePointStyle' => true,
                         'padding' => 16,
                     ],
+                ],
+            ],
+            'scales' => [
+                'x' => [
+                    'display' => false,
+                    'grid' => ['display' => false],
+                    'ticks' => ['display' => false],
+                ],
+                'y' => [
+                    'display' => false,
+                    'grid' => ['display' => false],
+                    'ticks' => ['display' => false],
                 ],
             ],
             'cutout' => '68%',
