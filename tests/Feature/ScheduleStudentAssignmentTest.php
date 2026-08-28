@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\RegistrationSubjectResource\Pages\ListRegistrationSubjects;
 use App\Filament\Resources\TeacherStudentsResource;
 use App\Models\RegistrationSubject;
 use App\Models\Schedule;
@@ -9,6 +10,8 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ScheduleStudentAssignmentTest extends TestCase
@@ -51,6 +54,80 @@ class ScheduleStudentAssignmentTest extends TestCase
         $this->assertSame('P1234', $registrationSubject->student->number);
     }
 
+    public function test_student_can_persist_the_selected_shift(): void
+    {
+        $data = $this->createScheduleFixture();
+        $user = User::factory()->create();
+        $user->assignRole(Role::findOrCreate('Aluno'));
+
+        DB::table('students')->where('id', $data['student_id'])->update(['user_id' => $user->id]);
+
+        $registrationSubjectId = DB::table('registrations_subjects')->insertGetId([
+            'id_registration' => $data['registration_id'],
+            'id_subject' => $data['subject_id'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(ListRegistrationSubjects::class)
+            ->callTableAction('selectTurno', $registrationSubjectId, [
+                'id_schedule' => $data['selected_schedule_id'],
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $this->assertDatabaseHas('registrations_subjects', [
+            'id' => $registrationSubjectId,
+            'id_schedule' => $data['selected_schedule_id'],
+            'shift' => 'Turno A - P1234',
+        ]);
+    }
+
+    public function test_shift_capacity_is_shared_by_all_schedule_slots(): void
+    {
+        $data = $this->createScheduleFixture();
+        $user = User::factory()->create();
+        $user->assignRole(Role::findOrCreate('Aluno'));
+
+        DB::table('students')->where('id', $data['student_id'])->update(['user_id' => $user->id]);
+        DB::table('schedules')->where('id', $data['other_schedule_id'])->update([
+            'shift' => 'Turno A - P1234',
+        ]);
+
+        foreach (range(1, 10) as $position) {
+            DB::table('registrations_subjects')->insert([
+                'id_registration' => $data['registration_id'],
+                'id_subject' => $data['subject_id'],
+                'id_schedule' => $position <= 5 ? $data['selected_schedule_id'] : $data['other_schedule_id'],
+                'shift' => 'Turno A - P1234',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $registrationSubjectId = DB::table('registrations_subjects')->insertGetId([
+            'id_registration' => $data['registration_id'],
+            'id_subject' => $data['subject_id'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(ListRegistrationSubjects::class)
+            ->mountTableAction('selectTurno', $registrationSubjectId)
+            ->assertSee('0 de 10')
+            ->setTableActionData(['id_schedule' => $data['selected_schedule_id']])
+            ->callMountedTableAction()
+            ->assertHasTableActionErrors();
+
+        $this->assertDatabaseHas('registrations_subjects', [
+            'id' => $registrationSubjectId,
+            'id_schedule' => null,
+        ]);
+    }
+
     public function test_teacher_students_only_contains_students_assigned_to_the_teacher_schedule(): void
     {
         $data = $this->createScheduleFixture();
@@ -73,7 +150,7 @@ class ScheduleStudentAssignmentTest extends TestCase
             'updated_at' => $now,
         ]);
 
-        $otherStudentId = Student::withoutEvents(fn() => Student::create([
+        $otherStudentId = Student::withoutEvents(fn () => Student::create([
             'number' => 'P5678',
             'name' => 'Student Two',
             'birthdate' => '2010-02-01',
@@ -116,6 +193,8 @@ class ScheduleStudentAssignmentTest extends TestCase
             'schoolyear' => '2026/2027',
             'start_date' => '2026-09-01',
             'end_date' => '2027-08-31',
+            'start_date_registration' => now()->subDay()->toDateString(),
+            'end_date_registration' => now()->addDay()->toDateString(),
             'active' => true,
             'created_at' => $now,
             'updated_at' => $now,
@@ -179,7 +258,7 @@ class ScheduleStudentAssignmentTest extends TestCase
             'updated_at' => $now,
         ]);
 
-        $studentId = Student::withoutEvents(fn() => Student::create([
+        $studentId = Student::withoutEvents(fn () => Student::create([
             'number' => 'P1234',
             'name' => 'Student One',
             'birthdate' => '2010-01-01',
@@ -202,6 +281,7 @@ class ScheduleStudentAssignmentTest extends TestCase
             'id_weekday' => 1,
             'id_subject' => $subjectId,
             'shift' => 'Turno A - P1234',
+            'shift_limit' => 10,
             'status' => 'Aprovado',
         ])->id;
 
@@ -213,6 +293,7 @@ class ScheduleStudentAssignmentTest extends TestCase
             'id_weekday' => 2,
             'id_subject' => $subjectId,
             'shift' => 'Turno B - P1234',
+            'shift_limit' => 10,
             'status' => 'Aprovado',
         ])->id;
 

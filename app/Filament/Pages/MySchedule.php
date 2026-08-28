@@ -7,6 +7,7 @@ use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
+use Filament\Support\Enums\MaxWidth;
 
 class MySchedule extends Page
 {
@@ -47,5 +48,10 @@ class MySchedule extends Page
     public function getHeaderWidgetsColumns(): int
     {
         return 1;
+    }
+
+    public function getMaxContentWidth(): MaxWidth
+    {
+        return MaxWidth::SevenExtraLarge;
     }
 }

@@ -113,7 +113,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('MAESTRO')
             ->brandLogo(asset('images/maestro-logo-light.svg'))
             ->darkModeBrandLogo(asset('images/maestro-logo-dark.svg'))
-            ->brandLogoHeight(fn (): string => request()->is('maestro/login') ? '7rem' : '2.625rem')
+            ->brandLogoHeight(fn (): string => request()->is('maestro/login') ? '10rem' : '2.625rem')
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Académico'),
