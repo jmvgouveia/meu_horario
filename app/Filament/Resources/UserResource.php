@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Helpers\ValidationRules;
 use App\Models\User;
-use Dom\Text;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -13,6 +13,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 
@@ -85,13 +87,63 @@ class UserResource extends Resource
                     ->sortable()
                     ->icon('heroicon-m-envelope')
                     ->iconColor('primary'),
+                TextColumn::make('mfa_status')
+                    ->label('MFA')
+                    ->state(fn (User $record): string => $record->hasTwoFactorEnabled() ? 'Ativa' : 'Pendente')
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'Ativa' ? 'success' : 'warning'),
+                TextColumn::make('mfa_grace_until')
+                    ->label('Prazo MFA')
+                    ->date('d/m/Y')
+                    ->placeholder('Expirado'),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Impersonate::make(),
+                Impersonate::make()
+                    ->label('Ver como utilizador')
+                    ->redirectTo('/maestro'),
+                Action::make('renewMfaGrace')
+                    ->label('Renovar prazo MFA')
+                    ->icon('heroicon-o-clock')
+                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false)
+                    ->requiresConfirmation()
+                    ->action(function (User $record): void {
+                        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+
+                        $record->forceFill([
+                            'mfa_grace_until' => now()->addDays((int) config('two-factor.grace_days')),
+                            'mfa_grace_renewed_at' => now(),
+                            'mfa_grace_renewed_by' => auth()->id(),
+                        ])->save();
+                    }),
+                Action::make('resetMfa')
+                    ->label('Repor MFA')
+                    ->icon('heroicon-o-shield-exclamation')
+                    ->color('danger')
+                    ->visible(fn (User $record): bool => (auth()->user()?->isSuperAdmin() ?? false) && ! $record->is(auth()->user()))
+                    ->requiresConfirmation()
+                    ->modalHeading('Repor autenticação multifator')
+                    ->modalDescription('A autenticação multifator será desativada e todas as sessões deste utilizador serão terminadas.')
+                    ->action(function (User $record): void {
+                        abort_unless(auth()->user()?->isSuperAdmin(), 403);
+                        abort_if($record->is(auth()->user()), 422, 'Não pode repor o MFA da sua própria conta.');
+
+                        if ($record->twoFactorAuth()->exists()) {
+                            $record->disableTwoFactorAuth();
+                        }
+
+                        $record->forceFill([
+                            'remember_token' => Str::random(60),
+                            'mfa_grace_until' => now(),
+                            'mfa_grace_renewed_at' => now(),
+                            'mfa_grace_renewed_by' => auth()->id(),
+                        ])->save();
+
+                        DB::table('sessions')->where('user_id', $record->getKey())->delete();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

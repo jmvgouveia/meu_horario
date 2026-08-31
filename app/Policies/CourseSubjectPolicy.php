@@ -37,7 +37,8 @@ class CourseSubjectPolicy
      */
     public function update(User $user, CourseSubject $coursesubject): bool
     {
-        return $user->checkPermissionTo('update CourseSubject');
+        return (int) $coursesubject->id_schoolyear === (int) \App\Filament\Resources\CourseSubjectResource::activeSchoolYearId()
+            && $user->checkPermissionTo('update CourseSubject');
     }
 
     /**
@@ -45,7 +46,8 @@ class CourseSubjectPolicy
      */
     public function delete(User $user, CourseSubject $coursesubject): bool
     {
-        return $user->checkPermissionTo('delete CourseSubject');
+        return (int) $coursesubject->id_schoolyear === (int) \App\Filament\Resources\CourseSubjectResource::activeSchoolYearId()
+            && $user->checkPermissionTo('delete CourseSubject');
     }
 
     /**

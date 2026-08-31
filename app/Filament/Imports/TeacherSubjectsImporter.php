@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Models\TeacherSubject;
+use App\Models\SchoolYear;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -26,7 +27,7 @@ class TeacherSubjectsImporter extends Importer
 
             ImportColumn::make('id_schoolyear')
                 ->label('Descrição')
-                ->rules(['required', 'integer', 'exists:schoolyears,id']),
+                ->rules(['nullable', 'integer', 'exists:schoolyears,id']),
 
 
         ];
@@ -43,7 +44,7 @@ class TeacherSubjectsImporter extends Importer
     {
         $this->data['id_teacher'] = trim($this->data['id_teacher'] ?? '');
         $this->data['id_subject'] = trim($this->data['id_subject'] ?? '');
-        $this->data['id_schoolyear'] = trim($this->data['id_schoolyear'] ?? '');
+        $this->data['id_schoolyear'] = SchoolYear::query()->where('active', true)->value('id');
     }
 
     public static function getCompletedNotificationBody(Import $import): string

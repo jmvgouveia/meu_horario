@@ -9,6 +9,7 @@
         "php": "^8.2",
         "althinect/filament-spatie-roles-permissions": "2.3.2",
         "filament/filament": "^3.3",
+        "laragear/two-factor": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",

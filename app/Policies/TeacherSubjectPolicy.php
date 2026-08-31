@@ -37,7 +37,8 @@ class TeacherSubjectPolicy
      */
     public function update(User $user, TeacherSubject $teachersubject): bool
     {
-        return $user->checkPermissionTo('update TeacherSubject');
+        return (int) $teachersubject->id_schoolyear === (int) \App\Filament\Resources\TeacherSubjectResource::activeSchoolYearId()
+            && $user->checkPermissionTo('update TeacherSubject');
     }
 
     /**
@@ -45,7 +46,8 @@ class TeacherSubjectPolicy
      */
     public function delete(User $user, TeacherSubject $teachersubject): bool
     {
-        return $user->checkPermissionTo('delete TeacherSubject');
+        return (int) $teachersubject->id_schoolyear === (int) \App\Filament\Resources\TeacherSubjectResource::activeSchoolYearId()
+            && $user->checkPermissionTo('delete TeacherSubject');
     }
 
     /**

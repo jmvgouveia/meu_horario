@@ -4,6 +4,7 @@ namespace App\Filament\Imports;
 
 use App\Models\Registration;
 use App\Models\Subject;
+use App\Models\SchoolYear;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -29,7 +30,7 @@ class RegistrationImporter extends Importer
 
             ImportColumn::make('id_schoolyear')
                 ->label('ID do Ano Letivo')
-                ->rules(['required', 'integer', 'exists:schoolyears,id'])
+                ->rules(['nullable', 'integer', 'exists:schoolyears,id'])
                 ->example('1'),
 
             ImportColumn::make('id_class')
@@ -52,7 +53,7 @@ class RegistrationImporter extends Importer
         // Normalização de inteiros
         $this->data['id_student']    = (int) ($this->data['id_student']    ?? 0);
         $this->data['id_course']     = (int) ($this->data['id_course']     ?? 0);
-        $this->data['id_schoolyear'] = (int) ($this->data['id_schoolyear'] ?? 0);
+        $this->data['id_schoolyear'] = SchoolYear::query()->where('active', true)->value('id');
         $this->data['id_class']      = (int) ($this->data['id_class']      ?? 0);
 
         // Não tocamos em id_subject aqui (fica apenas no originalData; sem estado partilhado)

@@ -37,7 +37,8 @@ class RegistrationPolicy
      */
     public function update(User $user, Registration $registration): bool
     {
-        return $user->checkPermissionTo('update Registration');
+        return (int) $registration->id_schoolyear === (int) \App\Filament\Resources\RegistrationResource::activeSchoolYearId()
+            && $user->checkPermissionTo('update Registration');
     }
 
     /**
@@ -45,7 +46,8 @@ class RegistrationPolicy
      */
     public function delete(User $user, Registration $registration): bool
     {
-        return $user->checkPermissionTo('delete Registration');
+        return (int) $registration->id_schoolyear === (int) \App\Filament\Resources\RegistrationResource::activeSchoolYearId()
+            && $user->checkPermissionTo('delete Registration');
     }
 
     /**

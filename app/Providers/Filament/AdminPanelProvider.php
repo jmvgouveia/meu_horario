@@ -4,6 +4,8 @@ namespace App\Providers\Filament;
 
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\MfaSetup;
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Resources\TeacherResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\BuildingsOverview;
@@ -12,6 +14,9 @@ use App\Filament\Widgets\StatsOverviewAP;
 use App\Filament\Widgets\StatsOverviewRH;
 use App\Filament\Widgets\StudentsOverview;
 use App\Filament\Widgets\TeachersOverview;
+use App\Filament\Widgets\MfaGracePeriodNotice;
+use App\Http\Middleware\EnforceMfa;
+use App\Http\Middleware\EnforceReadOnlyImpersonation;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
@@ -42,8 +47,13 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('maestro')
-            ->login()
+            ->login(Login::class)
+            ->passwordReset()
             ->userMenuItems([
+                MenuItem::make()
+                    ->label('Autenticação multifator')
+                    ->url(fn (): string => MfaSetup::getUrl(panel: 'admin'))
+                    ->icon('heroicon-o-shield-check'),
                 MenuItem::make()
                     ->label('A Minha Conta')
                     ->url(function () {
@@ -69,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarWidth('18rem')
             ->favicon(asset('images/maestro-symbol.svg'))
             ->assets([
-                Css::make('maestro')->html(asset('css/maestro.css')),
+                Css::make('maestro', asset('css/maestro.css')),
                 Js::make('maestro-charts', asset('js/maestro-charts.js')),
             ])
             ->renderHook(
@@ -84,6 +94,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             //   ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
+                MfaGracePeriodNotice::class,
                 StatsOverviewAP::class,
                 StatsOverviewRH::class,
                 StatsOverview::class,
@@ -106,8 +117,10 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
+                EnforceMfa::class,
                 Authenticate::class,
-            ])
+                EnforceReadOnlyImpersonation::class,
+            ], isPersistent: true)
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->sidebarFullyCollapsibleOnDesktop()
             ->brandName('MAESTRO')

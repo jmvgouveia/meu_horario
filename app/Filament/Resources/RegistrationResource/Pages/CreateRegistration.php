@@ -9,4 +9,11 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateRegistration extends CreateRecord
 {
     protected static string $resource = RegistrationResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['id_schoolyear'] = RegistrationResource::activeSchoolYearId();
+
+        return $data;
+    }
 }

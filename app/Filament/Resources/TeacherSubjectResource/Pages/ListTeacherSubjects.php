@@ -8,12 +8,15 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListTeacherSubjects extends ListRecords
 {
+    use \App\Filament\Concerns\HandlesSchoolYearHistory;
+
     protected static string $resource = TeacherSubjectResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->visible(fn () => ! $this->isHistoricalMode()),
         ];
     }
 }

@@ -10,6 +10,13 @@ class EditTeacherSubject extends EditRecord
 {
     protected static string $resource = TeacherSubjectResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['id_schoolyear'] = TeacherSubjectResource::activeSchoolYearId();
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

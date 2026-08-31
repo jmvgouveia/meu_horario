@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class SchoolYear extends Model
 {
@@ -14,9 +15,34 @@ class SchoolYear extends Model
         'end_date',
         'start_date_registration',
         'end_date_registration',
-        'active'
+        'active',
     ];
 
+    public static function createWithExclusiveActive(array $attributes): self
+    {
+        return DB::transaction(function () use ($attributes): self {
+            if ($attributes['active'] ?? false) {
+                static::query()->where('active', true)->lockForUpdate()->update(['active' => false]);
+            }
+
+            return static::query()->create($attributes);
+        });
+    }
+
+    public function updateWithExclusiveActive(array $attributes): bool
+    {
+        return DB::transaction(function () use ($attributes): bool {
+            if ($attributes['active'] ?? false) {
+                static::query()
+                    ->whereKeyNot($this->getKey())
+                    ->where('active', true)
+                    ->lockForUpdate()
+                    ->update(['active' => false]);
+            }
+
+            return $this->update($attributes);
+        });
+    }
 
     public function courseSubjects()
     {

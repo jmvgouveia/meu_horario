@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToActiveSchoolYear;
 use Illuminate\Database\Eloquent\Model;
 
 class TeacherSubject extends Model
 {
+    use BelongsToActiveSchoolYear;
+
     protected $fillable = [
         'id_teacher',
         'id_subject',

@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToActiveRegistrationSchoolYear;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 // class RegistrationSubject extends Model
 // {
@@ -85,10 +86,13 @@ use Illuminate\Database\Eloquent\Model;
 //     }
 // }
 
-
-class RegistrationSubject extends Model
+class RegistrationSubject extends Pivot
 {
+    use BelongsToActiveRegistrationSchoolYear;
+
     protected $table = 'registrations_subjects';
+
+    public $incrementing = true;
 
     protected $fillable = [
         'shift',

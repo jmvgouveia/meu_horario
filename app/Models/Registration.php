@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToActiveSchoolYear;
 use Illuminate\Database\Eloquent\Model;
 
 class Registration extends Model
 {
+    use BelongsToActiveSchoolYear;
+
     protected $fillable = [
         'id_student',
         'id_course',
@@ -35,6 +38,9 @@ class Registration extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'registrations_subjects', 'id_registration', 'id_subject');
+        return $this->belongsToMany(Subject::class, 'registrations_subjects', 'id_registration', 'id_subject')
+            ->using(RegistrationSubject::class)
+            ->withPivot(['id', 'shift', 'id_schedule'])
+            ->withTimestamps();
     }
 }

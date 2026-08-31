@@ -19,10 +19,17 @@ class RolesAndPermissionsSeeder extends Seeder
         $customPermissions = [
             'aprovar trocas',
             'ver relatórios',
+            'view teacher students',
         ];
 
-        foreach ($customPermissions as $perm) {
-            Permission::firstOrCreate(['name' => $perm]);
+        $secretariaPermissions = [
+            'view Registration', 'view-any Registration', 'create Registration', 'update Registration', 'delete Registration', 'delete-any Registration',
+            'view TeacherSubject', 'view-any TeacherSubject', 'create TeacherSubject', 'update TeacherSubject', 'delete TeacherSubject', 'delete-any TeacherSubject',
+            'view CourseSubject', 'view-any CourseSubject', 'create CourseSubject', 'update CourseSubject', 'delete CourseSubject', 'delete-any CourseSubject',
+        ];
+
+        foreach (array_merge($customPermissions, $secretariaPermissions) as $perm) {
+            Permission::firstOrCreate(['name' => $perm], ['guard_name' => 'web']);
         }
 
         // ⚙️ Gerar permissões automáticas a partir dos Filament Resources
@@ -39,6 +46,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view_schedule',
                 'create_schedule',
                 'aprovar trocas',
+                'view teacher students',
             ],
             'Gestor Conflitos' => [
                 'view_any_schedule',
@@ -52,6 +60,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'delete_user',
             ],
             'Aluno' => [],
+            'Secretaria' => $secretariaPermissions,
         ];
 
         foreach ($roles as $role => $permissions) {

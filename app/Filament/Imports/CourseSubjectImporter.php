@@ -3,6 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Models\CourseSubject;
+use App\Models\SchoolYear;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -27,7 +28,7 @@ class CourseSubjectImporter extends Importer
 
             ImportColumn::make('id_schoolyear')
                 ->label('ID do Ano Letivo')
-                ->rules(['required', 'integer', 'exists:schoolyears,id'])
+                ->rules(['nullable', 'integer', 'exists:schoolyears,id'])
                 ->example('2024'),
         ];
     }
@@ -43,7 +44,7 @@ class CourseSubjectImporter extends Importer
     {
         $this->data['id_course'] = intval($this->data['id_course'] ?? 0);
         $this->data['id_subject'] = intval($this->data['id_subject'] ?? 0);
-        $this->data['id_schoolyear'] = intval($this->data['id_schoolyear'] ?? 0);
+        $this->data['id_schoolyear'] = SchoolYear::query()->where('active', true)->value('id');
     }
 
     public static function getCompletedNotificationBody(Import $import): string

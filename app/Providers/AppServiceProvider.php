@@ -2,9 +2,16 @@
 
 namespace App\Providers;
 
+use App\Listeners\RevokeSessionsAfterPasswordReset;
+use App\Models\CourseSubject;
+use App\Models\Registration;
+use App\Models\TeacherSubject;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Event;
+use Lab404\Impersonate\Services\ImpersonateManager;
 use App\Policies\RolePolicy;
 use App\Policies\PermissionPolicy;
 use Filament\Support\Colors\Color;
@@ -49,9 +56,42 @@ class AppServiceProvider extends ServiceProvider
         // Políticas de permissões de utilizadores e Super Admin
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
-        Gate::before(function (User $user, string $ability) {
+        Gate::before(function (User $user, string $ability, array $arguments = []) {
+            $record = $arguments[0] ?? null;
+            $isSchoolYearRecord = $record instanceof Registration
+                || $record instanceof TeacherSubject
+                || $record instanceof CourseSubject;
+
+            if (
+                $isSchoolYearRecord
+                && in_array($ability, ['update', 'delete', 'forceDelete', 'restore', 'replicate'], true)
+                && (int) $record->id_schoolyear !== (int) \App\Models\SchoolYear::query()->where('active', true)->value('id')
+            ) {
+                return false;
+            }
+
+            if (
+                app(ImpersonateManager::class)->isImpersonating()
+                && in_array($ability, [
+                    'create',
+                    'update',
+                    'delete',
+                    'deleteAny',
+                    'forceDelete',
+                    'forceDeleteAny',
+                    'restore',
+                    'restoreAny',
+                    'replicate',
+                    'reorder',
+                ], true)
+            ) {
+                return false;
+            }
+
             return $user->isSuperAdmin() ? true : null;
         });
+
+        Event::listen(PasswordReset::class, RevokeSessionsAfterPasswordReset::class);
 
         Student::observe(StudentObserver::class);
         //  Teacher::observe(TeacherObserver::class);

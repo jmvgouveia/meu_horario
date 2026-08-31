@@ -5,15 +5,19 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\CourseSubjectImporter;
 use App\Filament\Resources\CourseSubjectResource\Pages;
 use App\Models\CourseSubject;
+use App\Filament\Concerns\HasSchoolYearHistory;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class CourseSubjectResource extends Resource
 {
+    use HasSchoolYearHistory;
     protected static ?string $model = CourseSubject::class;
 
     protected static ?string $navigationGroup = 'Académico';
@@ -50,7 +54,10 @@ class CourseSubjectResource extends Resource
                 Select::make('id_schoolyear')
                     ->label('Ano Lectivo')
                     ->required()
-                    ->relationship('schoolyear', 'schoolyear')
+                    ->relationship('schoolyear', 'schoolyear', fn (Builder $query) => $query->where('active', true))
+                    ->default(fn () => static::activeSchoolYearId())
+                    ->disabled()
+                    ->dehydrated()
                     ->placeholder('Ano Lectivo'),
             ]);
     }
@@ -73,14 +80,21 @@ class CourseSubjectResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('id_schoolyear')
+                    ->label('Ano Letivo')
+                    ->options(fn () => static::schoolYearOptions())
+                    ->default(static::activeSchoolYearId())
+                    ->selectablePlaceholder(false)
+                    ->visible(fn () => static::canBrowseSchoolYearHistory()),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn ($record, $livewire) => ! $livewire->isHistoricalMode()),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn ($livewire) => ! $livewire->isHistoricalMode()),
                 ]),
             ])
             ->headerActions([
@@ -88,7 +102,8 @@ class CourseSubjectResource extends Resource
                     ->importer(CourseSubjectImporter::class)
                     ->label('Importar Disciplinas - Curso')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->color('forest_green'),
+                    ->color('forest_green')
+                    ->visible(fn ($livewire) => ! $livewire->isHistoricalMode()),
 
             ]);
     }
@@ -98,6 +113,25 @@ class CourseSubjectResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        return static::canBrowseSchoolYearHistory()
+            ? $query
+            : $query->where('id_schoolyear', static::activeSchoolYearId() ?? 0);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return static::isActiveSchoolYear($record->id_schoolyear) && parent::canEdit($record);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return static::isActiveSchoolYear($record->id_schoolyear) && parent::canDelete($record);
     }
 
     public static function getPages(): array
