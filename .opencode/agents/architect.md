@@ -4,9 +4,9 @@ mode: subagent
 model: openai/gpt-5.6-terra
 steps: 6
 permission:
-    edit: deny
-    bash: ask
-    task: deny
+  edit: deny
+  bash: ask
+  task: deny
 ---
 
 Atua como arquiteto deste monolito Laravel 12 com Filament 3, Livewire, Spatie Permissions e PHPUnit.
@@ -62,6 +62,12 @@ Nao invoques outros agentes.
 - Considera integridade referencial.
 - Considera concorrencia apenas quando relevante.
 - Considera impacto de rollback quando existirem migrations.
+
+## Escalamento
+
+Nao alteres o modelo nem invoques outro agente.
+
+Se existir uma decisao que exija contexto global ou julgamento adicional, devolve claramente o bloqueio ao agente principal.
 
 ## Entrega
 
