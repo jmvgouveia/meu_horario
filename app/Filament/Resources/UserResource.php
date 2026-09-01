@@ -3,18 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Helpers\ValidationRules;
 use App\Models\User;
+use App\Notifications\UserActivationNotification;
+use App\Services\UserActivationService;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 
@@ -55,16 +58,11 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->placeholder('Introduza e-mail'),
-                TextInput::make('password')
-                    ->label('Password')
-                    ->placeholder('Introduza password')
-                    ->password()
-                    ->dehydrated(fn($state) => filled($state))
-                    ->nullable()
-                    ->minLength(5)
-                    ->regex(ValidationRules::PASSWORD_REGEX)
-                    ->helperText(ValidationRules::PASSWORD_HELPER_MSG),
-                Select::make('roles')->multiple()->relationship('roles', 'name')->preload()
+                Select::make('roles')
+                    ->multiple()
+                    ->relationship('roles', 'name')
+                    ->preload()
+                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
 
             ]);
     }
@@ -144,9 +142,67 @@ class UserResource extends Resource
 
                         DB::table('sessions')->where('user_id', $record->getKey())->delete();
                     }),
+                Action::make('activationCode')
+                    ->label('Gerar código de ativação')
+                    ->icon('heroicon-o-key')
+                    ->visible(fn (User $record): bool => ! $record->is_active)
+                    ->action(function (User $record): void {
+                        $token = app(UserActivationService::class)->issue($record);
+                        $activationUrl = route('activation', ['token' => $token]);
+
+                        Notification::make()
+                            ->title('Código gerado')
+                            ->body("Código: {$token}\nLink: {$activationUrl}")
+                            ->success()
+                            ->persistent()
+                            ->send();
+                    }),
+                Action::make('sendActivation')
+                    ->label('Reenviar convite')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->visible(fn (User $record): bool => ! $record->is_active && app(UserActivationService::class)->hasDeliverableEmail($record))
+                    ->action(function (User $record): void {
+                        $token = app(UserActivationService::class)->issue($record);
+                        $record->notify(new UserActivationNotification($record, $token));
+
+                        Notification::make()
+                            ->title('Convite reenviado')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('exportActivationCodes')
+                        ->label('Exportar códigos de ativação')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function ($records): StreamedResponse {
+                            $rows = [];
+
+                            foreach ($records as $record) {
+                                if ($record->is_active) {
+                                    continue;
+                                }
+
+                                $token = app(UserActivationService::class)->issue($record);
+                                $rows[] = [
+                                    $record->name,
+                                    $record->email,
+                                    $token,
+                                    route('activation', ['token' => $token]),
+                                    now()->addHours(UserActivationService::TOKEN_TTL_HOURS)->toDateTimeString(),
+                                ];
+                            }
+
+                            return response()->streamDownload(function () use ($rows): void {
+                                $output = fopen('php://output', 'wb');
+                                fputcsv($output, ['Nome', 'Email', 'Código', 'Link de ativação', 'Validade']);
+                                foreach ($rows as $row) {
+                                    fputcsv($output, $row);
+                                }
+                                fclose($output);
+                            }, 'codigos-ativacao.csv', ['Content-Type' => 'text/csv']);
+                        }),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);

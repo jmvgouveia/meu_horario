@@ -15,6 +15,10 @@ Route::get('/', function () {
     return redirect('/maestro');
 })->name('home');
 
+Route::view('/privacidade', 'public.privacy')->name('privacy');
+Route::view('/seguranca', 'public.security')->name('security');
+Route::view('/suporte', 'public.support')->name('support');
+
 Route::get('/filament-impersonate/leave', fn () => abort(405));
 
 Route::post('/filament-impersonate/leave', function (ImpersonateManager $impersonation): RedirectResponse {
@@ -42,7 +46,7 @@ Route::middleware([EnforceMfa::class, EnforceReadOnlyImpersonation::class])->gro
         return redirect('/maestro/o-meu-horario');
     })->name('teacher.schedule.shortcut');
 
-    Route::view('dashboard', 'dashboard')
+    Route::redirect('dashboard', 'maestro')
         ->middleware(['auth', 'verified', AuthenticateSession::class])
         ->name('dashboard');
 

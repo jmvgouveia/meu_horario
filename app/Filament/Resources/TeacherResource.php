@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Imports\TeacherImporter;
 use App\Filament\Resources\TeacherResource\Pages;
-use App\Helpers\ValidationRules;
 use App\Models\Teacher;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
@@ -12,12 +11,13 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
+use Filament\Forms\Get;
+
 
 class TeacherResource extends Resource
 {
@@ -158,16 +158,6 @@ class TeacherResource extends Resource
                             ->email()
                             ->required()
                             ->placeholder('Introduza e-mail'),
-                        TextInput::make('user.password')
-                            ->label('Password')
-                            ->nullable()
-                            ->required(fn(Get $get) => request()->routeIs('filament.admin.resources.teachers.create'))
-                            ->password()
-                            ->dehydrated(fn($state) => filled($state))
-                            ->minLength(5)
-                            ->placeholder('Deixe em branco para manter a atual')
-                            ->regex(ValidationRules::PASSWORD_REGEX)
-                            ->helperText(ValidationRules::PASSWORD_HELPER_MSG),
                     ]),
 
             ]);

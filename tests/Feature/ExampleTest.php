@@ -26,9 +26,18 @@ class ExampleTest extends TestCase
             ->assertOk()
             ->assertSee('maestro-logo-light.svg')
             ->assertSee('maestro-logo-dark.svg')
+            ->assertSee('Conservatório – Escola das Artes da Madeira, Eng. Luiz Peter Clode')
+            ->assertSee('Versão: V.1')
             ->assertSee('/css/maestro.css', escape: false);
 
         $this->assertFileExists(public_path('images/maestro-symbol.svg'));
+    }
+
+    public function test_public_institutional_pages_are_available_without_authentication(): void
+    {
+        foreach (['/privacidade', '/seguranca', '/suporte'] as $url) {
+            $this->get($url)->assertOk();
+        }
     }
 
     public function test_user_without_a_role_cannot_access_maestro_panel(): void

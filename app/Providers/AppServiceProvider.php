@@ -22,6 +22,8 @@ use App\Observers\StudentObserver;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Observers\TeacherObserver;
+use Filament\Notifications\Auth\ResetPassword as FilamentResetPassword;
+use App\Notifications\ResetPasswordNotification;
 
 
 
@@ -32,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(FilamentResetPassword::class, ResetPasswordNotification::class);
     }
 
     /**

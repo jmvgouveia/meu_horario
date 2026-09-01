@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Teacher;
 use App\Models\User;
+use App\Services\UserActivationService;
 
 class TeacherObserver
 {
@@ -13,14 +14,16 @@ class TeacherObserver
     public function created(Teacher $teacher): void
     {
         // Só cria se ainda não existir user_id
-        if (!$teacher->user_id) {
+        if (!$teacher->id_user) {
             $user = User::create([
                 'name'     => $teacher->name,
                 'email'    => $teacher->email, // garante que a coluna 'email' existe em teachers
-                'password' => bcrypt($teacher->number . 'CEAM'), // senha: numeroCEAM
+                'password' => str()->random(40),
+                'is_active' => false,
             ]);
 
-            $user->assignRole('professor'); // atribui o perfil
+            $user->assignRole('Professor');
+            app(UserActivationService::class)->issueAndNotify($user);
 
             $teacher->update(['user_id' => $user->id]);
         }

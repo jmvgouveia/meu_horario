@@ -68,7 +68,7 @@ class StudentResource extends Resource
                         TextInput::make('email')
                             ->label('E-mail')
                             ->email()
-                            ->required()
+                            ->nullable()
                             ->maxLength(255)
                             ->placeholder('Introduza e-mail'),
                     ]),

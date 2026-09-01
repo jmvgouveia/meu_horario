@@ -29,11 +29,7 @@ class StudentImporter extends Importer
                 ->rules(['required', 'integer']),
             ImportColumn::make('email')
                 ->label('Email')
-                ->fillRecordUsing(function ($record, $state, $data) {
-                    // Usa o número importado e cria o email automaticamente
-                    $record->email = $data['number'] . '@ceam.com';
-                })
-                ->rules(['required', 'email']),
+                ->rules(['nullable', 'email']),
         ];
     }
 
@@ -58,6 +54,7 @@ class StudentImporter extends Importer
                 'name' => $data['name'],
                 'birthdate' => $data['birthdate'],
                 'id_gender' => $data['id_gender'],
+                'email' => $data['email'] ?? null,
             ]);
 
             $record->save();

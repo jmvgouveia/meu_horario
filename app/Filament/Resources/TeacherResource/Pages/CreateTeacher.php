@@ -6,6 +6,7 @@ use App\Filament\Resources\TeacherResource;
 use App\Models\SchoolYear;
 use App\Models\TeacherHourCounter;
 use App\Models\User;
+use App\Services\UserActivationService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
@@ -24,11 +25,9 @@ class CreateTeacher extends CreateRecord
         $validator = Validator::make([
             'name' => $data['name'],
             'email' => $userData['email'],
-            'password' => $userData['password'],
         ], [
             'name' => ['required', 'string', 'max:255', 'unique:users,name'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
         ]);
 
         if ($validator->fails()) {
@@ -47,10 +46,12 @@ class CreateTeacher extends CreateRecord
         $user = User::create([
             'name' => $data['name'],
             'email' => $userData['email'],
-            'password' => Hash::make($userData['password']),
+            'password' => str()->random(40),
+            'is_active' => false,
         ]);
 
         $user->assignRole('Professor');
+        app(UserActivationService::class)->issueAndNotify($user);
 
         $data['id_user'] = $user->id;
 

@@ -49,7 +49,7 @@ class Login extends \Filament\Pages\Auth\Login
     {
         return TextInput::make('two_factor_code')
             ->label('Código de autenticação')
-            ->helperText('Introduza o código da aplicação autenticadora ou um código de recuperação.')
+            ->helperText('Introduza o código da aplicação autenticadora.')
             ->autocomplete('one-time-code')
             ->extraInputAttributes(['tabindex' => 3]);
     }

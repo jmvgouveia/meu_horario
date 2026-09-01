@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Policies\SchedulePolicy;
 use App\Policies\StudentPolicy;
 use App\Policies\TeacherPolicy;
+use App\Policies\UserPolicy;
 use Filament\Panel;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,6 +52,16 @@ class AuthorizationTest extends TestCase
         $this->assertTrue($policy->update($user, $ownStudent));
         $this->assertFalse($policy->view($user, $otherStudent));
         $this->assertFalse($policy->update($user, $otherStudent));
+    }
+
+    public function test_user_can_update_own_account_but_not_another_account(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $policy = new UserPolicy;
+
+        $this->assertTrue($policy->update($user, $user));
+        $this->assertFalse($policy->update($user, $otherUser));
     }
 
     public function test_administrator_with_explicit_permission_can_access_records_globally(): void

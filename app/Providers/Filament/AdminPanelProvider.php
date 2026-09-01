@@ -5,9 +5,8 @@ namespace App\Providers\Filament;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\MfaSetup;
+use App\Filament\Pages\MyAccount;
 use App\Filament\Pages\Auth\Login;
-use App\Filament\Resources\TeacherResource;
-use App\Filament\Resources\UserResource;
 use App\Filament\Widgets\BuildingsOverview;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\StatsOverviewAP;
@@ -17,7 +16,6 @@ use App\Filament\Widgets\TeachersOverview;
 use App\Filament\Widgets\MfaGracePeriodNotice;
 use App\Http\Middleware\EnforceMfa;
 use App\Http\Middleware\EnforceReadOnlyImpersonation;
-use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -56,17 +54,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-shield-check'),
                 MenuItem::make()
                     ->label('A Minha Conta')
-                    ->url(function () {
-                        $user = Filament::auth()->user();
-
-                        // Verifica se é professor e tem registo correspondente na tabela `teachers`
-                        if ($user instanceof User && $user->hasRole('Professor') && $user->teacher) {
-                            return TeacherResource::getUrl('edit', ['record' => $user->teacher->id]);
-                        }
-
-                        // Caso contrário, redireciona para edição do próprio user
-                        return UserResource::getUrl('edit', ['record' => $user->id]);
-                    })
+                    ->url(fn (): string => MyAccount::getUrl(panel: 'admin'))
                     ->icon('heroicon-o-user'),
             ])
 
@@ -79,12 +67,16 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarWidth('18rem')
             ->favicon(asset('images/maestro-symbol.svg'))
             ->assets([
-                Css::make('maestro', asset('css/maestro.css')),
+                Css::make('maestro', asset('css/maestro.css') . '?v=' . filemtime(public_path('css/maestro.css'))),
                 Js::make('maestro-charts', asset('js/maestro-charts.js')),
             ])
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn (): string => view('filament.components.topbar-user-summary')->render(),
+            )
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn (): string => view('filament.auth.login-footer')->render(),
             )
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

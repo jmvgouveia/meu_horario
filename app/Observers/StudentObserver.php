@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\Student;
 use App\Models\User;
-use Illuminate\Support\Str;
+use App\Services\UserActivationService;
 
 class StudentObserver
 {
@@ -17,11 +17,13 @@ class StudentObserver
         if (!$student->user_id) {
             $user = User::create([
                 'name' => $student->name,
-                'email' => ($student->number . '@ceam.com'),
-                'password' => bcrypt($student->number . 'CEAM'), // senha: numeroCEAM
+                'email' => $student->email ?: ($student->number . '@ceam.com'),
+                'password' => str()->random(40),
+                'is_active' => false,
             ]);
 
-            $user->assignRole('aluno');
+            $user->assignRole('Aluno');
+            app(UserActivationService::class)->issueAndNotify($user);
 
             $student->update(['user_id' => $user->id]);
         }

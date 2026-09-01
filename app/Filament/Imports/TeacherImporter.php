@@ -6,6 +6,7 @@ use App\Helpers\DatabaseHelper;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Models\TeacherHourCounter;
+use App\Services\UserActivationService;
 use Carbon\Carbon;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -112,14 +113,18 @@ class TeacherImporter extends Importer
                 ['email' => $email],
                 [
                     'name'     => $this->data['name'] ?? $email,
-                    'password' => Hash::make(($this->data['number'] ?? 'temp') . 'CEAM'), // ex.: 542231CEAM
+                    'password' => str()->random(40),
+                    'is_active' => false,
                 ]
             );
 
             // atribuir role professor (Spatie)
-            if (!$user->hasRole('professor')) {
-                $user->assignRole('professor');
-                $user->assignRole('editarcontaprofessor');
+            if (!$user->hasRole('Professor')) {
+                $user->assignRole('Professor');
+            }
+
+            if (! $user->is_active) {
+                app(UserActivationService::class)->issueAndNotify($user);
             }
 
             // 2) Upsert do Teacher pelo number e ligação ao user_id

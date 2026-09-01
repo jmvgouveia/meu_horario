@@ -31,6 +31,9 @@ class User extends Authenticatable implements FilamentUser, TwoFactorAuthenticat
         'name',
         'email',
         'password',
+        'is_active',
+        'activation_token',
+        'activation_token_expires_at',
     ];
 
     /**
@@ -55,6 +58,8 @@ class User extends Authenticatable implements FilamentUser, TwoFactorAuthenticat
             'mfa_grace_renewed_at' => 'datetime',
             'mfa_grace_until' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'activation_token_expires_at' => 'datetime',
         ];
     }
 

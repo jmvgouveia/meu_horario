@@ -1,3 +1,4 @@
+/* Variáveis de cores institucionais */
 :root {
     --maestro-blue: #063b82;
     --maestro-accent: #ffbf00;
@@ -10,6 +11,7 @@
     --maestro-chart-secondary: #64748b;
 }
 
+/* Estrutura geral do painel */
 .fi-body,
 .fi-main-ctn {
     background: var(--maestro-background);
@@ -20,6 +22,7 @@
     margin-inline: auto;
 }
 
+/* Cabeçalho do dashboard */
 .fi-dashboard-page .fi-header {
     margin-bottom: 0.25rem;
 }
@@ -39,6 +42,7 @@
     line-height: 1.5;
 }
 
+/* Indicador do ano letivo */
 .maestro-school-year.fi-btn {
     color: var(--maestro-blue);
     background: var(--maestro-selected);
@@ -48,7 +52,7 @@
     cursor: default;
 }
 
-/* The three permission-aware stat widgets form one uninterrupted KPI grid. */
+/* Grelha dos indicadores do dashboard */
 .fi-dashboard-page .fi-wi-stats-overview,
 .fi-dashboard-page .fi-wi-stats-overview-stats-ctn {
     display: contents;
@@ -114,6 +118,7 @@
     line-height: 1.35;
 }
 
+/* Secções e gráficos do dashboard */
 .fi-dashboard-page .fi-section {
     border: 1px solid var(--maestro-border);
     border-radius: 0.75rem;
@@ -133,6 +138,7 @@
     color: var(--maestro-text);
 }
 
+/* Fundo e estrutura da barra lateral */
 .fi-sidebar,
 .fi-sidebar-header,
 .fi-sidebar-nav {
@@ -151,19 +157,21 @@
     border-right: 1px solid var(--maestro-border);
 }
 
+/* Grupos da navegação lateral */
 .fi-sidebar-group {
     gap: 0.375rem;
 }
 
 .fi-sidebar-group-label {
     color: var(--maestro-secondary);
-    font-size: 0.6875rem;
+    font-size: 0.6rem;
     font-weight: 600;
     line-height: 1.25rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
+/* Ícones e botões dos grupos da navegação */
 .fi-sidebar-group-collapse-button,
 .fi-sidebar-item:not(.fi-active) .fi-sidebar-item-icon {
     color: #94a3b8;
@@ -174,6 +182,7 @@
     border-radius: 0.5rem;
 }
 
+/* Estados hover e ativo da navegação lateral */
 .fi-sidebar-item:not(.fi-active) .fi-sidebar-item-button:hover {
     background: #f1f5f9;
 }
@@ -183,6 +192,7 @@
     background: var(--maestro-selected);
 }
 
+/* Indicador dourado do item ativo */
 .fi-sidebar-item.fi-active .fi-sidebar-item-button::before {
     position: absolute;
     inset-block: 0.375rem;
@@ -193,17 +203,20 @@
     content: '';
 }
 
+/* Texto e ícone do item ativo */
 .fi-sidebar-item.fi-active .fi-sidebar-item-icon,
 .fi-sidebar-item.fi-active .fi-sidebar-item-label {
     color: var(--maestro-blue);
     font-weight: 600;
 }
 
+/* Barra superior */
 .fi-topbar > nav {
     border-bottom: 1px solid var(--maestro-border);
     box-shadow: none;
 }
 
+/* Resumo do utilizador na barra superior */
 .maestro-user-summary {
     display: none;
     min-width: 0;
@@ -233,6 +246,7 @@
     line-height: 1.2;
 }
 
+/* Estados de foco acessíveis */
 .fi-input:focus,
 .fi-select-input:focus,
 .fi-btn:focus-visible,
@@ -242,16 +256,46 @@
     outline-offset: 2px;
 }
 
+/* Linha dourada e espaçamento do login Filament */
 .fi-simple-main {
     border-top: 3px solid var(--maestro-accent);
 }
 
+.fi-simple-layout {
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 2rem 1.5rem;
+}
+
+.fi-simple-main-ctn {
+    flex-grow: 0;
+}
+
+.fi-simple-main {
+    margin-block: 0;
+    padding-block: 2rem;
+}
+
+.public-auth-footer {
+    max-width: 28rem;
+    padding-inline: 0;
+}
+
+/* Texto institucional abaixo do formulário de login */
+.maestro-login-footer,
+.maestro-login-footer p {
+    font-size: 0.65rem !important;
+    line-height: 1rem;
+}
+
+/* Ajustes responsivos */
 @media (min-width: 1280px) {
     .maestro-user-summary {
         display: block;
     }
 }
 
+/* Cores do modo escuro */
 .dark .fi-body,
 .dark .fi-main-ctn,
 .dark .fi-sidebar,
@@ -260,6 +304,7 @@
     background: #0f172a;
 }
 
+/* Texto e gráficos no modo escuro */
 .dark .fi-dashboard-page .fi-header-heading,
 .dark .maestro-stat-card .fi-wi-stats-overview-stat-value,
 .dark .maestro-user-name {
@@ -271,6 +316,7 @@
     color: #f8fafc;
 }
 
+/* Cartões e secções no modo escuro */
 .dark .maestro-stat-card.fi-wi-stats-overview-stat,
 .dark .fi-dashboard-page .fi-section {
     border-color: #334155;
@@ -278,6 +324,7 @@
     box-shadow: none;
 }
 
+/* Estados hover e ativo no modo escuro */
 .dark .maestro-stat-card .fi-wi-stats-overview-stat-icon {
     color: #bfdbfe;
     background: rgb(21 88 166 / 25%);
@@ -291,12 +338,14 @@
     background: rgb(6 59 130 / 35%);
 }
 
+/* Bordas no modo escuro */
 .dark .fi-sidebar-header,
 .dark .fi-sidebar-nav,
 .dark .fi-topbar > nav {
     border-color: #334155;
 }
 
+/* Respeitar utilizadores que preferem menos animações */
 @media (prefers-reduced-motion: reduce) {
     .maestro-stat-card.fi-wi-stats-overview-stat {
         transition: none;
