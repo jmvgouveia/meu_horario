@@ -9,6 +9,8 @@ class ScheduleRequest extends Model
     protected $fillable = [
         'id_schedule',
         'id_teacher',
+        'id_teacher_requester',
+        'id_schoolyear',
         'id_new_schedule',
         'justification',
         'status',
@@ -36,7 +38,7 @@ class ScheduleRequest extends Model
 
     public function requester()
     {
-        return $this->belongsTo(Teacher::class, 'id_teacher');
+        return $this->belongsTo(Teacher::class, 'id_teacher_requester');
     }
     public function schoolyear()
     {

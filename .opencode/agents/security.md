@@ -113,7 +113,7 @@ Nao assumes que qualquer um dos seguintes mecanismos constitui autorizacao sufic
 
 ## Escalamento
 
-Nao alteres autonomamente para GPT-5.6 Sol.
+Nao alteres autonomamente para o modelo do agente principal.
 
 Nao invoques outros agentes.
 

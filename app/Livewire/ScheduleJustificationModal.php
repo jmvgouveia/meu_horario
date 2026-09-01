@@ -57,7 +57,9 @@ class ScheduleJustificationModal extends Component
 
         ScheduleRequest::create([
             'id_schedule' => $this->conflictingScheduleId,
-            'id_teacher' => $teacher?->id,
+            'id_teacher' => $conflictingSchedule->id_teacher,
+            'id_teacher_requester' => $teacher?->id,
+            'id_schoolyear' => $conflictingSchedule->id_schoolyear,
             'id_new_schedule' => $schedule->id,
             'justification' => $this->justification,
             'created_at' => now(),

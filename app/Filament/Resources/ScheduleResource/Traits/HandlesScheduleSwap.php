@@ -123,20 +123,15 @@ trait HandlesScheduleSwap
                 $schedule->classes()->sync($formState['id_classes'] ?? []);
                 $schedule->students()->sync($formState['students'] ?? []);
 
-                // ✅ 3. Verificar se já há pedido pendente para esse horário
-                $hasPending = ScheduleRequest::where('id_schedule', $ultimoHorario->id)
-                    ->where('status', 'Pendente')
-                    ->exists();
-
-                $status = $hasPending ? 'Aguardando' : 'Pendente';
-
                 // ✅ 4. Criar o pedido de troca encadeado
                 $scheduleRequest = ScheduleRequest::create([
                     'id_schedule' => $ultimoHorario->id, // ← encadeado corretamente
-                    'id_teacher' => $teacher?->id,
+                    'id_teacher' => $ultimoHorario->id_teacher,
+                    'id_teacher_requester' => $teacher?->id,
+                    'id_schoolyear' => $ultimoHorario->id_schoolyear,
                     'id_new_schedule' => $schedule->id,
                     'justification' => $data['justification'] ?? 'Conflito detetado automaticamente.',
-                    'status' => $status,
+                    'status' => 'Pendente',
                 ]);
 
                 // Notificação

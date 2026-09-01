@@ -1,25 +1,25 @@
 # OpenCode Orchestration Policy
 
-Este projeto usa um agente principal em GPT-5.6 Sol e subagentes especializados.
+Este projeto usa um agente principal em GPT-5.6 Luna e subagentes especializados.
 
 O objetivo e maximizar qualidade sem desperdiçar contexto, chamadas de modelo ou quota.
 
 ## Politica de modelos
 
-O GPT-5.6 Sol e reservado ao agente principal.
+O GPT-5.6 Luna e reservado ao agente principal para coordenacao eficiente e tarefas locais.
 
-Nao utilizes GPT-5.6 Sol em subagentes salvo pedido explicito do utilizador.
+Nao utilizes o modelo do agente principal em subagentes salvo pedido explicito do utilizador.
 
 Distribui trabalho segundo a especializacao:
 
-- decisoes globais e integracao: GPT-5.6 Sol;
+- coordenacao, decisoes globais e integracao: GPT-5.6 Luna;
 - arquitetura e dominio complexo: GPT-5.6 Terra;
 - implementacao Laravel/PHP: Kimi K2.7 Code via OpenCode Go;
 - revisao de codigo e regressao: GLM-5.3-Flash via OpenCode Go;
 - seguranca: GPT-5.6 Terra;
 - testes e debugging mecanico: modelos OpenCode Go quando apropriado.
 
-Um subagente nunca deve alterar ou escalar autonomamente para GPT-5.6 Sol.
+Um subagente nunca deve alterar ou escalar autonomamente para o modelo do agente principal.
 
 Quando um subagente encontrar uma decisao que exceda a sua funcao, deve devolver o bloqueio ao agente principal.
 

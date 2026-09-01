@@ -1,7 +1,7 @@
 ---
 description: Implementa funcionalidades e correcoes no monolito Laravel, Filament, Livewire e Blade.
 mode: subagent
-model: openai/gpt-5.6-terra
+model: opencode-go/kimi-k2.7-code
 steps: 12
 permission:
     edit: allow

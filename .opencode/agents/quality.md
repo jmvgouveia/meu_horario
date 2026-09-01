@@ -1,7 +1,7 @@
 ---
 description: Reve alteracoes, identifica regressoes e define ou executa testes focados para este projeto.
 mode: subagent
-model: openai/gpt-5.6-luna
+model: opencode-go/glm-5.3-flash
 steps: 7
 permission:
     edit: deny

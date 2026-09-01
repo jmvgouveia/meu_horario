@@ -32,18 +32,23 @@ class EditScheduleRequest extends EditRecord
         $this->record->loadMissing('scheduleConflict');
 
         $teacherId = Filament::auth()->user()?->teacher?->id;
-        $requesterId = $this->record->id_teacher;
+        $requesterId = $this->record->id_teacher_requester;
         $conflictOwnerId = $this->record->scheduleConflict?->id_teacher;
 
         $isRequestOwner = $teacherId === $requesterId;
         $isReceiver = $teacherId === $conflictOwnerId;
         $isGestor = in_array(Filament::auth()->id(), [1]);
+        $isFirstPending = ScheduleRequestQueueHelper::isFirstPending($this->record->id_schedule, $this->record->id);
 
         $status = $this->record->status;
         $actions = [];
 
         // Aprovar troca
-        if (($isReceiver || $isGestor) && $status !== 'Recusado' && $status !== 'Aprovado DP' && $status !== 'Aprovado') {
+        if (($isReceiver || $isGestor)
+            && ($status !== 'Pendente' || $isFirstPending)
+            && $status !== 'Recusado'
+            && $status !== 'Aprovado DP'
+            && $status !== 'Aprovado') {
             $actions[] = Action::make('accept')
                 ->label('Aceitar Troca')
                 ->color('success')
@@ -156,7 +161,6 @@ class EditScheduleRequest extends EditRecord
                             ])
                             ->sendToDatabase($requester);
                         //-----------NEW
-                        ScheduleRequestQueueHelper::promoverProximoNaFila($this->record->scheduleNew->id);
                     });
 
                     // return redirect($this->getResource()::getUrl('index'));
@@ -367,7 +371,7 @@ class EditScheduleRequest extends EditRecord
 
                         switch ($scheduleRequest->status) {
                             case 'Pendente':
-                                if ($teacherId === $scheduleRequest->id_teacher) {
+                                if ($teacherId === $scheduleRequest->id_teacher_requester) {
 
                                     $deletedSchedule = $scheduleNew;
 
@@ -377,7 +381,7 @@ class EditScheduleRequest extends EditRecord
 
 
                                     DBHelper::updateScheduleData(
-                                        $$deletedSchedule->id,
+                                        $deletedSchedule->id,
                                         [
                                             'status' => 'Eliminado'
                                         ],
@@ -417,7 +421,6 @@ class EditScheduleRequest extends EditRecord
                                     );
 
                                     //--------NEW
-                                    ScheduleRequestQueueHelper::promoverProximoNaFila($deletedSchedule->id);
 
                                     // $deletedSchedule->update(['status' => 'Eliminado']);
 
@@ -465,7 +468,7 @@ class EditScheduleRequest extends EditRecord
                                 break;
 
                             case 'Recusado':
-                                if ($teacherId === $scheduleRequest->id_teacher) {
+                                if ($teacherId === $scheduleRequest->id_teacher_requester) {
                                     $deletedSchedule = $scheduleNew;
 
                                     if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
@@ -517,7 +520,6 @@ class EditScheduleRequest extends EditRecord
                                     );
                                     // $deletedSchedule->update(['status' => 'Eliminado']);
                                     //---new
-                                    ScheduleRequestQueueHelper::promoverProximoNaFila($deletedSchedule->id);
 
                                     Notification::make()
                                         ->title('Marcação eliminada')
@@ -529,7 +531,7 @@ class EditScheduleRequest extends EditRecord
                                 }
                                 break;
                             case 'Aprovado DP':
-                                if ($teacherId === $scheduleRequest->id_teacher) {
+                                if ($teacherId === $scheduleRequest->id_teacher_requester) {
                                     $deletedSchedule = $scheduleNew;
 
                                     if (in_array($deletedSchedule->status, ['Aprovado', 'Aprovado DP'])) {
@@ -585,7 +587,6 @@ class EditScheduleRequest extends EditRecord
                                     );
 
                                     //--------NEW
-                                    ScheduleRequestQueueHelper::promoverProximoNaFila($deletedSchedule->id);
 
 
                                     //  $deletedSchedule->update(['status' => 'Eliminado']);

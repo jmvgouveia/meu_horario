@@ -34,34 +34,26 @@ class ScheduleRequestQueueHelper
             'id_schoolyear' => DBHelper::getIDActiveSchoolyear(),
         ]);
 
-        $hasPending = ScheduleRequest::where('id_schedule', $ultimoHorario->id)
-            ->where('status', 'Pendente')
-            ->exists();
-
-        $status = $hasPending ? 'Aguardando' : 'Pendente';
-
         $pedido = ScheduleRequest::create([
             'id_schedule' => $ultimoHorario->id,
             'id_new_schedule' => $novoHorario->id,
+            'id_teacher' => $ultimoHorario->id_teacher,
             'id_teacher_requester' => Auth::user()->teacher->id,
-            'status' => $status,
+            'id_schoolyear' => $ultimoHorario->id_schoolyear,
+            'status' => 'Pendente',
             'justification' => $justificacao,
         ]);
 
         return $pedido;
     }
 
-    public static function promoverProximoNaFila(int $scheduleId): void
+    public static function isFirstPending(int $scheduleId, int $requestId): bool
     {
-        $next = ScheduleRequest::where('id_schedule', $scheduleId)
-            ->where('status', 'Aguardando')
+        return (int) ScheduleRequest::where('id_schedule', $scheduleId)
+            ->where('status', 'Pendente')
             ->orderBy('created_at')
-            ->first();
-
-        if ($next) {
-            $next->update(['status' => 'Pendente']);
-
-            // Podes adicionar notificação aqui, se quiseres
-        }
+            ->orderBy('id')
+            ->value('id') === $requestId;
     }
+
 }
