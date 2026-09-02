@@ -3,9 +3,16 @@
 namespace App\Filament\Imports;
 
 use App\Helpers\DatabaseHelper;
+use App\Models\ContratualRelationship;
+use App\Models\Department;
+use App\Models\Gender;
+use App\Models\Nationality;
+use App\Models\ProfessionalRelationship;
+use App\Models\Qualification;
+use App\Models\SalaryScale;
 use App\Models\Teacher;
-use App\Models\User;
 use App\Models\TeacherHourCounter;
+use App\Models\User;
 use App\Services\UserActivationService;
 use Carbon\Carbon;
 use Filament\Actions\Imports\ImportColumn;
@@ -13,10 +20,8 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-
-
-use updateWorkload;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class TeacherImporter extends Importer
 {
@@ -27,200 +32,216 @@ class TeacherImporter extends Importer
         return [
             ImportColumn::make('number')
                 ->label('Número')
-                ->rules(['required']),
-
+                ->rules(['required', 'integer'])
+                ->example('2001'),
             ImportColumn::make('name')
                 ->label('Nome')
-                ->rules(['required']),
-
+                ->rules(['required', 'string', 'max:255'])
+                ->example('Professor Exemplo'),
             ImportColumn::make('acronym')
                 ->label('Sigla')
-                ->rules(['required']),
-
+                ->rules(['required', 'string', 'max:20'])
+                ->example('PE'),
             ImportColumn::make('email')
                 ->label('Email (User)')
                 ->rules(['required', 'email'])
-                ->fillRecordUsing(function (\App\Models\Teacher $record, ?string $state): void {
-                    // Intencionalmente vazio: NÃO mapear para o modelo Teacher
-                }),
-
+                ->fillRecordUsing(function (Teacher $record, ?string $state): void {
+                    // O email pertence ao User associado, não à tabela teachers.
+                })
+                ->example('professor@exemplo.pt'),
             ImportColumn::make('birthdate')
                 ->label('Data Nascimento')
-                ->rules(['required']),
-
+                ->rules(['required', 'date'])
+                ->example('15/01/1980'),
             ImportColumn::make('startingdate')
                 ->label('Data Início')
-                ->rules(['required']),
+                ->rules(['required', 'date'])
+                ->example('01/09/2020'),
+            ImportColumn::make('id_gender')
+                ->label('Género (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:genders,id'])
+                ->example('Masculino'),
+            ImportColumn::make('id_nationality')
+                ->label('Nacionalidade (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:nationalities,id'])
+                ->example('Portuguesa'),
+            ImportColumn::make('id_qualification')
+                ->label('Habilitação (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:qualifications,id'])
+                ->example('Licenciatura'),
+            ImportColumn::make('id_department')
+                ->label('Departamento (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:departments,id'])
+                ->example('Cordas'),
+            ImportColumn::make('id_professionalrelationship')
+                ->label('Relação profissional (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:professional_relationships,id'])
+                ->example('Docente'),
+            ImportColumn::make('id_contractualrelationship')
+                ->label('Relação contratual (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:contratual_relationships,id'])
+                ->example('Contrato'),
+            ImportColumn::make('id_salaryscale')
+                ->label('Escalão salarial (ID ou nome)')
+                ->rules(['nullable', 'integer', 'exists:salary_scales,id'])
+                ->example('Escala A'),
         ];
     }
 
-    protected function beforeFill(): void
+    protected function beforeValidate(): void
     {
-        $this->data['number']       = self::clean($this->data['number'] ?? '');
-        $this->data['name']         = self::clean($this->data['name'] ?? '');
-        $this->data['acronym']      = self::clean($this->data['acronym'] ?? '');
-        $this->data['email']        = self::clean($this->data['email'] ?? '');
-
-        // Normaliza datas para Y-m-d (aceita d-m-Y, d/m/Y, d.m.Y, Y-m-d)
-        $this->data['birthdate']    = self::normalizeDate($this->data['birthdate'] ?? null, 'birthdate');
+        $this->data['number'] = trim((string) ($this->data['number'] ?? ''));
+        $this->data['name'] = self::clean($this->data['name'] ?? null);
+        $this->data['acronym'] = mb_strtoupper(self::clean($this->data['acronym'] ?? null) ?? '');
+        $this->data['email'] = self::clean($this->data['email'] ?? null);
+        $this->data['birthdate'] = self::normalizeDate($this->data['birthdate'] ?? null, 'birthdate');
         $this->data['startingdate'] = self::normalizeDate($this->data['startingdate'] ?? null, 'startingdate');
 
-        // Ajustes de apresentação
-        if ($this->data['acronym'] !== null) {
-            $this->data['acronym'] = mb_strtoupper($this->data['acronym']);
-        }
-        if ($this->data['name'] !== null) {
-            $this->data['name'] = trim(preg_replace('/\s+/', ' ', $this->data['name']));
-        }
+        $this->data['id_gender'] = self::resolveRelation($this->data['id_gender'] ?? null, Gender::class, 'gender');
+        $this->data['id_nationality'] = self::resolveRelation($this->data['id_nationality'] ?? null, Nationality::class, 'name');
+        $this->data['id_qualification'] = self::resolveRelation($this->data['id_qualification'] ?? null, Qualification::class, 'name');
+        $this->data['id_department'] = self::resolveRelation($this->data['id_department'] ?? null, Department::class, 'name');
+        $this->data['id_professionalrelationship'] = self::resolveRelation($this->data['id_professionalrelationship'] ?? null, ProfessionalRelationship::class, 'name');
+        $this->data['id_contractualrelationship'] = self::resolveRelation($this->data['id_contractualrelationship'] ?? null, ContratualRelationship::class, 'name');
+        $this->data['id_salaryscale'] = self::resolveRelation($this->data['id_salaryscale'] ?? null, SalaryScale::class, 'scale');
     }
-
-    // public static function updateWorkload(Teacher $teacher, array $data): bool
-    // {
-    //     // já não fazemos $teacher->save() aqui
-
-    //     $schoolYearId = $data['id_schoolyear'] ?? null;
-    //     if (!$schoolYearId) {
-    //         return true;
-    //     }
-
-    //     TeacherHourCounter::firstOrCreate(
-    //         [
-    //             'id_teacher'    => $teacher->id,
-    //             'id_schoolyear' => $schoolYearId,
-    //         ],
-    //         [
-    //             'workload'            => 26,
-    //             'teaching_load'       => 22,
-    //             'non_teaching_load'   => 4,
-    //             'authorized_overtime' => 0,
-    //         ]
-    //     );
-
-    //     return true;
-    // }
 
     public function resolveRecord(): ?Teacher
     {
-        return DB::transaction(function () {
-            // 1) Criar/obter o User pelo email
+        return Teacher::firstOrNew([
+            'number' => $this->data['number'] ?? null,
+        ]);
+    }
+
+    protected function beforeSave(): void
+    {
+        DB::transaction(function (): void {
+            $teacher = $this->record;
             $email = $this->data['email'];
-            if (!$email) {
-                throw new \InvalidArgumentException('Email é obrigatório para criar o utilizador.');
+            $user = $teacher->user;
+
+            if ($user && $user->email !== $email) {
+                $emailOwner = User::where('email', $email)
+                    ->where($user->getKeyName(), '!=', $user->getKey())
+                    ->exists();
+
+                if ($emailOwner) {
+                    throw ValidationException::withMessages([
+                        'email' => 'O email já está associado a outro utilizador.',
+                    ]);
+                }
+
+                $user->forceFill(['email' => $email, 'name' => $this->data['name']])->save();
+            } else {
+                $user ??= User::firstOrNew(['email' => $email]);
+
+                if (! $user->exists) {
+                    $user->forceFill([
+                        'name' => $this->data['name'],
+                        'password' => str()->random(40),
+                        'is_active' => false,
+                    ])->save();
+                }
             }
 
-            /** @var \App\Models\User $user */
-            $user = User::firstOrCreate(
-                ['email' => $email],
-                [
-                    'name'     => $this->data['name'] ?? $email,
-                    'password' => str()->random(40),
-                    'is_active' => false,
-                ]
-            );
-
-            // atribuir role professor (Spatie)
-            if (!$user->hasRole('Professor')) {
+            if (! $user->hasRole('Professor')) {
                 $user->assignRole('Professor');
             }
 
-            if (! $user->is_active) {
+            if (! $user->is_active && blank($user->activation_token)) {
                 app(UserActivationService::class)->issueAndNotify($user);
             }
 
-            // 2) Upsert do Teacher pelo number e ligação ao user_id
-            $teacher = Teacher::firstOrNew([
-                'number' => $this->data['number'],
-            ]);
-
-            $teacher->fill([
-                'name'         => $this->data['name'],
-                'acronym'      => $this->data['acronym'],
-                'birthdate'    => $this->data['birthdate'],    // Y-m-d
-                'startingdate' => $this->data['startingdate'], // Y-m-d
-                'id_user'      => $user->id,
-            ]);
-
-
-            // 3) cria/sincroniza contador (salva o teacher se ainda não existir)
-            // self::updateWorkload($teacher, $this->data);
-
-
-            return $teacher;
+            $teacher->id_user = $user->getKey();
         });
     }
 
-    public function afterSave(): void
+    protected function afterSave(): void
     {
-        if ($this->record instanceof Teacher) {
-            //   $schoolYearId = $this->data['id_schoolyear'] ?? null;
-            $schoolYearId = DatabaseHelper::getIDActiveSchoolyear();
+        $schoolYearId = DatabaseHelper::getIDActiveSchoolyear();
 
-            if ($schoolYearId) {
-                TeacherHourCounter::firstOrCreate(
-                    [
-                        'id_teacher'    => $this->record->id,
-                        'id_schoolyear' => $schoolYearId,
-                    ],
-                    [
-                        'workload'            => 26,
-                        'teaching_load'       => 22,
-                        'non_teaching_load'   => 4,
-                        'authorized_overtime' => 0,
-                    ]
-                );
-            }
+        if ($schoolYearId) {
+            TeacherHourCounter::firstOrCreate(
+                [
+                    'id_teacher' => $this->record->getKey(),
+                    'id_schoolyear' => $schoolYearId,
+                ],
+                [
+                    'workload' => 26,
+                    'teaching_load' => 22,
+                    'non_teaching_load' => 4,
+                    'authorized_overtime' => 0,
+                ],
+            );
         }
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
         $successful = $import->successful_rows;
-        $failed     = $import->failed_rows;
-        $total      = $import->total_rows;
+        $failed = $import->failed_rows;
+        $total = $import->total_rows;
 
         if ($successful === 0) {
-            return "Nenhum Professor foi importado. {$failed} registos falharam de {$total} processados.";
+            return "Nenhum professor foi importado. {$failed} registos falharam de {$total} processados.";
         }
 
-        $msg = "Importação concluída: {$successful} Professores importados/atualizados com sucesso";
-        if ($failed > 0) $msg .= ", {$failed} falharam";
-        $msg .= " de {$total} registos processados.";
+        $message = "Importação concluída: {$successful} professores importados/atualizados com sucesso";
 
-        return $msg;
+        if ($failed > 0) {
+            $message .= ", {$failed} falharam";
+        }
+
+        return $message." de {$total} registos processados.";
     }
 
-    /* ====================== Helpers ====================== */
-
-    private static function clean(?string $value): ?string
+    private static function clean(mixed $value): ?string
     {
-        if ($value === null) return null;
-        $v = trim($value);
-        return $v === '' ? null : $v;
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 
-    private static function normalizeDate(?string $value, string $column): ?string
+    private static function normalizeDate(mixed $value, string $column): string
     {
         $value = self::clean($value);
-        if ($value === null) {
-            throw new \InvalidArgumentException("A coluna '{$column}' é obrigatória.");
-        }
 
-        $formats = ['d-m-Y', 'd/m/Y', 'd.m.Y', 'Y-m-d'];
-        foreach ($formats as $fmt) {
+        foreach (['d/m/Y', 'd-m-Y', 'd.m.Y', 'Y-m-d', 'd/m/Y H:i:s', 'Y-m-d H:i:s'] as $format) {
             try {
-                $dt = Carbon::createFromFormat($fmt, $value);
-                if ($dt && $dt->format($fmt) === $value) {
-                    return $dt->toDateString(); // Y-m-d
-                }
-            } catch (\Throwable $e) {
+                return Carbon::createFromFormat($format, $value)->format('Y-m-d');
+            } catch (\Throwable) {
+                // Try the next supported format.
             }
         }
 
-        $ts = strtotime($value);
-        if ($ts !== false) return date('Y-m-d', $ts);
+        throw ValidationException::withMessages([
+            $column => "A data na coluna {$column} deve estar num formato válido.",
+        ]);
+    }
 
-        throw new \InvalidArgumentException(
-            "Data inválida na coluna '{$column}': '{$value}'. Use d-m-Y, d/m/Y, d.m.Y ou Y-m-d."
+    private static function resolveRelation(mixed $value, string $model, string $labelColumn): ?int
+    {
+        $value = self::clean($value);
+
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+
+        $normalized = Str::lower(Str::ascii($value));
+        $record = $model::query()->get(['id', $labelColumn])->first(
+            fn (Model $record): bool => Str::lower(Str::ascii((string) $record->{$labelColumn})) === $normalized,
         );
+
+        if ($record) {
+            return $record->getKey();
+        }
+
+        throw ValidationException::withMessages([
+            'id_'.Str::snake(class_basename($model)) => "Valor de relação inválido: {$value}.",
+        ]);
     }
 }

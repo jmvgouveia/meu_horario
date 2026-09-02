@@ -14,10 +14,10 @@ class StudentObserver
     public function created(Student $student): void
     {
         // Só cria se ainda não existir user_id
-        if (!$student->user_id) {
+        if (! $student->user_id && filled($student->email)) {
             $user = User::create([
                 'name' => $student->name,
-                'email' => $student->email ?: ($student->number . '@ceam.com'),
+                'email' => $student->email,
                 'password' => str()->random(40),
                 'is_active' => false,
             ]);

@@ -18,8 +18,11 @@ class ClassesResource extends Resource
     protected static ?string $model = Classes::class;
 
     protected static ?string $navigationGroup = 'Académico';
+
     protected static ?string $navigationLabel = 'Turmas';
+
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
     protected static ?int $navigationSort = 1;
 
     public static function getLabel(): string
@@ -50,10 +53,13 @@ class ClassesResource extends Resource
                     ->label('Ano')
                     ->numeric()
                     ->placeholder('Introduza ano'),
-                Select::make('id_building')
-                    ->label('Edifício')
-                    ->relationship('building', 'name')
-                    ->placeholder('Selecione o edifício'),
+                Select::make('buildings')
+                    ->label('Edifícios permitidos')
+                    ->relationship('buildings', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->placeholder('Selecione os edifícios permitidos para esta turma')
+                    ->hint('Turmas sem edifícios não aparecem na marcação de horários com turma.'),
             ]);
     }
 
@@ -77,10 +83,15 @@ class ClassesResource extends Resource
                     ->label('Ano')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('building.name')
-                    ->label('Edifício')
+                TextColumn::make('buildings.name')
+                    ->label('Edifícios permitidos')
+                    ->badge()
+                    ->separator(',')
+                    ->listWithLineBreaks()
+                    ->limitList(3)
+                    ->searchable()
                     ->sortable()
-                    ->searchable(),
+                    ->toggleable(),
             ])
             ->filters([
                 //

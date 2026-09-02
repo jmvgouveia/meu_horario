@@ -7,6 +7,9 @@ use App\Filament\Resources\ScheduleResource\Traits\CheckScheduleWindow;
 use App\Filament\Resources\ScheduleResource\Traits\ChecksScheduleConflicts;
 use App\Filament\Resources\ScheduleResource\Traits\HandlesScheduleSwap;
 use App\Filament\Resources\ScheduleResource\Traits\HourCounter;
+use App\Filament\Resources\ScheduleResource\Traits\ValidatesClassBuildings;
+use App\Helpers\DatabaseHelper as DBHelper;
+use App\Helpers\MensagensErro as MSGErro;
 use App\Models\Schedule;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -16,8 +19,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\DatabaseHelper as DBHelper;
-use App\Helpers\MensagensErro as MSGErro;
 
 class EditSchedule extends EditRecord
 {
@@ -25,7 +26,7 @@ class EditSchedule extends EditRecord
 
     public ?Schedule $conflictingSchedule = null;
 
-    use CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap, HourCounter;
+    use CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap, HourCounter, ValidatesClassBuildings;
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
@@ -39,6 +40,10 @@ class EditSchedule extends EditRecord
                 $this->validateScheduleWindow();
 
                 $this->checkScheduleConflictsAndAvailability($this->data, $this->record?->id);
+                $this->validateSelectedClassesBelongToRoomBuilding(
+                    $this->data['id_classes'] ?? [],
+                    $this->data['id_room'] ?? null,
+                );
 
                 $this->data['status'] = 'Aprovado';
             });
@@ -82,13 +87,13 @@ class EditSchedule extends EditRecord
         return [
 
             $this->getSaveFormAction()
-                ->visible(fn($record) => $record->status !== 'Eliminado'),
+                ->visible(fn ($record) => $record->status !== 'Eliminado'),
 
             DeleteAction::make()
                 ->label('Eliminar Horário')
                 ->color('danger')
                 ->requiresConfirmation()
-                ->visible(fn($record) => $record->status !== 'Eliminado')
+                ->visible(fn ($record) => $record->status !== 'Eliminado')
                 ->modalHeading('Eliminar Horário')
                 ->modalDescription('Ao eliminar este horário, qualquer pedido de troca que estava pendente com este registo será automaticamente aprovado.')
                 ->action(function () {
@@ -116,7 +121,7 @@ class EditSchedule extends EditRecord
 
                                     if ($requerente) {
                                         Notification::make()
-                                            ->title("Pedido de troca aprovado automaticamente")
+                                            ->title('Pedido de troca aprovado automaticamente')
                                             ->body("O horário em conflito (ID: {$idApagado}) foi eliminado. O seu horário (ID: {$idNovo}) foi aprovado automaticamente.")
                                             ->success()
                                             ->sendToDatabase($requerente);
@@ -140,7 +145,7 @@ class EditSchedule extends EditRecord
                             DBHelper::updateScheduleStatus($this->record->id, 'Eliminado', MSGErro::ERRO_ELIMINAR_SCHEDULE);
 
                             Notification::make()
-                                ->title("Horário Eliminado")
+                                ->title('Horário Eliminado')
                                 ->body("O horário com ID: {$record->id} foi eliminado com sucesso.")
                                 ->success()
                                 ->sendToDatabase(Filament::auth()->user());
@@ -166,7 +171,7 @@ class EditSchedule extends EditRecord
             ActionGroup::make([
                 Action::make('justificarConflito')
                     ->label('Solicitar Troca de Horário')
-                    ->visible(fn($livewire) => $livewire->conflictingSchedule !== null)
+                    ->visible(fn ($livewire) => $livewire->conflictingSchedule !== null)
                     ->icon('heroicon-o-exclamation-triangle')
                     ->color('danger')
                     ->modalHeading('Justificação do Conflito')
@@ -181,11 +186,13 @@ class EditSchedule extends EditRecord
                     ])
                     ->action(function (array $data, $livewire) {
                         $livewire->submitJustification($data);
+
                         return filament()->getUrl();
-                    })
+                    }),
             ]),
         ];
     }
+
     protected function getRedirectUrl(): string
     {
         return filament()->getUrl();

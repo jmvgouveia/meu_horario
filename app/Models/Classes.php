@@ -25,15 +25,16 @@ class Classes extends Model
     public function classes()
     {
         return $this->belongsToMany(
-            \App\Models\Classes::class,
+            Classes::class,
             'schedule_class',      // nome da tabela pivot
             'schedule_id',
             'class_id'
         );
     }
 
-    public function building()
+    public function buildings()
     {
-        return $this->belongsTo(Building::class, 'id_building');
+        return $this->belongsToMany(Building::class, 'class_buildings', 'id_class', 'id_building')
+            ->withTimestamps();
     }
 }

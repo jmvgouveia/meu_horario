@@ -3,12 +3,12 @@
 namespace App\Filament\Resources\ScheduleResource\Traits;
 
 use App\Models\Schedule;
-use App\Models\Teacher;
 use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
+use App\Models\Teacher;
 use Filament\Facades\Filament;
-use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 
 trait HandlesScheduleSwap
@@ -63,7 +63,6 @@ trait HandlesScheduleSwap
     //                 ->success()
     //                 ->send();
 
-
     //             Notification::make()
     //                 ->title("Novo pedido de troca recebido")
     //                 ->body("O(a) professor(a) {$requestername} solicitou trocar a sala {$currentRoom}, marcada para {$dayName} entre {$timePeriod}.")
@@ -88,7 +87,6 @@ trait HandlesScheduleSwap
     //     }
     // }
 
-
     public function submitJustification(array $data)
     {
         try {
@@ -97,6 +95,11 @@ trait HandlesScheduleSwap
                 $teacher = Teacher::where('id_user', Filament::auth()->id())->first();
                 $activeYear = SchoolYear::where('active', true)->first();
 
+                $this->validateSelectedClassesBelongToRoomBuilding(
+                    $formState['id_classes'] ?? [],
+                    $this->conflictingSchedule->id_room,
+                );
+
                 // ✅ 1. Obter o último horário ocupado no mesmo dia/período
                 $ultimoHorario = Schedule::where('id_weekday', $this->conflictingSchedule->id_weekday)
                     ->where('id_timeperiod', $this->conflictingSchedule->id_timeperiod)
@@ -104,7 +107,7 @@ trait HandlesScheduleSwap
                     ->latest('updated_at')
                     ->first();
 
-                if (!$ultimoHorario) {
+                if (! $ultimoHorario) {
                     throw new \Exception('Não foi encontrado horário válido para este slot.');
                 }
 
@@ -146,14 +149,14 @@ trait HandlesScheduleSwap
                 $requesterName = $requester?->name ?? 'um professor';
 
                 Notification::make()
-                    ->title("Pedido de Troca criado com sucesso!")
+                    ->title('Pedido de Troca criado com sucesso!')
                     ->body("O seu pedido de troca da sala {$currentRoom}, na {$dayName}, entre {$timePeriod}, foi enviado com sucesso para {$owner?->name}.")
                     ->persistent()
                     ->success()
                     ->send();
 
                 Notification::make()
-                    ->title("Novo pedido de troca recebido")
+                    ->title('Novo pedido de troca recebido')
                     ->body("O(a) professor(a) {$requesterName} solicitou trocar a sala {$currentRoom}, marcada para {$dayName} entre {$timePeriod}.")
                     ->success()
                     ->actions([

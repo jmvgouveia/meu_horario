@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\TeacherSubjectResource;
 use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -87,6 +88,7 @@ class ExampleTest extends TestCase
         $this->get('/maestro/o-meu-horario')
             ->assertOk()
             ->assertSee('O Meu Horário')
+            ->assertSee('Professor')
             ->assertSee('id="calendar-container"', escape: false)
             ->assertSee('/css/maestro.css', escape: false);
 
@@ -94,5 +96,17 @@ class ExampleTest extends TestCase
             WeeklyScheduleWidget::class,
             Filament::getPanel('admin')->getWidgets(),
         );
+    }
+
+    public function test_professor_sees_their_subjects_below_their_schedule(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Role::findOrCreate('Professor'));
+
+        $this->actingAs($user);
+
+        $this->assertSame('Horários', TeacherSubjectResource::getNavigationGroup());
+        $this->assertSame('As minhas disciplinas', TeacherSubjectResource::getNavigationLabel());
+        $this->assertSame(2, TeacherSubjectResource::getNavigationSort());
     }
 }

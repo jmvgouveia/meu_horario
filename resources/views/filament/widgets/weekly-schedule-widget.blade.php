@@ -148,6 +148,11 @@
     }
 </style>
 <div id="calendar-container">
+    @if (blank($timePeriods))
+        <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100">
+            Não existem períodos horários configurados para apresentar a grelha.
+        </div>
+    @else
     <div class="flex items-center justify-end text-xs text-gray-500 mt-2 space-x-1" id="last-updated">
     </div>
     <div class="w-full overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
@@ -315,6 +320,7 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
 <script>

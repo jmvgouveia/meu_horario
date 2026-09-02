@@ -6,6 +6,10 @@ webserver_type: nginx-fpm
 xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
+web_extra_daemons:
+    - name: queue
+      command: php artisan queue:work --sleep=1 --tries=1 --timeout=120
+      directory: /var/www/html
 database:
     type: mariadb
     version: "10.11"

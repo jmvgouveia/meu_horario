@@ -2,40 +2,46 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasSchoolYearHistory;
 use App\Filament\Imports\TeacherSubjectsImporter;
 use App\Filament\Resources\TeacherSubjectResource\Pages;
 use App\Models\TeacherSubject;
-use App\Filament\Concerns\HasSchoolYearHistory;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\Auth;
 
 class TeacherSubjectResource extends Resource
 {
     use HasSchoolYearHistory;
+
     protected static ?string $model = TeacherSubject::class;
 
-    protected static ?string $navigationGroup = 'Académico';
     protected static ?string $navigationLabel = 'Professores - Disciplinas';
+
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return auth()->user()?->isTeacher() ? 'Horários' : 'Académico';
+    }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 2;
+    }
 
     // public static function getLabel(): string
     // {
     //     return 'Disciplina do Professor';
     // }
-
-
 
     public static function getPluralLabel(): string
     {
@@ -43,13 +49,13 @@ class TeacherSubjectResource extends Resource
             ? 'As minhas disciplinas'
             : 'Disciplinas do Professor';
     }
+
     public static function getNavigationLabel(): string
     {
         return auth()->user()?->isTeacher()
             ? 'As minhas disciplinas'
             : 'Disciplinas do Professor';
     }
-
 
     public static function getEloquentQuery(): Builder
     {
@@ -108,7 +114,7 @@ class TeacherSubjectResource extends Resource
                     ->label('Professor')
                     ->sortable()
                     ->searchable()
-                    ->visible(fn() => static::canBrowseSchoolYearHistory()),
+                    ->visible(fn () => static::canBrowseSchoolYearHistory()),
                 TextColumn::make('subject.name')
                     ->label('Disciplina')
                     ->sortable()

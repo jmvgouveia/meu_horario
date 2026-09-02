@@ -35,6 +35,43 @@ class ScheduleStudentAssignmentTest extends TestCase
         $this->assertFalse($student->schedules->contains('id', $data['other_schedule_id']));
     }
 
+    public function test_same_class_can_have_schedules_in_different_buildings(): void
+    {
+        $data = $this->createScheduleFixture();
+        $now = now();
+        $secondBuildingId = DB::table('buildings')->insertGetId([
+            'name' => 'North Campus',
+            'address' => 'Second test address',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $secondRoomId = DB::table('rooms')->insertGetId([
+            'name' => '202',
+            'id_building' => $secondBuildingId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $secondSchedule = Schedule::create([
+            'id_schoolyear' => $data['school_year_id'],
+            'id_timeperiod' => DB::table('timeperiods')->value('id'),
+            'id_room' => $secondRoomId,
+            'id_teacher' => $data['teacher_id'],
+            'id_weekday' => 3,
+            'id_subject' => $data['subject_id'],
+            'shift' => 'Turno C - P1234',
+            'shift_limit' => 10,
+            'status' => 'Aprovado',
+        ]);
+        $secondSchedule->classes()->attach($data['class_id']);
+
+        $this->assertSame(
+            $secondBuildingId,
+            $secondSchedule->fresh('room')->room->id_building,
+        );
+        $this->assertTrue($secondSchedule->fresh('classes')->classes->contains('id', $data['class_id']));
+    }
+
     public function test_registration_subject_selected_schedule_uses_id_schedule(): void
     {
         $data = $this->createScheduleFixture();
@@ -224,7 +261,6 @@ class ScheduleStudentAssignmentTest extends TestCase
             'name' => '1A',
             'id_course' => $courseId,
             'year' => 1,
-            'id_building' => $buildingId,
             'created_at' => $now,
             'updated_at' => $now,
         ]);

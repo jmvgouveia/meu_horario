@@ -72,8 +72,8 @@ class SubjectImporter extends Importer
                     Rule::in([0, 1, '0', '1']),
                 ]),
 
-           /*  ImportColumn::make('student_can_enroll')
-                ->label('Aluno pode inscrever-se')
+            ImportColumn::make('student_can_enroll')
+                ->label('Pode Inscrever')
                 ->requiredMapping()
                 ->castStateUsing(
                     fn ($state) => self::normalizeBooleanForImport($state)
@@ -81,7 +81,7 @@ class SubjectImporter extends Importer
                 ->rules([
                     'required',
                     Rule::in([0, 1, '0', '1']),
-                ]), */
+                ]),
         ];
     }
 

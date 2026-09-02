@@ -9,6 +9,7 @@ use App\Models\Teacher;
 use App\Models\Timeperiod;
 use App\Models\User;
 use App\Models\Weekday;
+use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Widgets\Widget;
 use Illuminate\Contracts\View\View;
@@ -16,14 +17,14 @@ use Illuminate\Contracts\View\View;
 class WeeklyScheduleWidget extends Widget
 {
     protected static string $view = 'filament.widgets.weekly-schedule-widget';
+
     protected static bool $isLazy = false;
+
     protected static ?int $sort = 1;
 
     protected int|string|array $pollingInterval = '5s';
 
-
-    protected int | string | array $columnSpan = 'full';
-
+    protected int|string|array $columnSpan = 'full';
 
     public function render(): View
     {
@@ -76,25 +77,19 @@ class WeeklyScheduleWidget extends Widget
 
         $calendar = [];
 
-
-
         foreach ($timePeriods as $period) {
 
-            $start = \Carbon\Carbon::createFromFormat('H:i:s', $period->start_time);
+            $start = Carbon::createFromFormat('H:i:s', $period->start_time);
             $label = $start->format('H:00'); // agrupamento por hora cheia
 
             $timePeriodsGrouped[$label][] = $period;
         }
-
-
-
 
         // foreach ($timePeriods as $tp) {
         //     foreach (array_keys($weekdays) as $dayId) {
         //         $calendar[$tp->id][$dayId] = [];
         //     }
         // }
-
 
         // foreach ($schedules as $schedule) {
         //     $dayId = $schedule->id_weekday;
@@ -133,8 +128,8 @@ class WeeklyScheduleWidget extends Widget
             $dayId = $schedule->id_weekday;
             $timeId = $schedule->id_timeperiod;
 
-            $startMin = \Carbon\Carbon::createFromFormat('H:i:s', $schedule->timeperiod->start_time)->minute;
-            $currentIndex = $timePeriods->search(fn($tp) => $tp->id === $timeId);
+            $startMin = Carbon::createFromFormat('H:i:s', $schedule->timeperiod->start_time)->minute;
+            $currentIndex = $timePeriods->search(fn ($tp) => $tp->id === $timeId);
 
             // Começa às :00 → ocupar slot atual + slot seguinte
             if ($startMin === 0) {
@@ -156,7 +151,6 @@ class WeeklyScheduleWidget extends Widget
                 }
             }
         }
-
 
         // foreach ($calendar as $timeId => $slots) {
         //     foreach ($slots as $dayId => $items) {
@@ -187,32 +181,33 @@ class WeeklyScheduleWidget extends Widget
         //     }
         // }
 
-
         //    $timePeriodsGrouped = array_filter($timePeriodsGrouped, fn($group) => count($group) === 2);
 
         $recusados = ScheduleRequest::where('status', 'Recusado')
             ->where('id_teacher', $teacher->id)
-            ->whereHas('scheduleConflict', fn($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
+            ->whereHas('scheduleConflict', fn ($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->keyBy('id_new_schedule');
 
         $escalados = ScheduleRequest::where('status', 'Escalado')
             ->where('id_teacher', $teacher->id)
-            ->whereHas('scheduleConflict', fn($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
+            ->whereHas('scheduleConflict', fn ($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->reduce(function ($carry, $req) {
                 $carry[$req->id_schedule] = $req;
                 $carry[$req->id_new_schedule] = $req;
+
                 return $carry;
             }, collect());
 
         $PedidosAprovadosDP = ScheduleRequest::where('status', 'Aprovado DP')
             ->where('id_teacher', $teacher->id)
-            ->whereHas('scheduleConflict', fn($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
+            ->whereHas('scheduleConflict', fn ($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->reduce(function ($carry, $req) {
                 $carry[$req->id_schedule] = $req;
                 $carry[$req->id_new_schedule] = $req;
+
                 return $carry;
             }, collect());
 

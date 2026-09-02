@@ -3,62 +3,58 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ScheduleResource\Pages;
+use App\Helpers\DatabaseHelper as DBHelper;
+use App\Helpers\UserHelper;
 use App\Models\Building;
 use App\Models\Classes;
 use App\Models\Registration;
 use App\Models\Room;
 use App\Models\Schedule;
-use App\Models\Subject;
-use App\Models\Timeperiod;
-use App\Models\Weekday;
-use App\Models\Teacher;
-use App\Models\ScheduleRequest;
 use App\Models\SchoolYear;
 use App\Models\Student;
-use App\Models\TeacherHourCounter;
-use Dom\Text;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Filament\Forms\Components\Select;
+use App\Models\Subject;
+use App\Models\Teacher;
+use App\Models\Timeperiod;
+use App\Models\Weekday;
 use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Section;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Filament\Forms\Components\Actions as ActionGroup;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Actions as ActionGroup;
 use Filament\Forms\Components\Placeholder;
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Support\Collection;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Notifications\Notification;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables\Actions;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
-use Illuminate\Database\Eloquent\Model;
-use App\Helpers\UserHelper;
-use App\Helpers\DatabaseHelper as DBHelper;
-use Illuminate\Support\Str;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ScheduleResource extends Resource
 {
     protected static ?string $model = Schedule::class;
+
     protected static ?string $navigationGroup = 'Horários';
+
     protected static ?string $navigationLabel = 'Marcação de Horários';
+
     protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public ?Schedule $conflictingSchedule = null;
-
 
     public static function getLabel(): string
     {
@@ -69,11 +65,12 @@ class ScheduleResource extends Resource
     {
         return 'Marcações de Horários';
     }
+
     public static function exportSchedules(?Collection $records = null): StreamedResponse
     {
         Gate::authorize('export', Schedule::class);
 
-        //$anoLetivoAtivoId = \App\Models\SchoolYear::where('active', true)->value('id');
+        // $anoLetivoAtivoId = \App\Models\SchoolYear::where('active', true)->value('id');
         $anoLetivoAtivoId = DBHelper::getIDActiveSchoolyear();
 
         $query = static::getEloquentQuery()
@@ -123,11 +120,11 @@ class ScheduleResource extends Resource
                             "\"{$schedule->teacher->number}\"",
                             "\"{$schedule->subject->acronym}\"",
                             "\"{$schedule->room->name}\"",
-                            "\"\"",
-                            "\"\"",
+                            '""',
+                            '""',
                         ];
 
-                        fputs($handle, implode('|', $linha) . "\n");
+                        fwrite($handle, implode('|', $linha)."\n");
                     }
 
                     continue;
@@ -142,11 +139,11 @@ class ScheduleResource extends Resource
                         "\"{$schedule->teacher->number}\"",
                         "\"{$schedule->subject->acronym}\"",
                         "\"{$schedule->room->name}\"",
-                        "\"\"",
-                        "\"" . implode(',', $info['alunos']) . "\"",
+                        '""',
+                        '"'.implode(',', $info['alunos']).'"',
                     ];
 
-                    fputs($handle, implode('|', $linha) . "\n");
+                    fwrite($handle, implode('|', $linha)."\n");
                 }
             }
 
@@ -156,8 +153,6 @@ class ScheduleResource extends Resource
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
-
-
 
     public static function getEloquentQuery(): Builder
     {
@@ -178,7 +173,7 @@ class ScheduleResource extends Resource
         }
 
         // Obtém o ano letivo ativo (ajusta conforme o teu modelo)
-        $anoLetivoAtivo = \App\Models\SchoolYear::where('active', true)->first();
+        $anoLetivoAtivo = SchoolYear::where('active', true)->first();
 
         if ($anoLetivoAtivo) {
             $query->where('id_schoolyear', $anoLetivoAtivo->id);
@@ -189,7 +184,6 @@ class ScheduleResource extends Resource
 
         return $query;
     }
-
 
     public static function form(Form $form): Form
     {
@@ -208,7 +202,6 @@ class ScheduleResource extends Resource
                                     ->required()
                                     ->options(Weekday::all()->pluck('weekday', 'id'))
                                     ->placeholder('Selecione o dia da semana'),
-
 
                                 Select::make('id_timeperiod')
                                     ->label('Hora de Início')
@@ -230,7 +223,7 @@ class ScheduleResource extends Resource
                                     ->required()
                                     ->options(Building::all()->pluck('name', 'id'))
                                     ->reactive()
-                                    ->afterStateUpdated(fn(callable $set) => $set('id_room', null))
+                                    ->afterStateUpdated(fn (callable $set) => $set('id_room', null))
                                     ->placeholder('Selecione o local da aula')
                                     ->afterStateHydrated(function (callable $set, ?Schedule $record) {
                                         if ($record && $record->id_room && $record->room) {
@@ -241,12 +234,14 @@ class ScheduleResource extends Resource
                                 Select::make('id_room')
                                     ->label('Sala')
                                     ->required()
-                                    ->disabled(fn(callable $get) => blank($get('id_building')))
+                                    ->disabled(fn (callable $get) => blank($get('id_building')))
                                     ->placeholder('Tem que preencher o Núcleo/Pólo')
                                     ->options(function (callable $get, ?Schedule $record) {
                                         $buildingId = $get('id_building') ?? $record?->room?->id_building;
 
-                                        if (!$buildingId) return [];
+                                        if (! $buildingId) {
+                                            return [];
+                                        }
 
                                         return Room::where('id_building', $buildingId)->pluck('name', 'id');
                                     })
@@ -260,7 +255,6 @@ class ScheduleResource extends Resource
                             ]),
                     ]),
 
-
                 Section::make('Composição da Aula')
                     ->collapsible()
                     ->description('Defina a disciplina, turmas e alunos envolvidos')
@@ -270,18 +264,23 @@ class ScheduleResource extends Resource
                             ->required()
                             ->reactive()
                             ->searchable()
-                            ->disabled(fn(callable $get) => blank($get('id_room')))
+                            ->disabled(fn (callable $get) => blank($get('id_room')))
                             ->placeholder('Tem que preencher a Sala')
                             ->options(function () {
                                 $userId = Auth::id();
                                 $teacher = Teacher::where('id_user', $userId)->first();
-                                if (!$teacher) return collect(['' => 'Este utilizador não é um professor']);
+                                if (! $teacher) {
+                                    return collect(['' => 'Este utilizador não é um professor']);
+                                }
                                 $activeYear = SchoolYear::where('active', true)->first();
-                                if (!$activeYear) return collect(['' => 'Nenhum ano letivo ativo']);
+                                if (! $activeYear) {
+                                    return collect(['' => 'Nenhum ano letivo ativo']);
+                                }
                                 $subjects = Subject::whereHas('teachers', function ($query) use ($teacher, $activeYear) {
                                     $query->where('id_teacher', $teacher->id)
                                         ->where('teacher_subjects.id_schoolyear', $activeYear->id);
                                 })->pluck('name', 'id');
+
                                 return $subjects->isEmpty()
                                     ? collect(['' => 'Nenhuma disciplina atribuída neste ano letivo'])
                                     : $subjects;
@@ -295,13 +294,14 @@ class ScheduleResource extends Resource
 
                         Select::make('id_classes')
                             ->label('Turmas')
-                            ->disabled(fn(callable $get) => blank($get('id_subject')))
+                            ->disabled(fn (callable $get) => blank($get('id_subject')))
                             ->placeholder('Tem que preencher a disciplina primeiro')
                             ->multiple()
                             ->required(function (callable $get) {
                                 $subjectId = $get('id_subject');
                                 $subjectName = Subject::find($subjectId)?->name;
-                                return !in_array(strtolower($subjectName), ['reunião', 'tee']);
+
+                                return ! in_array(strtolower($subjectName), ['reunião', 'tee']);
                             })
                             ->helperText('Selecione a(s) turma(s) que vão assistir à aula')
                             ->reactive()
@@ -312,19 +312,21 @@ class ScheduleResource extends Resource
                                 $subjectId = $get('id_subject');
                                 $buildingId = $get('id_building');
 
-                                if (!$subjectId || !$buildingId) {
+                                if (! $subjectId) {
                                     return [];
                                 }
 
                                 $subject = Subject::find($subjectId);
-                                if (!$subject) {
+                                if (! $subject) {
                                     return [];
                                 }
 
                                 $courseIds = $subject->courses()->pluck('courses.id');
 
                                 return Classes::whereIn('id_course', $courseIds)
-                                    ->where('id_building', $buildingId)
+                                    ->whereHas('buildings', function ($query) use ($buildingId) {
+                                        $query->when($buildingId, fn ($q) => $q->where('buildings.id', $buildingId));
+                                    })
                                     ->pluck('name', 'id');
                             }),
 
@@ -353,7 +355,7 @@ class ScheduleResource extends Resource
                                 if ($record && $record->exists) {
                                     $studentIds = $record->students()->pluck('students.id')->filter()->values()->toArray();
 
-                                    if (!empty($studentIds)) {
+                                    if (! empty($studentIds)) {
                                         $set('students', $studentIds);
                                     } else {
                                         $set('students', []);
@@ -373,7 +375,7 @@ class ScheduleResource extends Resource
 
                                     $set('shift', $numeros);
 
-                                    if (!$get('filtrar_por_turma')) {
+                                    if (! $get('filtrar_por_turma')) {
                                         $schoolYear = SchoolYear::where('active', true)->first();
                                         $classIds = Registration::whereIn('id_student', $studentIds)
                                             ->where('id_schoolyear', $schoolYear->id)
@@ -398,28 +400,34 @@ class ScheduleResource extends Resource
                                 $filtrarUltimoAno = $get('filter_last_year_students');
                                 $filtroNome = trim($get('filter_student_name'));
 
-                                if (!$subjectId || !$schoolYear) return [];
+                                if (! $subjectId || ! $schoolYear) {
+                                    return [];
+                                }
 
                                 $registrationIds = DB::table('registrations_subjects')
                                     ->where('id_subject', $subjectId)
                                     ->pluck('id_registration');
 
-                                if ($registrationIds->isEmpty()) return [];
+                                if ($registrationIds->isEmpty()) {
+                                    return [];
+                                }
 
                                 $query = Registration::with(['student', 'class'])
                                     ->whereIn('id', $registrationIds)
                                     ->where('id_schoolyear', $schoolYear->id);
 
-                                if ($filtrarPorTurma && !empty($classIds)) {
+                                if ($filtrarPorTurma && ! empty($classIds)) {
                                     $query->whereIn('id_class', $classIds);
                                 }
 
                                 if ($filtrarUltimoAno) {
                                     $professorId = Auth::user()?->teacher?->id;
                                     $anoAnterior = $schoolYear->id - 1;
-                                    $anoLetivoAnterior = \App\Models\SchoolYear::find($anoAnterior);
+                                    $anoLetivoAnterior = SchoolYear::find($anoAnterior);
 
-                                    if (!$anoLetivoAnterior) return [];
+                                    if (! $anoLetivoAnterior) {
+                                        return [];
+                                    }
 
                                     $scheduleIds = DB::table('schedules')
                                         ->where('id_teacher', $professorId)
@@ -439,23 +447,24 @@ class ScheduleResource extends Resource
                                 }
 
                                 // Aplica filtro por nome (se preenchido)
-                                if (!empty($filtroNome)) {
+                                if (! empty($filtroNome)) {
                                     $query->whereHas('student', function ($q) use ($filtroNome) {
-                                        $q->where('name', 'like', '%' . $filtroNome . '%');
+                                        $q->where('name', 'like', '%'.$filtroNome.'%');
                                     });
                                 }
 
                                 return $query->get()->mapWithKeys(function ($registration) {
                                     $student = $registration->student;
                                     $turma = $registration->class?->name ?? '—';
-                                    if (!$student) return [];
+                                    if (! $student) {
+                                        return [];
+                                    }
 
                                     return [
                                         $registration->id_student => "{$student->number} - {$student->name} - {$turma}",
                                     ];
                                 });
                             }),
-
 
                         //     Section::make('Turno')
                         //         ->collapsible()
@@ -512,9 +521,10 @@ class ScheduleResource extends Resource
                                 Select::make('shift')
                                     ->label('Turno')
                                     ->reactive() // <--- garante que mudanças disparam actualizações
-                                    ->visible(fn(callable $get) => is_array($get('students')) ? count($get('students')) === 0 : true)
+                                    ->visible(fn (callable $get) => is_array($get('students')) ? count($get('students')) === 0 : true)
                                     ->options(function () {
                                         $acronym = Auth::user()?->teacher?->acronym ?? '';
+
                                         return [
                                             "Turno A - $acronym" => "Turno A - $acronym",
                                             "Turno B - $acronym" => "Turno B - $acronym",
@@ -526,26 +536,24 @@ class ScheduleResource extends Resource
 
                                 Placeholder::make('generated_shift')
                                     ->label('Turno Gerado (automático)')
-                                    ->visible(fn(callable $get) => is_array($get('students')) && count($get('students')) > 0)
-                                    ->content(fn(callable $get, ?Schedule $record) => $get('shift') ?: $record?->shift ?: 'Será preenchido automaticamente com os números dos alunos'),
+                                    ->visible(fn (callable $get) => is_array($get('students')) && count($get('students')) > 0)
+                                    ->content(fn (callable $get, ?Schedule $record) => $get('shift') ?: $record?->shift ?: 'Será preenchido automaticamente com os números dos alunos'),
 
                                 TextInput::make('shift_limit')
                                     ->label('Número limite de alunos')
                                     ->numeric()
                                     ->minValue(1)
                                     ->visible(
-                                        fn(callable $get) =>
-                                        Str::startsWith($get('shift'), ['Turno A', 'Turno B', 'Turno C', 'Turno D'])
-                                    )
+                                        fn (callable $get) => Str::startsWith($get('shift'), ['Turno A', 'Turno B', 'Turno C', 'Turno D'])
+                                    ),
                             ]),
 
                     ]),
 
-
                 ActionGroup::make([
                     Action::make('justificarConflito')
                         ->label('Solicitar Troca de Horário')
-                        ->visible(fn($livewire) => $livewire->conflictingSchedule !== null)
+                        ->visible(fn ($livewire) => $livewire->conflictingSchedule !== null)
                         ->icon('heroicon-o-exclamation-triangle')
                         ->color('danger')
                         ->modalHeading('Pedido de Troca de Horário')
@@ -559,12 +567,11 @@ class ScheduleResource extends Resource
                                 ->required()
                                 ->minLength(10),
                         ])
-                        ->action(fn(array $data, $livewire) => $livewire->submitJustification($data)),
+                        ->action(fn (array $data, $livewire) => $livewire->submitJustification($data)),
                 ]),
 
             ]);
     }
-
 
     public static function table(Table $table): Table
     {
@@ -580,7 +587,7 @@ class ScheduleResource extends Resource
                     ->sortable()
                     ->toggleable()
                     ->searchable()
-                    ->visible(fn() => UserHelper::isUserSuperAdmin())
+                    ->visible(fn () => UserHelper::isUserSuperAdmin())
                     ->wrap(),
                 TextColumn::make('weekday.weekday')
                     ->label('Dia da Semana')
@@ -619,7 +626,7 @@ class ScheduleResource extends Resource
                     ->sortable()
                     ->toggleable()
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Pendente' => 'warning',
                         'Aprovado' => 'success',
                         'Recusado' => 'danger',
@@ -648,7 +655,7 @@ class ScheduleResource extends Resource
                     ->label('Professor')
                     ->relationship('teacher', 'name')
                     ->searchable()
-                    ->visible(fn() => UserHelper::isUserSuperAdmin()),
+                    ->visible(fn () => UserHelper::isUserSuperAdmin()),
 
                 SelectFilter::make('weekday_id')
                     ->label('Dia da Semana')
@@ -680,20 +687,20 @@ class ScheduleResource extends Resource
                     ->trueLabel('Mostrar Eliminados')
                     ->falseLabel('Ocultar Eliminados') // Mesmo que default
                     ->queries(
-                        true: fn(Builder $query) => $query, // não aplica filtro → mostra todos
-                        false: fn(Builder $query) => $query->where('status', '!=', 'Eliminado'),
-                        blank: fn(Builder $query) => $query->where('status', '!=', 'Eliminado'),
+                        true: fn (Builder $query) => $query, // não aplica filtro → mostra todos
+                        false: fn (Builder $query) => $query->where('status', '!=', 'Eliminado'),
+                        blank: fn (Builder $query) => $query->where('status', '!=', 'Eliminado'),
                     ),
 
             ])
             ->headerActions([
-                Tables\Actions\Action::make('exportar_selecionados')
+                Actions\Action::make('exportar_selecionados')
                     ->label('Exportar Horários')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn() => self::exportSchedules())
+                    ->action(fn () => self::exportSchedules())
                     ->color('primary')
                     ->requiresConfirmation()
-                    ->visible(fn() => Gate::allows('export', Schedule::class)),
+                    ->visible(fn () => Gate::allows('export', Schedule::class)),
 
             ])
             ->bulkActions([
@@ -701,8 +708,8 @@ class ScheduleResource extends Resource
                 BulkAction::make('exportar_selecionados')
                     ->label('Exportar Selecionados')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(fn(Collection $records) => self::exportSchedules($records))
-                    ->visible(fn() => Gate::allows('export', Schedule::class)),
+                    ->action(fn (Collection $records) => self::exportSchedules($records))
+                    ->visible(fn () => Gate::allows('export', Schedule::class)),
             ]);
     }
 
@@ -721,6 +728,7 @@ class ScheduleResource extends Resource
             'edit' => Pages\EditSchedule::route('/{record}/edit'),
         ];
     }
+
     public static function getRecordActions(): array
     {
         return [
