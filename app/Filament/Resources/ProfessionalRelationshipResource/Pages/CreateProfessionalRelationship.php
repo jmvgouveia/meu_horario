@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateProfessionalRelationship extends CreateRecord
 {
     protected static string $resource = ProfessionalRelationshipResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

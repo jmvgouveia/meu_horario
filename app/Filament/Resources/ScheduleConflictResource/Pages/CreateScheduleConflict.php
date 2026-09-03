@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateScheduleConflict extends CreateRecord
 {
     protected static string $resource = ScheduleConflictResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

@@ -1,6 +1,6 @@
 # Current Project State
 
-Last updated: 2026-09-02
+Last updated: 2026-09-03
 
 ## Current Objective
 
@@ -9,8 +9,9 @@ ordem de risco.
 
 ## Current Task
 
-Permitir que uma turma tenha aulas em edificios diferentes, sem perder a
-relacao entre horario, sala e edificio.
+Preparar o projeto para produção, sem alterar a lógica de negócio nesta fase.
+Foi decidido aceitar temporariamente a limitação de não distinguir o mesmo
+aluno em duas inscrições da mesma disciplina no mesmo horário.
 
 Tambem foi completado o importer de docentes com campos relacionais opcionais.
 Foi corrigido o menu lateral do docente: `TeacherSubjectResource` aparece como
@@ -83,6 +84,10 @@ utilizador apenas depois da validação da linha.
 O item "As minhas disciplinas" agora fica abaixo de "O Meu Horário" e a lista
 continua filtrada por docente/ano ativo. A grelha mostra aviso quando
 `timeperiods` esta vazio.
+Foi aplicada a preparacao de producao: autorizacao server-side para acoes de
+ativacao, validacao de pedidos de troca, preservacao de turnos, neutralizacao
+de formulas em export CSV, validacao dos intervalos de inscricao, relacao
+SchoolYear-students corrigida e selecao do ano anterior por data.
 Foram adicionados exemplos visíveis no importer para todos os campos, incluindo
 formatos de data e valores relacionais por nome.
 
@@ -91,10 +96,8 @@ formatos de data e valores relacionais por nome.
 No host nao existe PHP, mas DDEV fornece PHP 8.3 e MariaDB 10.11.
 DDEV confirma `queue.default=database` e worker ativo.
 `StudentImporter.php` e `StudentObserver.php`: lint e Pint passaram.
-Suite Laravel: 84 passaram, 1 falhou em `DashboardTest` por resposta 302 em
-vez de 200 para utilizador sem role; falha aparentemente preexistente e fora
-do importador. Apos adicionar o teste do importador: suite completa com 85
-passaram e 1 falhou (mesma falha de `DashboardTest`, 300 assertions).
+Suite Laravel: 96 passaram (335 assertions), incluindo o `DashboardTest`
+alinhado com o redirecionamento atual para `/maestro`.
 Testes apos a migration: 16 passaram (80 assertions), incluindo horarios,
 historico e importacao de alunos.
 Testes de importacao de turmas e horarios: 7 passaram (22 assertions).
@@ -104,9 +107,17 @@ Teste de navegacao docente: 9 passaram (28 assertions).
 Teste de importacao de periodos: 19 passaram (85 assertions) no conjunto focado.
 `git diff --check` passou.
 
+Auditoria de produção identificou como prioritários: autorização server-side
+nas ações de ativação de utilizadores e no modal de pedidos de troca; a falha
+do `DashboardTest`; validação de integridade de `registrations_subjects`;
+preservação de turnos ao editar horários com alunos; validações de datas e
+algumas relações Eloquent suspeitas.
+
 ## Blockers
 
-Suite completa ainda tem a falha conhecida de `DashboardTest`.
+Nao existem falhas na suite completa atual. A limitação de distinguir o mesmo
+aluno em duas inscrições da mesma disciplina no mesmo horário foi aceite para
+este lançamento e está registada em `decisions.md` como `DEC-001`.
 O log antigo confirma a colisao de email auxiliar no `StudentObserver`; a
 causa foi corrigida, mas nao foi feita uma importacao manual em dados reais.
 Testes de horarios/historico e edificios: 16 passaram (80 assertions),

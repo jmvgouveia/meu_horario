@@ -64,21 +64,32 @@ class TeacherStudentsResource extends Resource
         return parent::getEloquentQuery()
             ->whereIn('id_subject', $teacherSubjectIds)
             ->whereHas('registration', fn($q) => $q->where('id_schoolyear', $activeYear->id))
-            ->whereExists(function ($query) use ($teacherId, $activeYear) {
-                $query->selectRaw('1')
-                    ->from('schedules_students')
-                    ->join('schedules', 'schedules.id', '=', 'schedules_students.id_schedule')
-                    ->join('registrations', 'registrations.id_student', '=', 'schedules_students.id_student')
-                    ->whereColumn('registrations.id', 'registrations_subjects.id_registration')
-                    ->whereColumn('schedules.id_subject', 'registrations_subjects.id_subject')
-                    ->where('schedules.id_teacher', $teacherId)
-                    ->where('schedules.id_schoolyear', $activeYear->id)
-                    ->where('schedules.status', 'Aprovado');
+            ->where(function ($query) use ($teacherId, $activeYear) {
+                $query->whereHas('selectedSchedule', function ($scheduleQuery) use ($teacherId, $activeYear) {
+                    $scheduleQuery
+                        ->where('id_teacher', $teacherId)
+                        ->where('id_schoolyear', $activeYear->id)
+                        ->where('status', 'Aprovado')
+                        ->whereColumn('schedules.id_subject', 'registrations_subjects.id_subject');
+                })->orWhereExists(function ($scheduleQuery) use ($teacherId, $activeYear) {
+                    $scheduleQuery->selectRaw('1')
+                        ->from('schedules_students')
+                        ->join('schedules', 'schedules.id', '=', 'schedules_students.id_schedule')
+                        ->join('schedules_classes', 'schedules_classes.id_schedule', '=', 'schedules.id')
+                        ->join('registrations', 'registrations.id_student', '=', 'schedules_students.id_student')
+                        ->whereColumn('registrations.id', 'registrations_subjects.id_registration')
+                        ->whereColumn('registrations.id_class', 'schedules_classes.id_class')
+                        ->whereColumn('schedules.id_subject', 'registrations_subjects.id_subject')
+                        ->where('schedules.id_teacher', $teacherId)
+                        ->where('schedules.id_schoolyear', $activeYear->id)
+                        ->where('schedules.status', 'Aprovado');
+                });
             })
             ->with([
                 'subject',
                 'registration.student',  // ->number (ou process_number)
                 'registration.class',    // ->name
+                'selectedSchedule',
             ]);
     }
 
@@ -103,6 +114,16 @@ class TeacherStudentsResource extends Resource
             $studentId = $record->registration?->id_student;
 
             if ($teacherId && $classId && $subjectId && $studentId) {
+            $schedule = $record->selectedSchedule;
+
+                if ($schedule
+                    && $schedule->id_teacher === $teacherId
+                    && $schedule->id_subject === $subjectId
+                    && $schedule->status === 'Aprovado'
+                    && ! blank($schedule->shift)) {
+                    return (string) $schedule->shift;
+                }
+
                 $schedule = Schedule::query()
                     ->where('id_teacher', $teacherId)
                     ->where('id_subject', $subjectId)
@@ -243,8 +264,8 @@ class TeacherStudentsResource extends Resource
 
     /**
      * Resolve o texto do turno:
-     *  1) Procura Schedule do professor (disciplina+turma) contendo o nº do aluno.
-     *  2) Fallback: usa id_schedule do pivot ou campo textual (shift/turno/turn).
+     *  1) Usa o Schedule escolhido pelo aluno no pivot.
+     *  2) Fallback: usa o id_schedule ou campo textual do pivot.
      */
     protected static function resolveShift(RegistrationSubject $record): ?string
     {
@@ -253,8 +274,18 @@ class TeacherStudentsResource extends Resource
         $subjectId = $record->id_subject;
         $studentId = $record->registration?->id_student;
 
-        // 1) Schedule do professor (preferencial)
+        // 1) Horário escolhido pelo aluno no pivot
         if ($teacherId && $classId && $subjectId && $studentId) {
+            $schedule = $record->selectedSchedule;
+
+            if ($schedule
+                && $schedule->id_teacher === $teacherId
+                && $schedule->id_subject === $subjectId
+                && $schedule->status === 'Aprovado'
+                && ! blank($schedule->shift)) {
+                return (string) $schedule->shift;
+            }
+
             $schedule = Schedule::query()
                 ->where('id_teacher', $teacherId)
                 ->where('id_subject', $subjectId)

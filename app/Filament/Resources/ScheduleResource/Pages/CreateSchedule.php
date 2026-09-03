@@ -21,6 +21,8 @@ class CreateSchedule extends CreateRecord
 {
     protected static string $resource = ScheduleResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     use CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap, HourCounter, InteractsWithActions, ValidatesClassBuildings;
 
     protected $listeners = ['botaoSolicitarTrocaClicado' => 'onSolicitarTrocaClicado'];
@@ -93,8 +95,4 @@ class CreateSchedule extends CreateRecord
         ]);
     }
 
-    protected function getRedirectUrl(): string
-    {
-        return filament()->getUrl();
-    }
 }

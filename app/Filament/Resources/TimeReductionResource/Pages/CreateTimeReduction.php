@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTimeReduction extends CreateRecord
 {
     protected static string $resource = TimeReductionResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

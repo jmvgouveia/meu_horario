@@ -12,6 +12,8 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['password'] = Str::random(40);

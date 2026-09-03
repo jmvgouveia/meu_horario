@@ -16,6 +16,8 @@ class EditTeacher extends EditRecord
 {
     protected static string $resource = TeacherResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -69,7 +71,6 @@ class EditTeacher extends EditRecord
 
         $record->loadMissing(['positions', 'timeReductions']); // garante que relações estão atualizadas
         $record->updateHourCounterFromReductions($schoolYearId);
-
 
         return $record;
     }

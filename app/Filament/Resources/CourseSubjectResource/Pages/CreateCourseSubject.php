@@ -10,6 +10,8 @@ class CreateCourseSubject extends CreateRecord
 {
     protected static string $resource = CourseSubjectResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['id_schoolyear'] = CourseSubjectResource::activeSchoolYearId();

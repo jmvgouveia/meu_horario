@@ -165,7 +165,7 @@ class ScheduleStudentAssignmentTest extends TestCase
         ]);
     }
 
-    public function test_teacher_students_only_contains_students_assigned_to_the_teacher_schedule(): void
+    public function test_teacher_students_includes_selected_and_individual_schedule_students(): void
     {
         $data = $this->createScheduleFixture();
         $now = now();
@@ -183,6 +183,36 @@ class ScheduleStudentAssignmentTest extends TestCase
         $assignedRegistrationSubjectId = DB::table('registrations_subjects')->insertGetId([
             'id_registration' => $data['registration_id'],
             'id_subject' => $data['subject_id'],
+            'id_schedule' => $data['selected_schedule_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $individualRegistrationSubjectId = DB::table('registrations_subjects')->insertGetId([
+            'id_registration' => $data['registration_id'],
+            'id_subject' => $data['subject_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        $otherClassId = DB::table('classes')->insertGetId([
+            'name' => '1B',
+            'id_course' => $data['course_id'],
+            'year' => 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $otherClassRegistrationId = DB::table('registrations')->insertGetId([
+            'id_student' => $data['student_id'],
+            'id_course' => $data['course_id'],
+            'id_schoolyear' => $data['school_year_id'],
+            'id_class' => $otherClassId,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        $otherClassRegistrationSubjectId = DB::table('registrations_subjects')->insertGetId([
+            'id_registration' => $otherClassRegistrationId,
+            'id_subject' => $data['subject_id'],
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -192,6 +222,13 @@ class ScheduleStudentAssignmentTest extends TestCase
             'name' => 'Student Two',
             'birthdate' => '2010-02-01',
         ]))->id;
+
+        DB::table('schedules_students')->insert([
+            'id_schedule' => $data['selected_schedule_id'],
+            'id_student' => $data['student_id'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
         $otherRegistrationId = DB::table('registrations')->insertGetId([
             'id_student' => $otherStudentId,
             'id_course' => $data['course_id'],
@@ -207,18 +244,13 @@ class ScheduleStudentAssignmentTest extends TestCase
             'updated_at' => $now,
         ]);
 
-        DB::table('schedules_students')->insert([
-            'id_schedule' => $data['selected_schedule_id'],
-            'id_student' => $data['student_id'],
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
-
         $this->actingAs($user);
 
         $registrationSubjectIds = TeacherStudentsResource::getEloquentQuery()->pluck('id');
 
         $this->assertTrue($registrationSubjectIds->contains($assignedRegistrationSubjectId));
+        $this->assertTrue($registrationSubjectIds->contains($individualRegistrationSubjectId));
+        $this->assertFalse($registrationSubjectIds->contains($otherClassRegistrationSubjectId));
         $this->assertFalse($registrationSubjectIds->contains($otherRegistrationSubjectId));
     }
 

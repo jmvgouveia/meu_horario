@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateNationality extends CreateRecord
 {
     protected static string $resource = NationalityResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

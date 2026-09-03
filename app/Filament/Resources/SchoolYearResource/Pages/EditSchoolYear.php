@@ -12,6 +12,8 @@ class EditSchoolYear extends EditRecord
 {
     protected static string $resource = SchoolYearResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         /** @var SchoolYear $record */

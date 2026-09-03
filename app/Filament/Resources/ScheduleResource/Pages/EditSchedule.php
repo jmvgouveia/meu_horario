@@ -24,6 +24,8 @@ class EditSchedule extends EditRecord
 {
     protected static string $resource = ScheduleResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     public ?Schedule $conflictingSchedule = null;
 
     use CheckScheduleWindow, ChecksScheduleConflicts, HandlesScheduleSwap, HourCounter, ValidatesClassBuildings;
@@ -193,8 +195,4 @@ class EditSchedule extends EditRecord
         ];
     }
 
-    protected function getRedirectUrl(): string
-    {
-        return filament()->getUrl();
-    }
 }

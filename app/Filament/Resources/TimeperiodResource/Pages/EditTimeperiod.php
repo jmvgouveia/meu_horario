@@ -10,6 +10,8 @@ class EditTimeperiod extends EditRecord
 {
     protected static string $resource = TimeperiodResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [

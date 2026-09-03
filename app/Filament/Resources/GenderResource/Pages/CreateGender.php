@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateGender extends CreateRecord
 {
     protected static string $resource = GenderResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

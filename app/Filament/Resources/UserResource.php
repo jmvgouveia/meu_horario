@@ -14,11 +14,14 @@ use Filament\Resources\Resource;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
+
 
 
 
@@ -62,7 +65,7 @@ class UserResource extends Resource
                     ->multiple()
                     ->relationship('roles', 'name')
                     ->preload()
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false),
+                    ->visible(fn(): bool => auth()->user()?->isSuperAdmin() ?? false),
 
             ]);
     }
@@ -87,13 +90,19 @@ class UserResource extends Resource
                     ->iconColor('primary'),
                 TextColumn::make('mfa_status')
                     ->label('MFA')
-                    ->state(fn (User $record): string => $record->hasTwoFactorEnabled() ? 'Ativa' : 'Pendente')
+                    ->state(fn(User $record): string => $record->hasTwoFactorEnabled() ? 'Ativa' : 'Pendente')
                     ->badge()
-                    ->color(fn (string $state): string => $state === 'Ativa' ? 'success' : 'warning'),
+                    ->color(fn(string $state): string => $state === 'Ativa' ? 'success' : 'warning'),
                 TextColumn::make('mfa_grace_until')
                     ->label('Prazo MFA')
                     ->date('d/m/Y')
                     ->placeholder('Expirado'),
+
+                TextColumn::make('roles.name')
+                    ->label('Funções')
+                    ->sortable()
+                    ->toggleable()
+                    ->wrap(),
             ])
             ->filters([
                 //
@@ -106,7 +115,7 @@ class UserResource extends Resource
                 Action::make('renewMfaGrace')
                     ->label('Renovar prazo MFA')
                     ->icon('heroicon-o-clock')
-                    ->visible(fn (): bool => auth()->user()?->isSuperAdmin() ?? false)
+                    ->visible(fn(): bool => auth()->user()?->isSuperAdmin() ?? false)
                     ->requiresConfirmation()
                     ->action(function (User $record): void {
                         abort_unless(auth()->user()?->isSuperAdmin(), 403);
@@ -121,7 +130,7 @@ class UserResource extends Resource
                     ->label('Repor MFA')
                     ->icon('heroicon-o-shield-exclamation')
                     ->color('danger')
-                    ->visible(fn (User $record): bool => (auth()->user()?->isSuperAdmin() ?? false) && ! $record->is(auth()->user()))
+                    ->visible(fn(User $record): bool => (auth()->user()?->isSuperAdmin() ?? false) && ! $record->is(auth()->user()))
                     ->requiresConfirmation()
                     ->modalHeading('Repor autenticação multifator')
                     ->modalDescription('A autenticação multifator será desativada e todas as sessões deste utilizador serão terminadas.')
@@ -145,8 +154,10 @@ class UserResource extends Resource
                 Action::make('activationCode')
                     ->label('Gerar código de ativação')
                     ->icon('heroicon-o-key')
-                    ->visible(fn (User $record): bool => ! $record->is_active)
+                    ->visible(fn(User $record): bool => static::canManageActivation() && ! $record->is_active)
                     ->action(function (User $record): void {
+                        static::authorizeActivationManagement();
+
                         $token = app(UserActivationService::class)->issue($record);
                         $activationUrl = route('activation', ['token' => $token]);
 
@@ -160,8 +171,10 @@ class UserResource extends Resource
                 Action::make('sendActivation')
                     ->label('Reenviar convite')
                     ->icon('heroicon-o-paper-airplane')
-                    ->visible(fn (User $record): bool => ! $record->is_active && app(UserActivationService::class)->hasDeliverableEmail($record))
+                    ->visible(fn(User $record): bool => static::canManageActivation() && ! $record->is_active && app(UserActivationService::class)->hasDeliverableEmail($record))
                     ->action(function (User $record): void {
+                        static::authorizeActivationManagement();
+
                         $token = app(UserActivationService::class)->issue($record);
                         $record->notify(new UserActivationNotification($record, $token));
 
@@ -177,6 +190,16 @@ class UserResource extends Resource
                         ->label('Exportar códigos de ativação')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(function ($records): StreamedResponse {
+                            static::authorizeActivationManagement();
+
+                            $safeCsvValue = static function (mixed $value): string {
+                                $value = (string) $value;
+
+                                return preg_match('/^[=+\-@]/', $value) === 1
+                                    ? "'{$value}"
+                                    : $value;
+                            };
+
                             $rows = [];
 
                             foreach ($records as $record) {
@@ -185,13 +208,13 @@ class UserResource extends Resource
                                 }
 
                                 $token = app(UserActivationService::class)->issue($record);
-                                $rows[] = [
+                                $rows[] = array_map($safeCsvValue, [
                                     $record->name,
                                     $record->email,
                                     $token,
                                     route('activation', ['token' => $token]),
                                     now()->addHours(UserActivationService::TOKEN_TTL_HOURS)->toDateTimeString(),
-                                ];
+                                ]);
                             }
 
                             return response()->streamDownload(function () use ($rows): void {
@@ -213,6 +236,17 @@ class UserResource extends Resource
         return [
             //
         ];
+    }
+
+    protected static function canManageActivation(): bool
+    {
+        return auth()->user()?->isSuperAdmin()
+            || auth()->user()?->checkPermissionTo('manage user activation');
+    }
+
+    protected static function authorizeActivationManagement(): void
+    {
+        abort_unless(static::canManageActivation(), 403);
     }
 
     public static function getPages(): array

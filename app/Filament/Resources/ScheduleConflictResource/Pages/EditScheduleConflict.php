@@ -28,6 +28,8 @@ class EditScheduleConflict extends EditRecord
     use HourCounter;
     protected static string $resource = ScheduleConflictResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
 
@@ -41,7 +43,6 @@ class EditScheduleConflict extends EditRecord
 
         return $data;
     }
-
 
     protected function getFormActions(): array
     {
@@ -121,8 +122,6 @@ class EditScheduleConflict extends EditRecord
                         // $this->record->scheduleNew?->update([
                         //     'status' => 'Aprovado DP',
                         // ]);
-
-
 
                         $salaAntiga = $this->record->scheduleConflict?->room?->name ?? 'desconhecida';
                         $salaNova = Room::find($data['id_room_novo'])?->name ?? 'desconhecida';
@@ -207,13 +206,11 @@ class EditScheduleConflict extends EditRecord
                         //     'status' => 'Recusado DP',
                         // ]);
 
-
                         DBHelper::updateScheduleData(
                             $this->record->scheduleConflict->id,
                             ['status' => 'Aprovado'],
                             MSGErro::ERRO_ATUALIZAR_SCHEDULE
                         );
-
 
                         // $this->record->scheduleConflict?->update([
                         //     'status' => 'Aprovado',
@@ -311,7 +308,6 @@ class EditScheduleConflict extends EditRecord
                                 );
                                 //$this->record->scheduleConflict?->update(['status' => 'Aprovado']);
 
-
                                 break;
 
                             case 'Escalado':
@@ -323,7 +319,6 @@ class EditScheduleConflict extends EditRecord
                                 );
                                 // $this->record->update(['status' => 'Eliminado']);
 
-
                                 if (UserHelper::currentUser()?->id === $this->record->scheduleConflict?->teacher?->user?->id) {
 
                                     DBHelper::updateScheduleData(
@@ -332,7 +327,6 @@ class EditScheduleConflict extends EditRecord
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
 
-
                                     //$this->record->scheduleConflict?->update(['status' => 'Eliminado',]);
 
                                     $this->hoursCounterUpdate($this->record->scheduleConflict, true);
@@ -340,17 +334,14 @@ class EditScheduleConflict extends EditRecord
                                     $this->hoursCounterUpdate($this->record->scheduleNew, false);
                                 } else {
 
-
                                     DBHelper::updateScheduleData(
                                         $this->record->scheduleNew->id,
                                         ['status' => 'Eliminado'],
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
 
-
                                     //$this->record->scheduleNew?->update(['status' => 'Eliminado']);
                                 }
-
 
                                 if (UserHelper::currentUser()?->id === $this->record->scheduleNew?->teacher?->user?->id) {
 
@@ -371,20 +362,17 @@ class EditScheduleConflict extends EditRecord
                                     //  $this->record->scheduleNew?->update(['status' => 'Eliminado']);
                                 } else {
 
-
                                     DBHelper::updateScheduleData(
                                         $this->record->scheduleConflict->id,
                                         ['status' => 'Eliminado'],
                                         MSGErro::ERRO_ELIMINAR_SCHEDULE
                                     );
 
-
                                     DBHelper::updateScheduleData(
                                         $this->record->scheduleNew->id,
                                         ['status' => 'Aprovado'],
                                         MSGErro::ERRO_APROVAR_SCHEDULE
                                     );
-
 
                                     // $this->record->scheduleConflict?->update(['status' => 'Eliminado']);
 
@@ -400,7 +388,6 @@ class EditScheduleConflict extends EditRecord
                                     ->send();
                                 throw new \Exception('Estado não tratado');
                         }
-
 
                         Notification::make()
                             ->title("Horário Eliminado")
@@ -423,7 +410,6 @@ class EditScheduleConflict extends EditRecord
                         ->send();
                 }
             });
-
 
         return $actions;
     }
@@ -451,9 +437,5 @@ class EditScheduleConflict extends EditRecord
             ->get()
             ->pluck('name', 'id')
             ->toArray();
-    }
-    protected function getRedirectUrl(): string
-    {
-        return filament()->getUrl();
     }
 }

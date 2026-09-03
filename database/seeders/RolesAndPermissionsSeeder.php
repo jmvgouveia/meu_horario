@@ -27,6 +27,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view ScheduleRequest',
             'view-any ScheduleRequest',
             'update ScheduleRequest',
+            'manage user activation',
         ];
 
         $secretariaPermissions = [
@@ -76,6 +77,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'create_user',
                 'update_user',
                 'delete_user',
+                'manage user activation',
             ],
             'Aluno' => [],
             'Secretaria' => $secretariaPermissions,

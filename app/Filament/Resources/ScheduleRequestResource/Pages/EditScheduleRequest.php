@@ -19,11 +19,11 @@ use App\Helpers\DatabaseHelper as DBHelper;
 use App\Helpers\MensagensErro as MSGErro;
 use App\Helpers\ScheduleRequestQueueHelper;
 
-
-
 class EditScheduleRequest extends EditRecord
 {
     protected static string $resource = ScheduleRequestResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 
     use CheckScheduleWindow, HourCounter;
 
@@ -78,7 +78,6 @@ class EditScheduleRequest extends EditRecord
 
                 ->action(function (array $data) use ($isGestor) {
 
-
                     if ($this->record->status === 'Eliminado') {
 
                         Notification::make()
@@ -92,7 +91,6 @@ class EditScheduleRequest extends EditRecord
 
                     DB::transaction(function () use ($data, $isGestor) {
                         $this->validateScheduleWindow();
-
 
                         // $this->record->update([
                         //     'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
@@ -134,7 +132,6 @@ class EditScheduleRequest extends EditRecord
                             ],
                             MSGErro::ERRO_APROVAR_SCHEDULE
                         );
-
 
                         // $this->record->scheduleNew?->update(['status' => 'Aprovado']);
                         //  DBHelper::updateScheduleRequestStatus($this->record->scheduleNew?->id, true, 'Aprovado', MSGErro::ERRO_APROVAR_SCHEDULE);
@@ -204,7 +201,6 @@ class EditScheduleRequest extends EditRecord
                     DB::transaction(function () use ($data, $isGestor) {
                         $this->validateScheduleWindow();
 
-
                         DBHelper::updateScheduleRequestData(
                             $this->record->id,
                             [
@@ -214,7 +210,6 @@ class EditScheduleRequest extends EditRecord
                             ],
                             MSGErro::ERRO_APROVAR_SCHEDULE
                         );
-
 
                         // $this->record->update([
                         //     'status' => $isGestor ? 'Recusado DP' : 'Recusado',
@@ -283,7 +278,6 @@ class EditScheduleRequest extends EditRecord
                     DB::transaction(function () use ($data) {
                         $this->validateScheduleWindow();
 
-
                         DBHelper::updateScheduleRequestData(
                             $this->record->id,
                             [
@@ -293,7 +287,6 @@ class EditScheduleRequest extends EditRecord
                             ],
                             MSGErro::ERRO_APROVAR_SCHEDULE
                         );
-
 
                         // $this->record->update([
                         //     'status' => 'Escalado',
@@ -379,7 +372,6 @@ class EditScheduleRequest extends EditRecord
                                         $this->hoursCounterUpdate($deletedSchedule, true);
                                     }
 
-
                                     DBHelper::updateScheduleData(
                                         $deletedSchedule->id,
                                         [
@@ -424,7 +416,6 @@ class EditScheduleRequest extends EditRecord
 
                                     // $deletedSchedule->update(['status' => 'Eliminado']);
 
-
                                     if ($scheduleNew->status !== 'Aprovado') {
                                         // $scheduleNew->update([
                                         //     'status' => $isGestor ? 'Aprovado DP' : 'Aprovado',
@@ -440,7 +431,6 @@ class EditScheduleRequest extends EditRecord
 
                                         $this->hoursCounterUpdate($scheduleNew, false);
                                     }
-
 
                                     DBHelper::updateScheduleRequestData(
                                         $scheduleRequest->id,
@@ -510,7 +500,6 @@ class EditScheduleRequest extends EditRecord
                                         $this->hoursCounterUpdate($deletedSchedule, true);
                                     }
 
-
                                     DBHelper::updateScheduleData(
                                         $deletedSchedule->id,
                                         [
@@ -538,8 +527,6 @@ class EditScheduleRequest extends EditRecord
                                         $this->hoursCounterUpdate($deletedSchedule, true);
                                     }
 
-
-
                                     DBHelper::updateScheduleData(
                                         $deletedSchedule->id,
                                         ['status' => 'Eliminado'],
@@ -557,7 +544,6 @@ class EditScheduleRequest extends EditRecord
                                         ['status' => 'Aprovado'],
                                         'Erro ao reativar horário em conflito (Aprovado DP - requester)'
                                     );
-
 
                                     // $deletedSchedule->update(['status' => 'Eliminado']);
 
@@ -579,7 +565,6 @@ class EditScheduleRequest extends EditRecord
                                         $this->hoursCounterUpdate($deletedSchedule, true);
                                     }
 
-
                                     DBHelper::updateScheduleData(
                                         $deletedSchedule->id,
                                         ['status' => 'Eliminado'],
@@ -587,7 +572,6 @@ class EditScheduleRequest extends EditRecord
                                     );
 
                                     //--------NEW
-
 
                                     //  $deletedSchedule->update(['status' => 'Eliminado']);
 
@@ -599,13 +583,11 @@ class EditScheduleRequest extends EditRecord
                                             'Erro ao aprovar novo horário (Aprovado DP - conflito)'
                                         );
 
-
                                         // $scheduleNew->update([
                                         //     'status' => 'Aprovado',
                                         // ]);
                                         // $this->hoursCounterUpdate($scheduleNew, false); --> VALIDAR CONTADOR DE HORAS
                                     }
-
 
                                     DBHelper::updateScheduleRequestData(
                                         $scheduleRequest->id,
@@ -616,7 +598,6 @@ class EditScheduleRequest extends EditRecord
                                     // $scheduleRequest->update(['status' => 'Eliminado']);
 
                                     //$scheduleNew->update(['status' => 'Aprovado']);
-
 
                                     Notification::make()
                                         ->title('Troca aprovada')
@@ -644,10 +625,8 @@ class EditScheduleRequest extends EditRecord
                 }
             });
 
-
         return $actions;
     }
-
 
     protected function getAvailableRooms(): array
     {
@@ -678,9 +657,5 @@ class EditScheduleRequest extends EditRecord
             'dayName' => $conflict?->weekday?->weekday ?? 'desconhecido',
             'timePeriod' => $conflict?->timeperiod?->description ?? 'desconhecido',
         ];
-    }
-    protected function getRedirectUrl(): string
-    {
-        return filament()->getUrl();
     }
 }

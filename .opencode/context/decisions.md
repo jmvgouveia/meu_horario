@@ -37,7 +37,31 @@ DEC-XXX, when applicable.
 
 ## Active Decisions
 
-No decisions recorded yet.
+### DEC-001 — Adiar distinção de inscrições duplicadas no horário
+
+Date: 2026-09-03
+
+Status: Active
+
+Decision:
+
+Para o lançamento em produção, aceitar temporariamente a limitação de o mesmo
+aluno não poder ser distinguido entre duas inscrições da mesma disciplina em
+turmas/cursos diferentes no mesmo horário.
+
+Reason:
+
+O lançamento está previsto para os próximos dias e a alteração correta exige
+uma mudança estrutural na associação entre horário e inscrição.
+
+Consequences:
+
+- Não adicionar agora `id_registration` a `schedules_students`.
+- Alunos diferentes em turmas diferentes continuam a ser suportados.
+- A distinção por inscrição será tratada numa fase posterior, com migration,
+  atualização dos fluxos de gravação e testes.
+
+---
 
 ---
 

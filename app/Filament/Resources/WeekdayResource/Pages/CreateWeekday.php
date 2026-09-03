@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateWeekday extends CreateRecord
 {
     protected static string $resource = WeekdayResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

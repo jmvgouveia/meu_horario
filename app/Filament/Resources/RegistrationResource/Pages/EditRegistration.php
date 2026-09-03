@@ -10,6 +10,8 @@ class EditRegistration extends EditRecord
 {
     protected static string $resource = RegistrationResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['id_schoolyear'] = RegistrationResource::activeSchoolYearId();

@@ -10,6 +10,8 @@ class EditRegistrationSubject extends EditRecord
 {
     protected static string $resource = RegistrationSubjectResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [

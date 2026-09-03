@@ -10,6 +10,8 @@ class EditTimeReduction extends EditRecord
 {
     protected static string $resource = TimeReductionResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [

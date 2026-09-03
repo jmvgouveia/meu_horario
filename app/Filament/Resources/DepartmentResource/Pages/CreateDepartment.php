@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateDepartment extends CreateRecord
 {
     protected static string $resource = DepartmentResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

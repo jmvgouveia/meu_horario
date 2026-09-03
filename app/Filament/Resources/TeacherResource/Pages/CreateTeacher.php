@@ -18,6 +18,8 @@ class CreateTeacher extends CreateRecord
 {
     protected static string $resource = TeacherResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $userData = $data['user'];

@@ -10,6 +10,8 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [

@@ -65,18 +65,12 @@ class SchoolYearResource extends Resource
                             ->reactive()
                             ->afterStateUpdated(
                                 function ($state, callable $set, callable $get) {
-                                    $startYear = Carbon::parse($state)->year;
-                                    $end = $get('end_date');
+                                    $end = $get('end_date_registration');
 
-                                    if ($end) {
-                                        $endYear = Carbon::parse($end)->year;
-
-                                        if ($startYear === $endYear) {
-
-                                            throw ValidationException::withMessages([
-                                                'end_date' => 'As datas devem estar em anos diferentes.',
-                                            ]);
-                                        }
+                                    if ($end && Carbon::parse($state)->gt(Carbon::parse($end))) {
+                                        throw ValidationException::withMessages([
+                                            'end_date_registration' => 'A data de início deve ser anterior ou igual à data de fim.',
+                                        ]);
                                     }
                                 }
                             ),
@@ -86,18 +80,12 @@ class SchoolYearResource extends Resource
                             ->reactive()
                             ->afterStateUpdated(
                                 function ($state, callable $set, callable $get) {
-                                    $endYear = Carbon::parse($state)->year;
-                                    $start = $get('start_date');
+                                    $start = $get('start_date_registration');
 
-                                    if ($start) {
-                                        $startYear = Carbon::parse($start)->year;
-
-                                        if ($startYear === $endYear) {
-
-                                            throw ValidationException::withMessages([
-                                                'end_date' => 'As datas devem estar em anos diferentes.',
-                                            ]);
-                                        }
+                                    if ($start && Carbon::parse($state)->lt(Carbon::parse($start))) {
+                                        throw ValidationException::withMessages([
+                                            'end_date_registration' => 'A data de fim deve ser posterior ou igual à data de início.',
+                                        ]);
                                     }
                                 }
                             ),

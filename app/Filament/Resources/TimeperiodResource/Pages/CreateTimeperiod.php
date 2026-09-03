@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTimeperiod extends CreateRecord
 {
     protected static string $resource = TimeperiodResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

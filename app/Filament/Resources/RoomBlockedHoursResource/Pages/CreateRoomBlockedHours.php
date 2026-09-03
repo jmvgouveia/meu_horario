@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateRoomBlockedHours extends CreateRecord
 {
     protected static string $resource = RoomBlockedHoursResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

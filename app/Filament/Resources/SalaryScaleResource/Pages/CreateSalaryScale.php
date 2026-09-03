@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateSalaryScale extends CreateRecord
 {
     protected static string $resource = SalaryScaleResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

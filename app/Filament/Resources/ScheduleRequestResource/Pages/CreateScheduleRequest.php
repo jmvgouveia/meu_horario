@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateScheduleRequest extends CreateRecord
 {
     protected static string $resource = ScheduleRequestResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

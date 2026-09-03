@@ -53,11 +53,11 @@ class SchoolYear extends Model
     {
         return $this->hasManyThrough(
             Student::class,
-            CourseSubject::class,
+            Registration::class,
             'id_schoolyear',
             'id',
             'id',
-            'id_subject'
+            'id_student'
         )->distinct();
     }
 

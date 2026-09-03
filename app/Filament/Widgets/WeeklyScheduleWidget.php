@@ -53,7 +53,7 @@ class WeeklyScheduleWidget extends Widget
         }
 
         // Horários do professor no ano letivo ativo
-        $schedules = Schedule::with(['room', 'weekday', 'timeperiod', 'subject', 'classes'])
+        $schedules = Schedule::with(['room', 'weekday', 'timeperiod', 'subject', 'classes', 'students'])
             ->where('id_teacher', $teacher->id)
             ->where('id_schoolyear', $anoLetivoAtivo->id)
             ->whereNotIn('status', ['Recusado DP', 'Eliminado'])

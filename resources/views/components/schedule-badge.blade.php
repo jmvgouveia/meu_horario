@@ -8,12 +8,24 @@ default => '',
 
 $info = ['Sala: ' . ($schedule->room->name ?? '—')];
 
+$displayShift = $schedule->shift;
+
+if (blank($displayShift)) {
+    $studentNumbers = $schedule->relationLoaded('students')
+        ? $schedule->students->pluck('number')
+        : $schedule->students()->pluck('students.number');
+
+    if ($studentNumbers->isNotEmpty()) {
+        $displayShift = $studentNumbers->sort()->implode(', ');
+    }
+}
+
 if (!empty($schedule->classes)) {
 $info[] = collect($schedule->classes)->pluck('name')->join(', ');
 }
 
-if (!empty($schedule->shift)) {
-$info[] = 'Turno: ' . $schedule->shift;
+if (!empty($displayShift)) {
+    $info[] = 'Turno: ' . $displayShift;
 }
 
 $info[] = 'ID: ' . $schedule->id;

@@ -11,6 +11,8 @@ class CreateSchoolYear extends CreateRecord
 {
     protected static string $resource = SchoolYearResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function handleRecordCreation(array $data): Model
     {
         return SchoolYear::createWithExclusiveActive($data);

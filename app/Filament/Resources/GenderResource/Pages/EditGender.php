@@ -10,6 +10,8 @@ class EditGender extends EditRecord
 {
     protected static string $resource = GenderResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [

@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTeacherHourCounter extends CreateRecord
 {
     protected static string $resource = TeacherHourCounterResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

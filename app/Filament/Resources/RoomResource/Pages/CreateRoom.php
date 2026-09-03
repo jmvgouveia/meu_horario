@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateRoom extends CreateRecord
 {
     protected static string $resource = RoomResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

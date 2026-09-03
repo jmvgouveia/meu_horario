@@ -335,14 +335,9 @@ class ScheduleResource extends Resource
                                     ->pluck('name', 'id');
                             }),
 
-                        Grid::make(2)
-                            ->schema([
-                                Toggle::make('filtrar_por_turma')
-                                    ->label('Filtrar alunos pelas turmas selecionadas')
-                                    ->default(true)
-                                    ->reactive(),
-
-                                Toggle::make('filter_last_year_students')
+                         Grid::make(1)
+                             ->schema([
+                                 Toggle::make('filter_last_year_students')
                                     ->label('Mostrar os meus alunos (último ano letivo)')
                                     ->default(true)
                                     ->reactive(),
@@ -362,6 +357,13 @@ class ScheduleResource extends Resource
 
                                     if (! empty($studentIds)) {
                                         $set('students', $studentIds);
+
+                                        if (blank($record->shift)) {
+                                            $set('shift', Student::whereIn('id', $studentIds)
+                                                ->pluck('number')
+                                                ->sort()
+                                                ->implode(', '));
+                                        }
                                     } else {
                                         $set('students', []);
                                     }
@@ -369,7 +371,7 @@ class ScheduleResource extends Resource
                                     $set('students', []);
                                 }
                             })
-                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            ->afterStateUpdated(function ($state, callable $set) {
                                 $studentIds = is_array($state) ? $state : [];
 
                                 if (count($studentIds) > 0) {
@@ -380,34 +382,25 @@ class ScheduleResource extends Resource
 
                                     $set('shift', $numeros);
 
-                                    if (! $get('filtrar_por_turma')) {
-                                        $schoolYear = SchoolYear::where('active', true)->first();
-                                        $classIds = Registration::whereIn('id_student', $studentIds)
-                                            ->where('id_schoolyear', $schoolYear->id)
-                                            ->pluck('id_class')
-                                            ->unique()
-                                            ->filter()
-                                            ->values()
-                                            ->toArray();
-
-                                        $set('id_classes', $classIds);
-                                    }
-                                } else {
+                                 } else {
                                     $set('shift', null);
                                 }
                             })
                             ->columns(4)
-                            ->options(function (callable $get) {
-                                $subjectId = $get('id_subject');
-                                $schoolYear = SchoolYear::where('active', true)->first();
-                                $classIds = $get('id_classes') ?? [];
-                                $filtrarPorTurma = $get('filtrar_por_turma');
-                                $filtrarUltimoAno = $get('filter_last_year_students');
+                             ->options(function (callable $get, ?Schedule $record) {
+                                 $subjectId = $get('id_subject');
+                                 $schoolYear = SchoolYear::where('active', true)->first();
+                                 $classIds = $get('id_classes') ?? [];
+                                 $filtrarUltimoAno = $get('filter_last_year_students');
                                 $filtroNome = trim($get('filter_student_name'));
 
-                                if (! $subjectId || ! $schoolYear) {
-                                    return [];
-                                }
+                                 if (! $subjectId || ! $schoolYear) {
+                                     return [];
+                                 }
+
+                                 if (empty($classIds) && $record?->exists) {
+                                     $classIds = $record->classes()->pluck('classes.id')->all();
+                                 }
 
                                 $registrationIds = DB::table('registrations_subjects')
                                     ->where('id_subject', $subjectId)
@@ -417,18 +410,22 @@ class ScheduleResource extends Resource
                                     return [];
                                 }
 
-                                $query = Registration::with(['student', 'class'])
-                                    ->whereIn('id', $registrationIds)
-                                    ->where('id_schoolyear', $schoolYear->id);
+                                 $query = Registration::with(['student', 'class'])
+                                     ->whereIn('id', $registrationIds)
+                                     ->where('id_schoolyear', $schoolYear->id);
 
-                                if ($filtrarPorTurma && ! empty($classIds)) {
-                                    $query->whereIn('id_class', $classIds);
-                                }
+                                 if (empty($classIds)) {
+                                     return [];
+                                 }
+
+                                 $query->whereIn('id_class', $classIds);
 
                                 if ($filtrarUltimoAno) {
-                                    $professorId = Auth::user()?->teacher?->id;
-                                    $anoAnterior = $schoolYear->id - 1;
-                                    $anoLetivoAnterior = SchoolYear::find($anoAnterior);
+                                     $professorId = Auth::user()?->teacher?->id;
+                                     $anoLetivoAnterior = SchoolYear::query()
+                                         ->where('start_date', '<', $schoolYear->start_date)
+                                         ->orderByDesc('start_date')
+                                         ->first();
 
                                     if (! $anoLetivoAnterior) {
                                         return [];
@@ -458,18 +455,19 @@ class ScheduleResource extends Resource
                                     });
                                 }
 
-                                return $query->get()->mapWithKeys(function ($registration) {
-                                    $student = $registration->student;
-                                    $turma = $registration->class?->name ?? '—';
-                                    if (! $student) {
-                                        return [];
-                                    }
+                                 return $query->orderBy('id_class')->orderBy('id')->get()
+                                     ->filter(fn ($registration) => $registration->student)
+                                     ->groupBy('id_student')
+                                     ->mapWithKeys(function ($registrations, $studentId) {
+                                         $registration = $registrations->first();
+                                         $student = $registration->student;
+                                         $class = $registration->class?->name ?? '—';
 
-                                    return [
-                                        $registration->id_student => "{$student->number} - {$student->name} - {$turma}",
-                                    ];
-                                });
-                            }),
+                                         return [
+                                             $studentId => "{$student->number} - {$student->name} - {$class}",
+                                         ];
+                                     });
+                             }),
 
                         //     Section::make('Turno')
                         //         ->collapsible()

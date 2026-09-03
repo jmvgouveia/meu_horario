@@ -10,6 +10,8 @@ class EditTeacherHourCounter extends EditRecord
 {
     protected static string $resource = TeacherHourCounterResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [

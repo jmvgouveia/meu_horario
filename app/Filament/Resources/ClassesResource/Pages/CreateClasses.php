@@ -9,4 +9,6 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateClasses extends CreateRecord
 {
     protected static string $resource = ClassesResource::class;
+
+    use \App\Filament\Resources\Concerns\RedirectsToList;
 }

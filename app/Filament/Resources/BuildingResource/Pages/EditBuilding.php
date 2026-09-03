@@ -10,6 +10,8 @@ class EditBuilding extends EditRecord
 {
     protected static string $resource = BuildingResource::class;
 
+    use \App\Filament\Resources\Concerns\RedirectsToList;
+
     protected function getHeaderActions(): array
     {
         return [
