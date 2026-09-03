@@ -129,7 +129,7 @@ class HorarioSobreposto extends Page
     {
         return [
             'Coordenador de Departamento',
-            'Coordenador Departamento Curricular (10)',
+            'Coordenador de Departamento Curricular - Até 10 docentes',
             'Coordenador Departamento Curricular (20)',
             'Coordenador Departamento Curricular (30)',
             'Coordenador Departamento Curricular (+31)',

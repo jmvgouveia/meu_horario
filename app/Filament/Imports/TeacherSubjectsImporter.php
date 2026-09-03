@@ -4,6 +4,7 @@ namespace App\Filament\Imports;
 
 use App\Models\TeacherSubject;
 use App\Models\SchoolYear;
+use App\Models\Teacher;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -18,15 +19,18 @@ class TeacherSubjectsImporter extends Importer
         return [
 
             ImportColumn::make('id_teacher')
-                ->label('Descrição')
-                ->rules(['required', 'integer', 'exists:teachers,id']),
+                ->label('número de processo do professor')
+                ->guess(['Docente', 'Professor', 'id_professor'])
+                ->rules(['required', 'integer', 'exists:teachers,number']),
 
             ImportColumn::make('id_subject')
-                ->label('Descrição')
+                ->label('id_disciplina')
+                ->guess(['Disciplina', 'id_disciplina', 'id_subjects'])
                 ->rules(['required', 'integer', 'exists:subjects,id']),
 
             ImportColumn::make('id_schoolyear')
-                ->label('Descrição')
+                ->label('id_ano_letivo')
+                ->guess(['anoletivo', 'Ano Letivo', 'id_ano_letivo'])
                 ->rules(['nullable', 'integer', 'exists:schoolyears,id']),
 
 
@@ -42,7 +46,10 @@ class TeacherSubjectsImporter extends Importer
 
     protected function beforeFill(): void
     {
-        $this->data['id_teacher'] = trim($this->data['id_teacher'] ?? '');
+        $teacherNumber = trim((string) ($this->data['id_teacher'] ?? ''));
+        $this->data['id_teacher'] = Teacher::query()
+            ->where('number', $teacherNumber)
+            ->value('id');
         $this->data['id_subject'] = trim($this->data['id_subject'] ?? '');
         $this->data['id_schoolyear'] = SchoolYear::query()->where('active', true)->value('id');
     }

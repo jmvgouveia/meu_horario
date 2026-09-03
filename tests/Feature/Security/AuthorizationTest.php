@@ -99,6 +99,7 @@ class AuthorizationTest extends TestCase
         $policy = new SchedulePolicy;
 
         $this->assertTrue($policy->view($user, $ownSchedule));
+        $this->assertTrue($policy->create($user));
         $this->assertTrue($policy->update($user, $ownSchedule));
         $this->assertFalse($policy->view($user, $otherSchedule));
         $this->assertFalse($policy->update($user, $otherSchedule));
@@ -106,6 +107,19 @@ class AuthorizationTest extends TestCase
         $this->assertFalse($policy->deleteAny($user));
         $this->assertFalse($policy->restoreAny($user));
         $this->assertFalse($policy->forceDeleteAny($user));
+    }
+
+    public function test_professor_can_access_schedule_creation(): void
+    {
+        $user = User::factory()->create(['mfa_grace_until' => now()->addDay()]);
+        $user->assignRole(Role::findOrCreate('Professor'));
+
+        $this->actingAs($user);
+
+        $this->assertTrue(ScheduleResource::canCreate());
+
+        $this->get('/maestro/schedules/create?weekday=2&timeperiod=5')
+            ->assertOk();
     }
 
     public function test_end_user_roles_cannot_turn_explicit_permissions_into_global_access(): void

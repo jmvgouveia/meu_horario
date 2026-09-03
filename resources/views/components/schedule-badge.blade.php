@@ -49,14 +49,19 @@ $tooltip = 'Troca escalada';
 $link = route('filament.admin.resources.schedule-conflicts.edit', $escalados[$schedule->id]->id);
 }
 
-$firstRequest = $schedule->requests()
+$firstRequest = \App\Models\ScheduleRequest::query()
+->where(function ($query) use ($schedule) {
+    $query->where('id_schedule', $schedule->id)
+        ->orWhere('id_new_schedule', $schedule->id);
+})
 ->with('scheduleConflict.teacher.user')
 ->whereIn('status', ['Pendente', 'Escalado', 'Aprovado DP'])
 ->orderBy('created_at')
 ->first();
 
 if ($firstRequest && $firstRequest->status === 'Pendente') {
-if ($authId === $firstRequest->scheduleConflict?->teacher?->id) {
+if ($authId === $firstRequest->scheduleConflict?->teacher?->id
+    || $authId === $firstRequest->id_teacher_requester) {
 $hasNotification = true;
 $notifLetter = 'T';
 $tooltip = 'Pedido pendente';

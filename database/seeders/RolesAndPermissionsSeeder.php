@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
-use Filament\Facades\Filament;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -20,6 +19,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'aprovar trocas',
             'ver relatórios',
             'view teacher students',
+            'view Schedule',
+            'view-any Schedule',
+            'create Schedule',
+            'view TeacherSubject',
+            'view-any TeacherSubject',
+            'view ScheduleRequest',
+            'view-any ScheduleRequest',
+            'update ScheduleRequest',
         ];
 
         $secretariaPermissions = [
@@ -28,23 +35,34 @@ class RolesAndPermissionsSeeder extends Seeder
             'view CourseSubject', 'view-any CourseSubject', 'create CourseSubject', 'update CourseSubject', 'delete CourseSubject', 'delete-any CourseSubject',
         ];
 
-        foreach (array_merge($customPermissions, $secretariaPermissions) as $perm) {
-            Permission::firstOrCreate(['name' => $perm], ['guard_name' => 'web']);
-        }
-
-        // ⚙️ Gerar permissões automáticas a partir dos Filament Resources
-        foreach (Filament::getResources() as $resource) {
-            foreach ($resource::getPermissions() as $permission) {
-                Permission::firstOrCreate(['name' => $permission]);
+        $resourcePermissions = [];
+        foreach ([
+            'Building', 'Classes', 'ContratualRelationship', 'Course', 'CourseSubject',
+            'Department', 'Gender', 'Nationality', 'Permission', 'Position',
+            'ProfessionalRelationship', 'Qualification', 'Registration', 'Role',
+            'Room', 'RoomBlockedHours', 'SalaryScale', 'Schedule', 'ScheduleRequest',
+            'SchoolYear', 'Student', 'Subject', 'Teacher', 'TeacherHourCounter',
+            'TeacherSubject', 'TimeReduction', 'Timeperiod', 'User', 'Weekday',
+        ] as $model) {
+            foreach (['view', 'view-any', 'create', 'update', 'delete', 'delete-any', 'restore', 'restore-any', 'replicate', 'reorder', 'force-delete', 'force-delete-any'] as $ability) {
+                $resourcePermissions[] = "{$ability} {$model}";
             }
         }
 
         // 🧱 Criar roles e associar permissões
         $roles = [
-            'Super Admin' => Permission::all()->pluck('name')->toArray(),
+            'Super Admin' => [],
             'Professor' => [
                 'view_schedule',
                 'create_schedule',
+                'create Schedule',
+                'view Schedule',
+                'view-any Schedule',
+                'view TeacherSubject',
+                'view-any TeacherSubject',
+                'view ScheduleRequest',
+                'view-any ScheduleRequest',
+                'update ScheduleRequest',
                 'aprovar trocas',
                 'view teacher students',
             ],
@@ -62,6 +80,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'Aluno' => [],
             'Secretaria' => $secretariaPermissions,
         ];
+
+        foreach (array_unique(array_merge($resourcePermissions, $customPermissions, ...array_values($roles))) as $permission) {
+            Permission::firstOrCreate(['name' => $permission], ['guard_name' => 'web']);
+        }
+
+        $roles['Super Admin'] = Permission::query()->pluck('name')->all();
 
         foreach ($roles as $role => $permissions) {
             $roleModel = Role::firstOrCreate(['name' => $role]);

@@ -66,7 +66,9 @@ class WeeklyScheduleWidget extends Widget
         ")
             ->get();
 
-        $weekdays = Weekday::orderBy('id')->pluck('weekday')->toArray();
+        // Keep the database IDs as the array keys because the calendar uses them
+        // for both schedule lookup and the create URL.
+        $weekdays = Weekday::orderBy('id')->pluck('weekday', 'id')->toArray();
 
         $timePeriods = Timeperiod::orderBy('start_time')->get()->values(); //
 
@@ -184,13 +186,19 @@ class WeeklyScheduleWidget extends Widget
         //    $timePeriodsGrouped = array_filter($timePeriodsGrouped, fn($group) => count($group) === 2);
 
         $recusados = ScheduleRequest::where('status', 'Recusado')
-            ->where('id_teacher', $teacher->id)
+            ->where(function ($query) use ($teacher) {
+                $query->where('id_teacher', $teacher->id)
+                    ->orWhere('id_teacher_requester', $teacher->id);
+            })
             ->whereHas('scheduleConflict', fn ($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->keyBy('id_new_schedule');
 
         $escalados = ScheduleRequest::where('status', 'Escalado')
-            ->where('id_teacher', $teacher->id)
+            ->where(function ($query) use ($teacher) {
+                $query->where('id_teacher', $teacher->id)
+                    ->orWhere('id_teacher_requester', $teacher->id);
+            })
             ->whereHas('scheduleConflict', fn ($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->reduce(function ($carry, $req) {
@@ -201,7 +209,10 @@ class WeeklyScheduleWidget extends Widget
             }, collect());
 
         $PedidosAprovadosDP = ScheduleRequest::where('status', 'Aprovado DP')
-            ->where('id_teacher', $teacher->id)
+            ->where(function ($query) use ($teacher) {
+                $query->where('id_teacher', $teacher->id)
+                    ->orWhere('id_teacher_requester', $teacher->id);
+            })
             ->whereHas('scheduleConflict', fn ($query) => $query->where('id_schoolyear', $anoLetivoAtivo->id))
             ->get()
             ->reduce(function ($carry, $req) {

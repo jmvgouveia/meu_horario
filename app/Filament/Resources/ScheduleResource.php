@@ -54,6 +54,11 @@ class ScheduleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! Auth::user()?->isTeacher();
+    }
+
     public ?Schedule $conflictingSchedule = null;
 
     public static function getLabel(): string

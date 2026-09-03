@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\TeacherSubjectResource;
+use App\Filament\Resources\ScheduleConflictResource;
+use App\Filament\Resources\ScheduleResource;
 use App\Filament\Widgets\WeeklyScheduleWidget;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -105,6 +107,9 @@ class ExampleTest extends TestCase
 
         $this->actingAs($user);
 
+        $this->assertTrue(TeacherSubjectResource::canViewAny());
+        $this->assertFalse(ScheduleResource::shouldRegisterNavigation());
+        $this->assertFalse(ScheduleConflictResource::shouldRegisterNavigation());
         $this->assertSame('Horários', TeacherSubjectResource::getNavigationGroup());
         $this->assertSame('As minhas disciplinas', TeacherSubjectResource::getNavigationLabel());
         $this->assertSame(2, TeacherSubjectResource::getNavigationSort());

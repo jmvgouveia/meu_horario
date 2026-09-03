@@ -21,7 +21,8 @@ class ScheduleRequestPolicy
      */
     public function view(User $user, ScheduleRequest $schedulerequest): bool
     {
-        return $user->checkPermissionTo('view ScheduleRequest');
+        return $user->checkPermissionTo('view ScheduleRequest')
+            && (! $user->isTeacher() || $this->belongsToTeacher($user, $schedulerequest));
     }
 
     /**
@@ -37,7 +38,8 @@ class ScheduleRequestPolicy
      */
     public function update(User $user, ScheduleRequest $schedulerequest): bool
     {
-        return $user->checkPermissionTo('update ScheduleRequest');
+        return $user->checkPermissionTo('update ScheduleRequest')
+            && (! $user->isTeacher() || $this->belongsToTeacher($user, $schedulerequest));
     }
 
     /**
@@ -102,5 +104,14 @@ class ScheduleRequestPolicy
     public function forceDeleteAny(User $user): bool
     {
         return $user->checkPermissionTo('force-delete-any ScheduleRequest');
+    }
+
+    private function belongsToTeacher(User $user, ScheduleRequest $request): bool
+    {
+        $teacherId = $user->teacher?->getKey();
+
+        return $teacherId !== null
+            && ((int) $request->id_teacher_requester === (int) $teacherId
+                || $request->scheduleConflict()->where('id_teacher', $teacherId)->exists());
     }
 }

@@ -12,7 +12,8 @@ class SchedulePolicy
      */
     public function viewAny(User $user): bool
     {
-        return ! $user->hasRole('Aluno') && $user->checkPermissionTo('view-any Schedule');
+        return ! $user->hasRole('Aluno')
+            && ($user->isTeacher() || $user->checkPermissionTo('view-any Schedule'));
     }
 
     /**
@@ -30,7 +31,10 @@ class SchedulePolicy
      */
     public function create(User $user): bool
     {
-        return ! $user->hasRole('Aluno') && $user->checkPermissionTo('create Schedule');
+        return ! $user->hasRole('Aluno')
+            && ($user->isTeacher()
+                || $user->checkPermissionTo('create Schedule')
+                || $user->checkPermissionTo('create_schedule'));
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\TeacherImporter;
 use App\Filament\Resources\TeacherResource\Pages;
 use App\Models\Teacher;
+use App\Models\SchoolYear;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
@@ -137,6 +138,9 @@ class TeacherResource extends Resource
                         Select::make('positions')
                             ->label('Cargos')
                             ->relationship('positions', 'name')
+                            ->pivotData(fn (): array => [
+                                'id_schoolyear' => SchoolYear::query()->where('active', true)->value('id'),
+                            ])
                             ->multiple()
                             ->preload()
                             ->searchable()
@@ -144,6 +148,9 @@ class TeacherResource extends Resource
                         Select::make('time_reductions')
                             ->label('Reduções de Horário')
                             ->relationship('timeReductions', 'name')
+                            ->pivotData(fn (): array => [
+                                'id_schoolyear' => SchoolYear::query()->where('active', true)->value('id'),
+                            ])
                             ->multiple()
                             ->preload()
                             ->searchable()

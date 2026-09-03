@@ -14,6 +14,11 @@ class EnforceReadOnlyImpersonation
         '$refresh',
         'applyTableFilters',
         'gotoPage',
+        'getFormState',
+        'getFormSelectOptionLabel',
+        'getFormSelectOptionLabels',
+        'getFormSelectOptions',
+        'getFormSelectSearchResults',
         'loadTable',
         'nextPage',
         'previousPage',
@@ -26,6 +31,9 @@ class EnforceReadOnlyImpersonation
         'setPage',
         'sortTable',
         'toggleTableColumn',
+        'update',
+        'updateFormData',
+        'updatedInteractsWithForms',
     ];
 
     public function handle(Request $request, Closure $next): Response

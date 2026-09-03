@@ -178,6 +178,41 @@ class ImpersonationSecurityTest extends TestCase
         );
     }
 
+    public function test_form_interaction_is_allowed_during_impersonation(): void
+    {
+        $admin = $this->createMfaUser('Super Admin');
+        session()->put($this->impersonationSession($admin));
+
+        $response = app(EnforceReadOnlyImpersonation::class)->handle(
+            $this->makeRequest('POST', 'livewire/update', 'default.livewire.update', [
+                'components' => [[
+                    'calls' => [['method' => 'updatedInteractsWithForms']],
+                    'updates' => ['data.id_subject' => 41],
+                ]],
+            ]),
+            fn () => response('form-updated'),
+        );
+
+        $this->assertSame('form-updated', $response->getContent());
+    }
+
+    public function test_form_select_queries_are_allowed_during_impersonation(): void
+    {
+        $admin = $this->createMfaUser('Super Admin');
+        session()->put($this->impersonationSession($admin));
+
+        $response = app(EnforceReadOnlyImpersonation::class)->handle(
+            $this->makeRequest('POST', 'livewire/update', 'default.livewire.update', [
+                'components' => [[
+                    'calls' => [['method' => 'getFormSelectOptions']],
+                ]],
+            ]),
+            fn () => response('options'),
+        );
+
+        $this->assertSame('options', $response->getContent());
+    }
+
     public function test_email_verification_route_is_blocked_during_impersonation(): void
     {
         $admin = $this->createMfaUser('Super Admin');

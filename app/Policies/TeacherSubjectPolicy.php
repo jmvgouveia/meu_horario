@@ -13,7 +13,7 @@ class TeacherSubjectPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->checkPermissionTo('view-any TeacherSubject');
+        return $user->isTeacher() || $user->checkPermissionTo('view-any TeacherSubject');
     }
 
     /**
@@ -21,7 +21,8 @@ class TeacherSubjectPolicy
      */
     public function view(User $user, TeacherSubject $teachersubject): bool
     {
-        return $user->checkPermissionTo('view TeacherSubject');
+        return ($user->isTeacher() || $user->checkPermissionTo('view TeacherSubject'))
+            && (! $user->isTeacher() || (int) $teachersubject->id_teacher === (int) $user->teacher?->getKey());
     }
 
     /**

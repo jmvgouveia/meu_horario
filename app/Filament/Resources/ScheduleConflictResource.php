@@ -28,6 +28,11 @@ class ScheduleConflictResource extends Resource
     protected static ?string $navigationGroup = 'Horários';
     protected static ?string $navigationLabel = 'Gestão de Conflitos';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! Filament::auth()->user()?->isTeacher();
+    }
+
     public static function getLabel(): string
     {
         return 'Gestão de Conflitos de Horário';
@@ -78,6 +83,7 @@ class ScheduleConflictResource extends Resource
             ->where(function ($query) use ($teacher) {
                 $query
                     ->where('id_teacher', $teacher->id)
+                    ->orWhere('id_teacher_requester', $teacher->id)
                     ->orWhereHas('scheduleConflict', function ($subQuery) use ($teacher) {
                         $subQuery->where('id_teacher', $teacher->id);
                     });
