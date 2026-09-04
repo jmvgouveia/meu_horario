@@ -137,6 +137,7 @@ class EditScheduleRequest extends EditRecord
                         //  DBHelper::updateScheduleRequestStatus($this->record->scheduleNew?->id, true, 'Aprovado', MSGErro::ERRO_APROVAR_SCHEDULE);
 
                         $this->hoursCounterUpdate($this->record->scheduleNew, false);
+                        $this->hoursCounterUpdate($this->record->scheduleConflict, false);
 
                         extract($this->getScheduleDetails());
 

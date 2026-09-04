@@ -212,6 +212,13 @@ class ScheduleConflictResource extends Resource
 
         return $table
             ->columns([
+                textColumn::make('created_at')
+                    ->label('Data do Pedido')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
+
                 TextColumn::make('id')
                     ->label('ID')
                     ->sortable()

@@ -150,6 +150,7 @@ class EditScheduleConflict extends EditRecord
 
                         //ScheduleResource::hoursCounterUpdate($this->record->scheduleNew, false);
                         $this->hoursCounterUpdate($this->record->scheduleNew, false);
+                        $this->hoursCounterUpdate($this->record->scheduleConflict, false);
                     });
                 });
 

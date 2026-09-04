@@ -12,34 +12,46 @@ trait HourCounter {
     protected function hoursCounterUpdate(Schedule $schedule, Bool $plusOrMinus): void
     {
         try {
-            DB::transaction(function () use ($schedule, $plusOrMinus) {
-
-                $schedule->load('subject');
-
-                $tipo = strtolower(trim($schedule->subject->type ?? 'letiva'));
-
+            DB::transaction(function () use ($schedule) {
                 $counter = TeacherHourCounter::where('id_teacher', $schedule->id_teacher)
                     ->where('id_schoolyear', $schedule->id_schoolyear)
                     ->first();
 
-                if (!$counter) {
+                if (! $counter) {
                     return;
                 }
 
-                if ($plusOrMinus) {
-                    if ($tipo === 'Não Letiva' || $tipo === 'nao letiva' || $tipo === 'não letiva') {
-                        $counter->non_teaching_load += 1;
-                    } else {
-                        $counter->teaching_load += 1;
-                    }
-                } else {
-                    if ($tipo === 'Não Letiva' || $tipo === 'nao letiva' || $tipo === 'não letiva') {
-                        $counter->non_teaching_load -= 1;
-                    } else {
-                        $counter->teaching_load -= 1;
-                    }
-                }
+                $teacher = $schedule->teacher()->first();
+                $teachingReduction = $teacher?->positions()
+                    ->wherePivot('id_schoolyear', $schedule->id_schoolyear)
+                    ->sum('positions.reduction_l') ?? 0;
+                $teachingReduction += $teacher?->timeReductions()
+                    ->wherePivot('id_schoolyear', $schedule->id_schoolyear)
+                    ->sum('time_reductions.value_l') ?? 0;
 
+                $nonTeachingReduction = $teacher?->positions()
+                    ->wherePivot('id_schoolyear', $schedule->id_schoolyear)
+                    ->sum('positions.reduction_nl') ?? 0;
+                $nonTeachingReduction += $teacher?->timeReductions()
+                    ->wherePivot('id_schoolyear', $schedule->id_schoolyear)
+                    ->sum('time_reductions.value_nl') ?? 0;
+
+                $approvedSchedules = Schedule::query()
+                    ->with('subject')
+                    ->where('id_teacher', $schedule->id_teacher)
+                    ->where('id_schoolyear', $schedule->id_schoolyear)
+                    ->whereIn('status', ['Aprovado', 'Aprovado DP'])
+                    ->get();
+
+                $nonTeachingSchedules = $approvedSchedules->filter(
+                    fn (Schedule $item): bool => strtolower(trim($item->subject?->type ?? 'letiva')) === 'não letiva'
+                        || strtolower(trim($item->subject?->type ?? 'letiva')) === 'nao letiva'
+                )->count();
+
+                $teachingSchedules = $approvedSchedules->count() - $nonTeachingSchedules;
+
+                $counter->teaching_load = 22 - $teachingReduction - $teachingSchedules;
+                $counter->non_teaching_load = 4 - $nonTeachingReduction - $nonTeachingSchedules;
                 $counter->workload = $counter->teaching_load + $counter->non_teaching_load;
                 $counter->save();
             });

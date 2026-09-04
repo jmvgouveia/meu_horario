@@ -59,6 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'create Schedule',
                 'view Schedule',
                 'view-any Schedule',
+                'update Schedule',
                 'view TeacherSubject',
                 'view-any TeacherSubject',
                 'view ScheduleRequest',

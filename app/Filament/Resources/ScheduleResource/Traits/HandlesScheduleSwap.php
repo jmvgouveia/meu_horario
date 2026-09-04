@@ -96,7 +96,10 @@ trait HandlesScheduleSwap
                 $activeYear = SchoolYear::where('active', true)->first();
 
                 abort_unless($teacher && $activeYear, 403);
-                abort_unless($this->record?->id_teacher === $teacher->id, 403);
+                abort_unless(
+                    $this->record === null || (int) $this->record->id_teacher === (int) $teacher->id,
+                    403,
+                );
 
                 $conflictingSchedule = Schedule::query()
                     ->whereKey($this->conflictingSchedule?->getKey())
@@ -112,6 +115,12 @@ trait HandlesScheduleSwap
                     $formState['id_classes'] ?? [],
                     $this->conflictingSchedule->id_room,
                 );
+
+                abort_unless(DB::table('teacher_subjects')
+                    ->where('id_teacher', $teacher->id)
+                    ->where('id_subject', $formState['id_subject'] ?? null)
+                    ->where('id_schoolyear', $activeYear->id)
+                    ->exists(), 403);
 
                 // ✅ 1. Obter o último horário ocupado no mesmo dia/período
                 $ultimoHorario = Schedule::where('id_weekday', $this->conflictingSchedule->id_weekday)
@@ -135,12 +144,6 @@ trait HandlesScheduleSwap
                     'id_schoolyear' => $activeYear?->id,
                     'status' => 'Pendente',
                 ]);
-
-                abort_unless(DB::table('teacher_subjects')
-                    ->where('id_teacher', $teacher->id)
-                    ->where('id_subject', $formState['id_subject'] ?? null)
-                    ->where('id_schoolyear', $activeYear->id)
-                    ->exists(), 403);
 
                 $schedule->classes()->sync($formState['id_classes'] ?? []);
                 $schedule->students()->sync($formState['students'] ?? []);

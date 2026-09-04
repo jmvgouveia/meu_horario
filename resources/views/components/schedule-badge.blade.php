@@ -46,12 +46,10 @@ $link = route('filament.admin.resources.schedule-requests.edit', $recusados[$sch
 }
 
 if ($schedule->status === 'Aprovado DP' && $PedidosAprovadosDP->has($schedule->id)) {
-$req = $PedidosAprovadosDP[$schedule->id];
 $hasNotification = true;
 $notifLetter = 'DP';
 $notifClass = 'dp';
 $tooltip = 'Troca aprovada pelo DP';
-$link = route('filament.admin.resources.schedule-requests.edit', $req->id);
 }
 
 if ($escalados->has($schedule->id)) {
