@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SchoolyearResource\Pages;
+use App\Filament\Resources\SchoolYearResource\Pages;
 use App\Models\SchoolYear;
 use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
